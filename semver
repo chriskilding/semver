@@ -1,0 +1,214 @@
+#!/bin/sh
+
+##
+## semver
+## Semantic Version parser.
+##
+
+set -o errexit
+set -o noclobber
+set -o noglob
+set -o nounset
+
+# Regex adapted from semver.org: https://github.com/semver/semver/pull/460
+SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\-([0-9a-zA-Z-]+(?:\.(?:0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+
+usage() {
+    program=$(basename "$0")
+    cat 1>&2 <<EOF
+Semantic Version parser.
+
+Usage:
+  ${program} compare <version> (-eq | -ne) <version>
+  ${program} decrement-major <version>
+  ${program} decrement-minor <version>
+  ${program} decrement-patch <version>
+  ${program} get-major <version>
+  ${program} get-minor <version>
+  ${program} get-patch <version>
+  ${program} get-prerelease <version>
+  ${program} get-build <version>
+  ${program} grep -
+  ${program} increment-major <version>
+  ${program} increment-minor <version>
+  ${program} increment-patch <version>
+  ${program} init
+  ${program} validate <string>
+  ${program} (-h | --help)
+
+Options:
+  -h --help  Show this screen.
+EOF
+    exit 1
+}
+
+# $1 = string
+# $2 = capture group index (1-based)
+get() {
+    component=$(perl -e '@match = ($ARGV[0] =~ /$ARGV[1]/) and print @match[$ARGV[2]]' -- "$1" "$SEMVER_REGEX" "$2")
+
+    if [ -n "$component" ]; then
+        echo "$component"
+    else
+        return 1
+    fi
+}
+
+semver_compare_eq() {
+    a="$1"
+    b="$2"
+
+    a_major=$(semver_get_major "$a")
+    a_minor=$(semver_get_minor "$a")
+    a_patch=$(semver_get_patch "$a")
+
+    b_major=$(semver_get_major "$b")
+    b_minor=$(semver_get_minor "$b")
+    b_patch=$(semver_get_patch "$b")
+
+    if [ "$a_major" = "$b_major" ] && [ "$a_minor" = "$b_minor" ] && [ "$a_patch" = "$b_patch" ]; then
+        maybe_a_prerelease="$(semver_get_prerelease "$a" || printf "")"
+        maybe_b_prerelease="$(semver_get_prerelease "$b" || printf "")"
+
+        [ "$maybe_a_prerelease" = "$maybe_b_prerelease" ]
+    else
+        return 1
+    fi
+}
+
+semver_compare_ne() {
+    a="$1"
+    b="$2"
+
+    if semver_compare_eq "$a" "$b"; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+semver_decrement_major() {
+    major=$(semver_get_major "$1")
+
+    if [ "$major" -gt 0 ]; then
+        new_major=$((major - 1))
+        echo "${new_major}.0.0"
+    else
+        exit 1
+    fi
+}
+
+semver_decrement_minor() {
+    major=$(semver_get_major "$1")
+    minor=$(semver_get_minor "$1")
+
+    if [ "$minor" -gt 0 ]; then
+        new_minor=$((minor - 1))
+        echo "${major}.${new_minor}.0"
+    else
+        exit 1
+    fi
+}
+
+semver_decrement_patch() {
+    major=$(semver_get_major "$1")
+    minor=$(semver_get_minor "$1")
+    patch=$(semver_get_patch "$1")
+
+    if [ "$patch" -gt 0 ]; then
+        new_patch=$((patch - 1))
+        echo "${major}.${minor}.${new_patch}"
+    else
+        exit 1
+    fi
+}
+
+semver_get_major() {
+    get "$1" 0
+}
+
+semver_get_minor() {
+    get "$1" 1
+}
+
+semver_get_patch() {
+    get "$1" 2
+}
+
+semver_get_prerelease() {
+    get "$1" 3
+}
+
+semver_get_build() {
+    get "$1" 4
+}
+
+semver_grep() {
+    tr '[:blank:]' '\n' | perl -e 'while (<STDIN>) { /$ARGV[0]/ and print qq($1.$2.$3) . ($4 and qq(-$4)) . ($5 and qq(+$5)) . qq(\n) }' -- "$SEMVER_REGEX"
+}
+
+semver_increment_major() {
+    major=$(semver_get_major "$1")
+    new_major=$((major + 1))
+    echo "${new_major}.0.0"
+}
+
+semver_increment_minor() {
+    major=$(semver_get_major "$1")
+    minor=$(semver_get_minor "$1")
+    new_minor=$((minor + 1))
+    echo "${major}.${new_minor}.0"
+}
+
+semver_increment_patch() {
+    major=$(semver_get_major "$1")
+    minor=$(semver_get_minor "$1")
+    patch=$(semver_get_patch "$1")
+    new_patch=$((patch + 1))
+    echo "${major}.${minor}.${new_patch}"
+}
+
+semver_init() {
+    echo "0.0.0"
+}
+
+semver_validate() {
+    perl -e '($ARGV[0] =~ /$ARGV[1]/) or exit 1' -- "$1" "$SEMVER_REGEX"
+}
+
+main() {
+    if [ "$#" -lt 1 ]; then
+        usage
+    fi
+
+    case ${1} in
+        "compare")
+            if [ -n "${2:-}" ] && [ -n "${3:-}" ] && [ -n "${4:-}" ]; then
+                case ${3} in
+                    "-eq") semver_compare_eq "$2" "$4";;
+                    "-ne") semver_compare_ne "$2" "$4";;
+                     *) usage;;
+                esac
+            else
+                usage
+            fi;;
+        "decrement-major") if [ -n "${2:-}" ]; then semver_decrement_major "$2"; else usage; fi;;
+        "decrement-minor") if [ -n "${2:-}" ]; then semver_decrement_minor "$2"; else usage; fi;;
+        "decrement-patch") if [ -n "${2:-}" ]; then semver_decrement_patch "$2"; else usage; fi;;
+        "get-major") if [ -n "${2:-}" ]; then semver_get_major "$2"; else usage; fi;;
+        "get-minor") if [ -n "${2:-}" ]; then semver_get_minor "$2"; else usage; fi;;
+        "get-patch") if [ -n "${2:-}" ]; then semver_get_patch "$2"; else usage; fi;;
+        "get-prerelease") if [ -n "${2:-}" ]; then semver_get_prerelease "$2"; else usage; fi;;
+        "get-build") if [ -n "${2:-}" ]; then semver_get_build "$2"; else usage; fi;;
+        "grep") semver_grep;;
+        "increment-major") if [ -n "${2:-}" ]; then semver_increment_major "$2"; else usage; fi;;
+        "increment-minor") if [ -n "${2:-}" ]; then semver_increment_minor "$2"; else usage; fi;;
+        "increment-patch")if [ -n "${2:-}" ]; then semver_increment_patch "$2"; else usage; fi;;
+        "init") semver_init;;
+        "validate") if [ -n "${2:-}" ]; then semver_validate "$2"; else usage; fi;;
+        "-h"|"--help") usage;;
+        *) usage;;
+    esac
+}
+
+main "$@"
