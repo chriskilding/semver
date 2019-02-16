@@ -1,5 +1,7 @@
 # semver
 
+[![Build Status](https://travis-ci.com/chriskilding/semver.svg?branch=master)](https://travis-ci.com/chriskilding/semver)
+
 Semantic Version parser.
 
 ## What is a Semantic Version?
