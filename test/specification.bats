@@ -194,7 +194,42 @@ semver() {
     [[ "$status" -eq 0 ]]
 }
 
-# TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows: identifiers consisting of only digits are compared numerically and identifiers with letters or hyphens are compared lexically in ASCII sort order. Numeric identifiers always have lower precedence than non-numeric identifiers. A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0.
+# TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows: identifiers consisting of only digits are compared numerically and identifiers with letters or hyphens are compared lexically in ASCII sort order. Numeric identifiers always have lower precedence than non-numeric identifiers. A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
+
+@test 'Example: 1.0.0-alpha < 1.0.0-alpha.1' {
+    run semver compare '1.0.0-alpha.1' -gt '1.0.0-alpha'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 1.0.0-alpha.1 < 1.0.0-alpha.beta' {
+    run semver compare '1.0.0-alpha.beta' -gt '1.0.0-alpha.1'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 1.0.0-alpha.beta < 1.0.0-beta' {
+    run semver compare '1.0.0-beta' -gt '1.0.0-alpha.beta'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 1.0.0-beta < 1.0.0-beta.2' {
+    run semver compare '1.0.0-beta.2' -gt '1.0.0-beta'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 1.0.0-beta.2 < 1.0.0-beta.11' {
+    run semver compare '1.0.0-beta.11' -gt '1.0.0-beta.2'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 1.0.0-beta.11 < 1.0.0-rc.1' {
+    run semver compare '1.0.0-rc.1' -gt '1.0.0-beta.11'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 1.0.0-rc.1 < 1.0.0' {
+    run semver compare '1.0.0' -gt '1.0.0-rc.1'
+    [[ "$status" -eq 0 ]]
+}
 
 @test 'When major, minor, and patch are equal, a pre-release version has lower precedence than a normal version. Example: 1.0.0-alpha < 1.0.0.' {
     run semver compare '1.0.0' -gt '1.0.0-alpha'
