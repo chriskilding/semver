@@ -203,7 +203,7 @@ main() {
         "grep") semver_grep;;
         "increment-major") if [ -n "${2:-}" ]; then semver_increment_major "$2"; else usage; fi;;
         "increment-minor") if [ -n "${2:-}" ]; then semver_increment_minor "$2"; else usage; fi;;
-        "increment-patch")if [ -n "${2:-}" ]; then semver_increment_patch "$2"; else usage; fi;;
+        "increment-patch") if [ -n "${2:-}" ]; then semver_increment_patch "$2"; else usage; fi;;
         "init") semver_init;;
         "validate") if [ -n "${2:-}" ]; then semver_validate "$2"; else usage; fi;;
         "-h"|"--help") usage;;
