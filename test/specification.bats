@@ -169,3 +169,34 @@ semver() {
 @test "Example: 1.0.0-beta+exp.sha.5114f85" {
     [[ $(semver get-build "1.0.0-beta+exp.sha.5114f85") = "exp.sha.5114f85" ]]
 }
+
+##
+## Precedence <https://semver.org/spec/v2.0.0.html#spec-item-11>
+##
+
+@test 'Major, minor, and patch versions are always compared numerically [not lexicographically].' {
+    run semver compare '200.0.0' -gt '19999.0.0'
+    [[ "$status" -eq 1 ]]
+}
+
+@test 'Example: 1.0.0 < 2.0.0' {
+    run semver compare '2.0.0' -gt '1.0.0'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 2.0.0 < 2.1.0' {
+    run semver compare '2.1.0' -gt '2.0.0'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Example: 2.1.0 < 2.1.1' {
+    run semver compare '2.1.1' -gt '2.1.0'
+    [[ "$status" -eq 0 ]]
+}
+
+# TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows: identifiers consisting of only digits are compared numerically and identifiers with letters or hyphens are compared lexically in ASCII sort order. Numeric identifiers always have lower precedence than non-numeric identifiers. A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0.
+
+@test 'When major, minor, and patch are equal, a pre-release version has lower precedence than a normal version. Example: 1.0.0-alpha < 1.0.0.' {
+    run semver compare '1.0.0' -gt '1.0.0-alpha'
+    [[ "$status" -eq 0 ]]
+}

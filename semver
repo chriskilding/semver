@@ -19,7 +19,7 @@ usage() {
 Semantic Version parser.
 
 Usage:
-  ${program} compare <version> (-eq | -ne) <version>
+  ${program} compare <version> (-eq | -gt | -ne) <version>
   ${program} decrement-major <version>
   ${program} decrement-minor <version>
   ${program} decrement-patch <version>
@@ -71,6 +71,34 @@ semver_compare_eq() {
         maybe_b_prerelease="$(semver_get_prerelease "$b" || printf "")"
 
         [ "$maybe_a_prerelease" = "$maybe_b_prerelease" ]
+    else
+        return 1
+    fi
+}
+
+semver_compare_gt() {
+    a="$1"
+    b="$2"
+
+    a_major=$(semver_get_major "$a")
+    a_minor=$(semver_get_minor "$a")
+    a_patch=$(semver_get_patch "$a")
+
+    b_major=$(semver_get_major "$b")
+    b_minor=$(semver_get_minor "$b")
+    b_patch=$(semver_get_patch "$b")
+
+    if [ "$a_major" -gt "$b_major" ]; then
+        return 0
+    elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -gt "$b_minor" ]; then
+        return 0
+    elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -gt "$b_patch" ]; then
+        return 0
+    elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -eq "$b_patch" ]; then
+        a_prerelease=$(semver_get_prerelease "$a" || true)
+        b_prerelease=$(semver_get_prerelease "$b" || true)
+
+        [ -z "$a_prerelease" ] && [ -n "$b_prerelease" ]
     else
         return 1
     fi
@@ -186,6 +214,7 @@ main() {
             if [ -n "${2:-}" ] && [ -n "${3:-}" ] && [ -n "${4:-}" ]; then
                 case ${3} in
                     "-eq") semver_compare_eq "$2" "$4";;
+                    "-gt") semver_compare_gt "$2" "$4";;
                     "-ne") semver_compare_ne "$2" "$4";;
                      *) usage;;
                 esac
