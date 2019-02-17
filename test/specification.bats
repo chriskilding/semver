@@ -194,7 +194,27 @@ semver() {
     [[ "$status" -eq 0 ]]
 }
 
-# TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows: identifiers consisting of only digits are compared numerically and identifiers with letters or hyphens are compared lexically in ASCII sort order. Numeric identifiers always have lower precedence than non-numeric identifiers. A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
+# TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows...
+
+@test 'Identifiers consisting of only digits are compared numerically.' {
+    run semver compare '1.0.0-2' -gt '1.0.0-1'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Identifiers with letters or hyphens are compared lexically in ASCII sort order.' {
+    run semver compare '1.0.0-a-b' -gt '1.0.0-a-a'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'Numeric identifiers always have lower precedence than non-numeric identifiers.' {
+    run semver compare '1.0.0-a' -gt '1.0.0-1'
+    [[ "$status" -eq 0 ]]
+}
+
+@test 'A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.' {
+    run semver compare '1.0.0-1.1.1' -gt '1.0.0-1.1'
+    [[ "$status" -eq 0 ]]
+}
 
 @test 'Example: 1.0.0-alpha < 1.0.0-alpha.1' {
     run semver compare '1.0.0-alpha.1' -gt '1.0.0-alpha'
