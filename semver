@@ -13,6 +13,8 @@ set -o nounset
 # Regex adapted from semver.org: https://github.com/semver/semver/pull/460
 SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\-([0-9a-zA-Z-]+(?:\.(?:0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 
+SEMVER_PRECEDENCE_REGEX='^([0-9a-zA-Z-])+(?:\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*$'
+
 usage() {
     program=$(basename "$0")
     cat 1>&2 <<EOF
@@ -40,6 +42,18 @@ Options:
   -h --help  Show this screen.
 EOF
     exit 1
+}
+
+string_matches() {
+    str="$1"
+    regex="$2"
+
+    perl -e '@matches = ($ARGV[0] =~ /$ARGV[1]/) and print join qq(\n), @matches' -- "$str" "$regex"
+}
+
+string_line_count() {
+    str="$1"
+    echo "$str" | wc -l | tr -d ' '
 }
 
 # $1 = string
@@ -99,6 +113,14 @@ semver_compare_gt() {
         return 0
     elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -eq "$b_patch" ] && [ -z "$a_prerelease" ] && [ -n "$b_prerelease" ]; then
         return 0
+    elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -eq "$b_patch" ] && [ -n "$a_prerelease" ] && [ -n "$b_prerelease" ]; then
+        a_prerelease_components=$(string_matches "$a_prerelease" "$SEMVER_PRECEDENCE_REGEX")
+        a_prerelease_components_count=$(string_line_count "$a_prerelease_components")
+
+        b_prerelease_components=$(string_matches "$b_prerelease" "$SEMVER_PRECEDENCE_REGEX")
+        b_prerelease_components_count=$(string_line_count "$b_prerelease_components")
+
+        [ "$a_prerelease_components_count" -gt "$b_prerelease_components_count" ]
     else
         return 1
     fi
