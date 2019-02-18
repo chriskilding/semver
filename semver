@@ -67,8 +67,8 @@ semver_compare_eq() {
     b_patch=$(semver_get_patch "$b")
 
     if [ "$a_major" = "$b_major" ] && [ "$a_minor" = "$b_minor" ] && [ "$a_patch" = "$b_patch" ]; then
-        maybe_a_prerelease="$(semver_get_prerelease "$a" || printf "")"
-        maybe_b_prerelease="$(semver_get_prerelease "$b" || printf "")"
+        maybe_a_prerelease="$(semver_get_prerelease "$a" || true)"
+        maybe_b_prerelease="$(semver_get_prerelease "$b" || true)"
 
         [ "$maybe_a_prerelease" = "$maybe_b_prerelease" ]
     else
@@ -88,17 +88,17 @@ semver_compare_gt() {
     b_minor=$(semver_get_minor "$b")
     b_patch=$(semver_get_patch "$b")
 
+    a_prerelease=$(semver_get_prerelease "$a" || true)
+    b_prerelease=$(semver_get_prerelease "$b" || true)
+
     if [ "$a_major" -gt "$b_major" ]; then
         return 0
     elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -gt "$b_minor" ]; then
         return 0
     elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -gt "$b_patch" ]; then
         return 0
-    elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -eq "$b_patch" ]; then
-        a_prerelease=$(semver_get_prerelease "$a" || true)
-        b_prerelease=$(semver_get_prerelease "$b" || true)
-
-        [ -z "$a_prerelease" ] && [ -n "$b_prerelease" ]
+    elif [ "$a_major" -eq "$b_major" ] && [ "$a_minor" -eq "$b_minor" ] && [ "$a_patch" -eq "$b_patch" ] && [ -z "$a_prerelease" ] && [ -n "$b_prerelease" ]; then
+        return 0
     else
         return 1
     fi
