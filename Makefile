@@ -2,14 +2,11 @@
 
 prefix := /usr/local
 
-.PHONY: all lint test
+.PHONY: all test install
 
 all: test
 
-lint:
-	shellcheck semver
-
-test: lint
+test:
 	bats test
 
 install:
