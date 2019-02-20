@@ -9,6 +9,9 @@ use strict;
 use warnings;
 use feature qw(say);
 
+my $true = 1;
+my $false = 0;
+
 # Regex adapted from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\-([0-9a-zA-Z-]+(?:\.(?:0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
 
@@ -81,10 +84,15 @@ sub semver_compare_eq {
     my $b_prerelease = $b_matches[3] if scalar(@b_matches) > 3;
 
     if (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch)) {
-#         "$maybe_a_prerelease" = "$maybe_b_prerelease" ]
-        exit 0;
+        if ((defined $a_prerelease) && (defined $b_prerelease) && ($a_prerelease eq $b_prerelease)) {
+            return $true;
+        } elsif ((!defined $a_prerelease) && (!defined $b_prerelease)) {
+            return $true;
+        } else {
+            return $false;
+        }
     } else {
-        exit 1;
+        return $false;
     }
 }
 
@@ -106,36 +114,33 @@ sub semver_compare_gt {
     my $b_prerelease = $b_matches[3] if scalar(@b_matches) > 3;
 
     if ($a_major > $b_major) {
-        exit 0;
+        return $true;
     } elsif (($a_major eq $b_major) && ($a_minor > $b_minor)) {
-        exit 0;
+        return $true;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch > $b_patch)) {
-        exit 0;
+        return $true;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (!defined $a_prerelease) && (defined $b_prerelease)) {
-        exit 0;
+        return $true;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (defined $a_prerelease) && (defined $b_prerelease)) {
         my @a_prerelease_components = string_matches($a_prerelease, $semver_precedence_regex);
         my @b_prerelease_components = string_matches($b_prerelease, $semver_precedence_regex);
-        # FIXME this regex is not capturing all eligible identifiers
+
+        # FIXME this regex is not capturing all eligible identifiers because the capture group is overwritten every time it matches
 
         if (scalar(@a_prerelease_components) > scalar(@b_prerelease_components)) {
-            exit 0;
+            return $true;
         } else {
-            exit 1;
+            return $false;
         }
     } else {
-        exit 1;
+        return $false;
     }
 }
 
 sub semver_compare_ne {
     my ($a, $b) = @_;
 
-    if (semver_compare_eq($a, $b)) {
-        exit 1;
-    } else {
-        exit 0;
-    }
+    return (!semver_compare_eq($a, $b));
 }
 
 sub semver_decrement_major {
@@ -275,17 +280,19 @@ sub semver_init {
 sub semver_validate {
     my ($str) = @_;
 
-    ($str =~ /$semver_regex/) or exit 1;
+    if ($str =~ /$semver_regex/) {
+        return $true;
+    } else {
+        return $false;
+    }
 }
 
 sub main {
     my @args = @_;
 
-    if (scalar(@args) < 1) {
-        usage();
-    }
+    my $num_args = scalar(@args);
 
-    if (scalar(@args) == 1) {
+    if ($num_args == 1) {
         my $subcommand = $args[0];
 
         if ($subcommand eq "grep") {
@@ -295,9 +302,7 @@ sub main {
         } else {
             usage();
         }
-    }
-
-    if (scalar(@args) == 2) {
+    } elsif ($num_args == 2) {
         my $subcommand = $args[0];
         my $operand = $args[1];
 
@@ -326,11 +331,9 @@ sub main {
         } elsif ($subcommand eq "increment-patch") {
             semver_increment_patch($operand);
         } elsif ($subcommand eq "validate") {
-            semver_validate($operand);
+            semver_validate($operand) ? exit 0 : exit 1;
         }
-    }
-
-    if (scalar(@args) == 4) {
+    } elsif ($num_args == 4) {
         my $subcommand = $args[0];
         my $a = $args[1];
         my $operator = $args[2];
@@ -338,17 +341,19 @@ sub main {
 
         if ($subcommand eq "compare") {
             if ($operator eq "-eq") {
-                semver_compare_eq($a, $b);
+                semver_compare_eq($a, $b) ? exit 0 : exit 1;
             } elsif ($operator eq "-gt") {
-                semver_compare_gt($a, $b);
+                semver_compare_gt($a, $b) ? exit 0 : exit 1;
             } elsif ($operator eq "-ne") {
-                semver_compare_ne($a, $b);
+                semver_compare_ne($a, $b) ? exit 0 : exit 1;
             } else {
                 usage();
             }
         } else {
             usage();
         }
+    } else {
+        usage();
     }
 }
 
