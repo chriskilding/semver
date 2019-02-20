@@ -4,7 +4,7 @@
 
 Semantic Version parser.
 
-## What is a Semantic Version?
+## Overview
 
 A Semantic Version is a version string that conforms to the [Semantic Versioning specification](https://semver.org/).
 
@@ -12,7 +12,7 @@ The general format is:
 
     major.minor.patch[-prerelease][+build]
 
-### Valid examples
+Valid examples:
 
 - `0.0.0`
 - `1.0.0`
@@ -20,22 +20,22 @@ The general format is:
 - `1.2.3+20080101`
 - `1.2.3-alpha+20080101`
 
-### Invalid examples
+Invalid examples:
 
 - `v1.0.0`
-- `1`
 - `1.0`
-- `1.0.0.0`
+
+The `semver` utility is able to parse, modify, compare, and validate these Semantic Version strings.
 
 ## Usage
 
 Read the help screen for instructions.
 
-```
-semver --help
-```
+    semver --help
 
-**Note:** `semver compare` compares versions according to the Semantic Versioning [precedence specification](https://semver.org/#spec-item-11). This is **not** a simple lexicographic comparison! For example, `0.0.1+foo` equals `0.0.1+bar` under Semantic Versioning precedence rules.
+Read the man page for full instructions and examples.
+
+    man semver
 
 ## Dependencies
 
