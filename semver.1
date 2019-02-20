@@ -1,0 +1,335 @@
+.Dd February 19, 2019
+.Dt SEMVER 1
+.Os
+.Sh NAME
+.Nm semver
+.Nd semantic version parser
+.Sh SYNOPSIS
+.Nm
+compare
+.Ar version
+.Op Fl eq | Fl ne
+.Ar version
+.Nm
+decrement-major
+.Ar version
+.Nm
+decrement-minor
+.Ar version
+.Nm
+decrement-patch
+.Ar version
+.Nm
+get-major
+.Ar version
+.Nm
+get-minor
+.Ar version
+.Nm
+get-patch
+.Ar version
+.Nm
+get-prerelease
+.Ar version
+.Nm
+get-build
+.Ar version
+.Nm
+grep
+.Fl
+.Nm
+increment-major
+.Ar version
+.Nm
+increment-minor
+.Ar version
+.Nm
+increment-patch
+.Ar version
+.Nm
+init
+.Nm
+validate
+.Ar string
+.Nm
+.Op Fl h | Fl -help
+.Sh DESCRIPTION
+The
+.Nm
+utility compares, generates, modifies, parses, and validates Semantic Version strings.
+.Ss compare
+.Nm
+can compare two Semantic Versions
+.Ar a
+and
+.Ar b
+for precedence.
+.Pp
+Standard shell
+.Sq test
+infix operators indicate the type of precedence comparison that you want. The supported operators are:
+.Bl -tag -width indent
+.It Fl eq
+Test if the versions
+.Ar a
+and
+.Ar b
+have equal precedence.
+.It Fl ne
+Test if the versions
+.Ar a
+and
+.Ar b
+do not have equal precendence.
+.El
+.Pp
+If either
+.Ar a
+or
+.Ar b
+are omitted, or an unsupported operator is provided, the utility will exit with an error code.
+.Pp
+Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+.Ss decrement-major
+.Nm
+can decrement the MAJOR component of a Semantic Version
+.Ar version
+\&.
+.Pp
+The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when a decrement occurs.
+.Pp
+The formula is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR - 1).0.0
+.Pp
+If the MAJOR component of
+.Ar version
+is 0, the decrement operation will halt, and the utility will exit with an error code.
+.Ss decrement-minor
+.Nm
+can decrement the MINOR component of a Semantic Version
+.Ar version
+\&.
+.Pp
+The PATCH, PRERELEASE, and BUILD components will be reset when a decrement occurs.
+.Pp
+The formula is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR - 1).0
+.Pp
+If the MINOR component of
+.Ar version
+is 0, the decrement operation will halt, and the utility will exit with an error code.
+.Ss decrement-patch
+.Nm
+can decrement the PATCH component of a Semantic Version
+.Ar version
+\&.
+.Pp
+The PRERELEASE and BUILD components will be reset when a decrement occurs.
+.Pp
+The formula is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
+.Pp
+If the PATCH component of
+.Ar version
+is 0, the decrement operation will halt, and the utility will exit with an error code.
+.Ss get-major
+.Nm
+can get the MAJOR component of a Semantic Version
+.Ar version
+and print it to STDOUT.
+.Pp
+If
+.Ar version
+is invalid, nothing will be printed, and the utility will exit with an error code.
+.Ss get-minor
+.Nm
+can get the MINOR component of a Semantic Version
+.Ar version
+and print it to STDOUT.
+.Pp
+If
+.Ar version
+is invalid, nothing will be printed, and the utility will exit with an error code.
+.Ss get-patch
+.Nm
+can get the PATCH component of a Semantic Version
+.Ar version
+and print it to STDOUT.
+.Pp
+If
+.Ar version
+is invalid, nothing will be printed, and the utility will exit with an error code.
+.Ss get-prerelease
+.Nm
+can get the PRERELEASE component of a Semantic Version
+.Ar version
+and print it to STDOUT. 
+.Pp
+If
+.Ar version
+does not contain a PRERELEASE, nothing will be printed, and the utility will exit with an error code.
+.Pp
+If 
+.Ar version
+is invalid, nothing will be printed, and the utility will exit with an error code.
+.Ss get-build
+.Nm
+can get the BUILD component of a Semantic Version
+.Ar version
+and print it to STDOUT. 
+.Pp
+If
+.Ar version
+does not contain a BUILD, nothing will be printed, and the utility will exit with an error code.
+.Pp
+If 
+.Ar version
+is invalid, nothing will be printed, and the utility will exit with an error code.
+.Ss grep
+.Nm
+can parse text from STDIN to extract zero or more Semantic Version strings, in the style of grep. It will tolerate quite noisy input.
+.Pp
+A candidate version
+.Sq string
+will be matched within the text stream if it meets the following criteria:
+.Pp
+.Bl -bullet -compact
+.It
+.Sq string
+is a valid Semantic Version.
+.It
+.Sq string
+is a whole word.
+.It
+.Sq string
+has whitespace immediately before it, OR its first character is also the first character of the line.
+.It
+.Sq string
+has whitespace immediately after it, OR its last character is also the last character of the line.
+.El
+.Ss increment-major
+.Nm
+can increment the MAJOR version of a Semantic Version string. The MINOR, PATCH, PRERELEASE, and BUILD will be reset when an increment occurs, per the Semver standard.
+.Pp
+The formula is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
+.Ss increment-minor
+.Nm
+can increment the MINOR version of a Semantic Version string. The PATCH, PRERELEASE, and BUILD will be reset when an increment occurs, per the Semver standard.
+.Pp
+The formula is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
+.Ss increment-patch
+.Nm
+can increment the PATCH version of a Semantic Version string. The PRERELEASE and BUILD will be reset when an increment occurs, per the Semver standard.
+.Pp
+The formula is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
+.Ss init
+.Nm
+can print the minimum acceptable Semantic Version
+.Sq 0.0.0
+to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
+.Ss validate
+.Nm
+can check if an input
+.Ar string
+is a valid Semantic Version.
+.Pp
+It will return the result using an exit code. The exit codes are:
+.Bl -tag 
+.It 0
+.Ar string
+is a valid Semantic Version.
+.It 1
+.Ar string
+is not a valid Semantic Version.
+.El
+.Sh OPTIONS
+.Pp
+The
+.Nm
+utility understands the following command-line options:
+.Bl -tag -width indent
+.It Fl h, Fl help
+Display the usage screen.
+.El
+.Sh EXAMPLES
+.Ss Compare
+.Pp
+To compare the versions
+.Sq 1.0.0
+and
+.Sq 2.0.0
+for precedence:
+.Pp
+.Dl [ semver compare '1.0.0' -eq '2.0.0' ] # => false
+.Pp
+.Dl [ semver compare '1.0.0' -ne '2.0.0' ] # => true
+.Ss Decrement
+.Pp
+To decrement components of the version string
+.Sq 2.3.4
+:
+.Pp
+.Dl $ semver decrement-major '2.3.4'
+.Dl 1.0.0
+.Pp
+.Dl $ semver decrement-minor '2.3.4'
+.Dl 2.2.0
+.Pp
+.Dl $ semver decrement-patch '2.3.4'
+.Dl 2.3.3
+.Ss Get
+.Pp
+To get components of the version string
+.Sq 1.2.3-SNAPSHOT+2019
+:
+.Pp
+.Dl $ semver get-major '1.2.3-SNAPSHOT+2019'
+.Dl 1
+.Pp
+.Dl $ semver get-minor '1.2.3-SNAPSHOT+2019'
+.Dl 2
+.Pp
+.Dl $ semver get-patch '1.2.3-SNAPSHOT+2019'
+.Dl 3
+.Pp
+.Dl $ semver get-prerelease '1.2.3-SNAPSHOT+2019'
+.Dl SNAPSHOT
+.Pp
+.Dl $ semver get-build '1.2.3-SNAPSHOT+2019'
+.Dl 2019
+.Ss Increment
+To increment components of the version string
+.Sq 1.2.3
+:
+.Pp
+.Dl $ semver increment-major '1.2.3'
+.Dl 2.0.0
+.Pp
+.Dl $ semver increment-minor '1.2.3'
+.Dl 1.3.0
+.Pp
+.Dl $ semver increment-patch '1.2.3'
+.Dl 1.2.4
+.Ss Validate
+.Pp
+To validate the version string
+.Sq 1.2.3
+:
+.Pp
+.Dl [ semver validate '1.2.3' ] # => true
+.Pp
+To validate the version string
+.Sq v1.0
+:
+.Pp
+.Dl [ semver validate 'v1.0' ] # => false
+.Sh EXIT STATUS
+.Ex -std
+.Sh STANDARDS
+The
+.Nm
+utility is expected to conform to the Semantic Versioning standard,
+defined at https://semver.org.
