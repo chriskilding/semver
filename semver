@@ -15,7 +15,8 @@ my $false = 0;
 # Regex adapted from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\-([0-9a-zA-Z-]+(?:\.(?:0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
 
-my $semver_precedence_regex = '^([0-9a-zA-Z-])+(?:\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*$';
+my $semver_precedence_regex_head = '^([0-9a-zA-Z-])+';
+my $semver_precedence_regex_tail = '\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*)';
 
 sub usage() {
     my $program = "semver";
@@ -96,6 +97,17 @@ sub semver_compare_eq {
     }
 }
 
+sub semver_get_prerelease_identifiers {
+    my ($prerelease) = @_;
+
+    my @prerelease_identifiers_first = $prerelease =~ /$semver_precedence_regex_head/;
+    my @prerelease_identifiers_rest = $prerelease =~ /$semver_precedence_regex_tail/g;
+
+    push(@prerelease_identifiers_first, @prerelease_identifiers_rest);
+
+    return @prerelease_identifiers_first;
+}
+
 sub semver_compare_gt {
     my ($a, $b) = @_;
 
@@ -122,12 +134,10 @@ sub semver_compare_gt {
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (!defined $a_prerelease) && (defined $b_prerelease)) {
         return $true;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (defined $a_prerelease) && (defined $b_prerelease)) {
-        my @a_prerelease_components = string_matches($a_prerelease, $semver_precedence_regex);
-        my @b_prerelease_components = string_matches($b_prerelease, $semver_precedence_regex);
+        my @a_prerelease_identifiers = semver_get_prerelease_identifiers($a_prerelease);
+        my @b_prerelease_identifiers = semver_get_prerelease_identifiers($b_prerelease);
 
-        # FIXME this regex is not capturing all eligible identifiers because the capture group is overwritten every time it matches
-
-        if (scalar(@a_prerelease_components) > scalar(@b_prerelease_components)) {
+        if (scalar(@a_prerelease_identifiers) > scalar(@b_prerelease_identifiers)) {
             return $true;
         } else {
             return $false;

@@ -223,8 +223,6 @@ semver() {
 }
 
 @test 'Example: 1.0.0-alpha < 1.0.0-alpha.1' {
-    skip "TODO implement"
-
     run semver compare '1.0.0-alpha.1' -gt '1.0.0-alpha'
     [[ "$status" -eq 0 ]]
 }
@@ -244,8 +242,6 @@ semver() {
 }
 
 @test 'Example: 1.0.0-beta < 1.0.0-beta.2' {
-    skip "TODO implement"
-
     run semver compare '1.0.0-beta.2' -gt '1.0.0-beta'
     [[ "$status" -eq 0 ]]
 }
