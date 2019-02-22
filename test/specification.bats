@@ -191,20 +191,14 @@ semver() {
 # TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows...
 
 @test 'Identifiers consisting of only digits are compared numerically.' {
-    skip "TODO implement"
-
     [[ $(semver compare '1.0.0-2' '1.0.0-1') -eq 1 ]]
 }
 
 @test 'Identifiers with letters or hyphens are compared lexically in ASCII sort order.' {
-    skip "TODO implement"
-
     [[ $(semver compare '1.0.0-a-b' '1.0.0-a-a') -eq 1 ]]
 }
 
 @test 'Numeric identifiers always have lower precedence than non-numeric identifiers.' {
-    skip "TODO implement"
-
     [[ $(semver compare '1.0.0-a' '1.0.0-1') -eq 1 ]]
 }
 

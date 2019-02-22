@@ -8,6 +8,7 @@
 use strict;
 use warnings;
 use feature qw(say);
+use Scalar::Util qw(looks_like_number);
 
 my $true = 1;
 my $false = 0;
@@ -138,6 +139,12 @@ sub semver_compare_gt {
         my @b_prerelease_identifiers = semver_get_prerelease_identifiers($b_prerelease);
 
         if (scalar(@a_prerelease_identifiers) > scalar(@b_prerelease_identifiers)) {
+            return $true;
+        } elsif (looks_like_number($a_prerelease) && looks_like_number($b_prerelease) && ($a_prerelease > $b_prerelease)) {
+            return $true;
+        } elsif (!looks_like_number($a_prerelease) && looks_like_number($b_prerelease)) {
+            return $true;
+        } elsif (!looks_like_number($a_prerelease) && !looks_like_number($b_prerelease) && (($a_prerelease cmp $b_prerelease) eq 1)) {
             return $true;
         } else {
             return $false;
