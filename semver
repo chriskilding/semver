@@ -24,7 +24,7 @@ sub usage() {
     say STDERR "Semantic Version parser.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program compare <version> (-eq | -gt | -ne) <version>";
+    say STDERR "  $program compare <version> <version>";
     say STDERR "  $program decrement-major <version>";
     say STDERR "  $program decrement-minor <version>";
     say STDERR "  $program decrement-patch <version>";
@@ -147,10 +147,16 @@ sub semver_compare_gt {
     }
 }
 
-sub semver_compare_ne {
+sub semver_compare {
     my ($a, $b) = @_;
 
-    return (!semver_compare_eq($a, $b));
+    if (semver_compare_gt($a, $b)) {
+        say "1";
+    } elsif (semver_compare_eq($a, $b)) {
+        say "0";
+    } else {
+        say "-1";
+    }
 }
 
 sub semver_decrement_major {
@@ -242,8 +248,16 @@ sub semver_get_build {
 }
 
 sub semver_grep {
-    while (<STDIN>) {
-        /$semver_regex/ and print qq($1.$2.$3) . ($4 and qq(-$4)) . ($5 and qq(+$5)) . qq(\n)
+    while (my $line = <STDIN>) {
+        my @words = split(/\s+/, $line);
+        foreach (@words) {
+            if (/$semver_regex/) {
+                print "$1.$2.$3";
+                print "-$4" if (length $4 // '');
+                print "+$5" if (length $5 // '');
+                print "\n";
+            }
+        }
     }
 }
 
@@ -290,78 +304,51 @@ sub semver_init {
 sub semver_validate {
     my ($str) = @_;
 
-    if ($str =~ /$semver_regex/) {
-        return $true;
-    } else {
-        return $false;
-    }
+    ($str =~ /$semver_regex/) ? exit 0 : exit 1;
 }
 
 sub main {
     my @args = @_;
 
     my $num_args = scalar(@args);
+    if ($num_args < 1) {
+        usage();
+    }
 
-    if ($num_args == 1) {
-        my $subcommand = $args[0];
+    my $subcommand = $args[0];
 
-        if ($subcommand eq "grep") {
-            semver_grep();
-        } elsif ($subcommand eq "init") {
-            semver_init();
-        } else {
-            usage();
-        }
-    } elsif ($num_args == 2) {
-        my $subcommand = $args[0];
-        my $operand = $args[1];
-
-        if ($subcommand eq "decrement-major") {
-            semver_decrement_major($operand);
-        } elsif ($subcommand eq "decrement-minor") {
-            semver_decrement_minor($operand);
-        } elsif ($subcommand eq "decrement-patch") {
-            semver_decrement_patch($operand);
-        } elsif ($subcommand eq "get-major") {
-            semver_get_major($operand);
-        } elsif ($subcommand eq "get-minor") {
-            semver_get_minor($operand);
-        } elsif ($subcommand eq "get-patch") {
-            semver_get_patch($operand);
-        } elsif ($subcommand eq "get-prerelease") {
-            semver_get_prerelease($operand);
-        } elsif ($subcommand eq "get-build") {
-            semver_get_build($operand);
-        } elsif (($subcommand eq "-h") || ($subcommand eq "--help")) {
-            usage();
-        } elsif ($subcommand eq "increment-major") {
-            semver_increment_major($operand);
-        } elsif ($subcommand eq "increment-minor") {
-            semver_increment_minor($operand);
-        } elsif ($subcommand eq "increment-patch") {
-            semver_increment_patch($operand);
-        } elsif ($subcommand eq "validate") {
-            semver_validate($operand) ? exit 0 : exit 1;
-        }
-    } elsif ($num_args == 4) {
-        my $subcommand = $args[0];
-        my $a = $args[1];
-        my $operator = $args[2];
-        my $b = $args[3];
-
-        if ($subcommand eq "compare") {
-            if ($operator eq "-eq") {
-                semver_compare_eq($a, $b) ? exit 0 : exit 1;
-            } elsif ($operator eq "-gt") {
-                semver_compare_gt($a, $b) ? exit 0 : exit 1;
-            } elsif ($operator eq "-ne") {
-                semver_compare_ne($a, $b) ? exit 0 : exit 1;
-            } else {
-                usage();
-            }
-        } else {
-            usage();
-        }
+    if ($subcommand eq "grep") {
+        semver_grep();
+    } elsif ($subcommand eq "init") {
+        semver_init();
+    } elsif ($subcommand eq "decrement-major") {
+        semver_decrement_major($args[1]);
+    } elsif ($subcommand eq "decrement-minor") {
+        semver_decrement_minor($args[1]);
+    } elsif ($subcommand eq "decrement-patch") {
+        semver_decrement_patch($args[1]);
+    } elsif ($subcommand eq "get-major") {
+        semver_get_major($args[1]);
+    } elsif ($subcommand eq "get-minor") {
+        semver_get_minor($args[1]);
+    } elsif ($subcommand eq "get-patch") {
+        semver_get_patch($args[1]);
+    } elsif ($subcommand eq "get-prerelease") {
+        semver_get_prerelease($args[1]);
+    } elsif ($subcommand eq "get-build") {
+        semver_get_build($args[1]);
+    } elsif (($subcommand eq "-h") || ($subcommand eq "--help")) {
+        usage();
+    } elsif ($subcommand eq "increment-major") {
+        semver_increment_major($args[1]);
+    } elsif ($subcommand eq "increment-minor") {
+        semver_increment_minor($args[1]);
+    } elsif ($subcommand eq "increment-patch") {
+        semver_increment_patch($args[1]);
+    } elsif ($subcommand eq "validate") {
+        semver_validate($args[1]);
+    } elsif ($subcommand eq "compare") {
+        semver_compare($args[1], $args[2]);
     } else {
         usage();
     }
