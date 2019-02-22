@@ -211,8 +211,6 @@ semver() {
 }
 
 @test 'Example: 1.0.0-alpha.1 < 1.0.0-alpha.beta' {
-    skip "TODO implement"
-
     [[ $(semver compare '1.0.0-alpha.1' '1.0.0-alpha.beta') -eq -1 ]]
 }
 
