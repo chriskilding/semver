@@ -4,7 +4,8 @@ prefix := /usr/local
 
 .PHONY: all test install
 
-all: test
+# Nothing to compile
+all:
 
 test:
 	bats test
