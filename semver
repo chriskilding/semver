@@ -136,16 +136,26 @@ sub semver_compare_gt {
         return $true;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (defined $a_prerelease) && (defined $b_prerelease)) {
         my @a_prerelease_identifiers = semver_get_prerelease_identifiers($a_prerelease);
+        my $a_prerelease_identifiers_count = scalar(@a_prerelease_identifiers);
         my @b_prerelease_identifiers = semver_get_prerelease_identifiers($b_prerelease);
+        my $b_prerelease_identifiers_count = scalar(@b_prerelease_identifiers);
 
-        if (scalar(@a_prerelease_identifiers) > scalar(@b_prerelease_identifiers)) {
+        if ($a_prerelease_identifiers_count > $b_prerelease_identifiers_count) {
             return $true;
-        } elsif (looks_like_number($a_prerelease) && looks_like_number($b_prerelease) && ($a_prerelease > $b_prerelease)) {
-            return $true;
-        } elsif (!looks_like_number($a_prerelease) && looks_like_number($b_prerelease)) {
-            return $true;
-        } elsif (!looks_like_number($a_prerelease) && !looks_like_number($b_prerelease) && (($a_prerelease cmp $b_prerelease) eq 1)) {
-            return $true;
+        } elsif ($a_prerelease_identifiers_count eq $b_prerelease_identifiers_count) {
+            for (my $i = 0; $i <= $a_prerelease_identifiers_count; $i++) {
+                my $a_identifier = $a_prerelease_identifiers[$i];
+                my $b_identifier = $b_prerelease_identifiers[$i];
+                
+                if (looks_like_number($a_identifier) && looks_like_number($b_identifier) && ($a_identifier > $b_identifier)) {
+                	return $true;
+                } elsif (!looks_like_number($a_identifier) && looks_like_number($b_identifier)) {
+                    return $true;
+                } elsif (!looks_like_number($a_prerelease) && !looks_like_number($b_prerelease) && (($a_prerelease cmp $b_prerelease) eq 1)) {
+                    return $true;
+                }
+            }
+            return $false;
         } else {
             return $false;
         }
