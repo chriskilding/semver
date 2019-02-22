@@ -8,7 +8,6 @@
 .Nm
 compare
 .Ar version
-.Op Fl eq | Fl ne
 .Ar version
 .Nm
 decrement-major
@@ -65,29 +64,27 @@ and
 .Ar b
 for precedence.
 .Pp
-Standard shell
-.Sq test
-infix operators indicate the type of precedence comparison that you want. The supported operators are:
-.Bl -tag -width indent
-.It Fl eq
-Test if the versions
+The result of the comparison is a single number printed to STDOUT. The numbers are:
+.Bl -tag
+.It -1
 .Ar a
-and
+<
 .Ar b
-have equal precedence.
-.It Fl ne
-Test if the versions
+.It 0
 .Ar a
-and
+==
 .Ar b
-do not have equal precendence.
+.It 1
+.Ar a
+>
+.Ar b
 .El
 .Pp
 If either
 .Ar a
 or
 .Ar b
-are omitted, or an unsupported operator is provided, the utility will exit with an error code.
+are omitted, no result will be printed, and the utility will exit with an error code.
 .Pp
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
 .Ss decrement-major
@@ -257,15 +254,16 @@ Display the usage screen.
 .Sh EXAMPLES
 .Ss Compare
 .Pp
-To compare the versions
-.Sq 1.0.0
-and
-.Sq 2.0.0
-for precedence:
+To compare version numbers for precedence:
 .Pp
-.Dl [ semver compare '1.0.0' -eq '2.0.0' ] # => false
+.Dl $ semver compare '1.0.0' '2.0.0'
+.Dl -1
 .Pp
-.Dl [ semver compare '1.0.0' -ne '2.0.0' ] # => true
+.Dl $ semver compare '1.0.0' '1.0.0'
+.Dl 0
+.Pp
+.Dl $ semver compare '2.0.0' '1.0.0'
+.Dl 1
 .Ss Decrement
 .Pp
 To decrement components of the version string
