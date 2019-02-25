@@ -39,6 +39,7 @@ sub usage() {
     say STDERR "  $program increment-minor <version>";
     say STDERR "  $program increment-patch <version>";
     say STDERR "  $program init";
+    say STDERR "  $program sort -";
     say STDERR "  $program validate <string>";
     say STDERR "  $program (-h | --help)";
     say STDERR "";
@@ -156,15 +157,15 @@ sub semver::compare {
     my $b_prerelease = $b_matches[3];
 
     if ($a_major > $b_major) {
-        say $gt;
+        return $gt;
     } elsif (($a_major eq $b_major) && ($a_minor > $b_minor)) {
-        say $gt;
+        return $gt;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch > $b_patch)) {
-        say $gt;
+        return $gt;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch)) {
-        say semver_compare_prerelease($a_prerelease, $b_prerelease);
+        return semver_compare_prerelease($a_prerelease, $b_prerelease);
     } else {
-        say $lt;
+        return $lt;
     }
 }
 
@@ -310,6 +311,10 @@ sub semver::init {
     say "0.0.0";
 }
 
+sub semver::sort {
+    print sort <STDIN>;
+}
+
 sub semver::validate {
     my ($str) = @_;
 
@@ -354,10 +359,12 @@ sub main {
         semver::increment_minor($args[1]);
     } elsif ($subcommand eq "increment-patch") {
         semver::increment_patch($args[1]);
+    } elsif ($subcommand eq "sort") {
+        semver::sort();
     } elsif ($subcommand eq "validate") {
         semver::validate($args[1]);
     } elsif ($subcommand eq "compare") {
-        semver::compare($args[1], $args[2]);
+        say semver::compare($args[1], $args[2]);
     } else {
         usage();
     }
