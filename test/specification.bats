@@ -215,9 +215,7 @@ semver() {
 }
 
 @test 'Example: 1.0.0-alpha.beta < 1.0.0-beta' {
-    skip "TODO implement"
-
-    [[ $(semver compare '1.0.0-alpha.beta' '1.0.0-beta') -eq -1 ]]
+    [[ $(semver compare '1.0.0-alpha.beta' '1.0.0-beta') -eq -1 ]] && [[ $(semver compare '1.0.0-beta' '1.0.0-alpha.beta' ) -eq 1 ]]
 }
 
 @test 'Example: 1.0.0-beta < 1.0.0-beta.2' {
