@@ -312,7 +312,23 @@ sub semver::init {
 }
 
 sub semver::sort {
-    print sort <STDIN>;
+    my @lines = <STDIN>;
+    chomp(@lines);
+
+    my @sorted_lines = sort {
+        my $res = semver::compare($a, $b);
+
+        if ($res eq $gt) {
+            return $gt;
+        } elsif ($res eq $lt) {
+            return $lt;
+        } else {
+            # Extra sorting for precedence-equal but stringwise-unequal version strings.
+            return $a cmp $b;
+        }
+    } @lines;
+
+    say join "\n", @sorted_lines;
 }
 
 sub semver::validate {

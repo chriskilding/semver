@@ -19,16 +19,16 @@ semver() {
 
 @test "sort: should handle multiple versions" {
     input=$(cat <<EOF
-2.3.4
-1.2.3
-4.5.6
+2.2.2
+1.1.1
+3.3.3
 EOF
 )
 
     expected=$(cat <<EOF
-1.2.3
-2.3.4
-4.5.6
+1.1.1
+2.2.2
+3.3.3
 EOF
 )
 
@@ -53,11 +53,16 @@ EOF
     [[ "$(semver sort <<< "$input")" = "$expected" ]]
 }
 
-@test "sort: should ensure natural ordering when versions are stringwise-unequal but precedence-equal" {
+@test "sort: should apply lexicographic ordering when multiple versions are precedence-equal" {
     input=$(cat <<EOF
 1.0.0+1
 1.0.0
-1.0.0+3
+1.0.0+a.1
+1.0.0+20080102
+1.0.0+ab
+1.0.0+20080101
+1.0.0+a
+1.0.0+12
 1.0.0+2
 EOF
 )
@@ -65,8 +70,13 @@ EOF
     expected=$(cat <<EOF
 1.0.0
 1.0.0+1
+1.0.0+12
 1.0.0+2
-1.0.0+3
+1.0.0+20080101
+1.0.0+20080102
+1.0.0+a
+1.0.0+a.1
+1.0.0+ab
 EOF
 )
 

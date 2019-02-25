@@ -244,7 +244,9 @@ can order Semantic Version strings from STDIN by precedence, in the style of
 .Sq sort
 \&.
 .Pp
-When two Semantic Versions are precedence-equal but stringwise-unequal (for example the MAJOR.MINOR.PATCH of both strings is the same but the BUILD is different), an additional natural sort will be applied on top of the Semantic Version precedence sort, to maintain the intuitive natural order.
+Note: Some aspects of Semantic Version ordering are undefined in the specification. The
+.Nm
+utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
 .Ss validate
 .Nm
 can check if an input
@@ -362,6 +364,10 @@ To validate the (invalid) version string
 .Dl 1
 .Sh EXIT STATUS
 .Ex -std
+.Sh WARNINGS
+The Semantic Versioning standard does not define an ordering for two versions that are precedence-equal but stringwise-unequal (for example the BUILD is different). To guarantee predictable ordering between executions, the
+.Nm
+utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
 .Sh STANDARDS
 The
 .Nm
