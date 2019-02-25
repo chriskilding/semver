@@ -84,8 +84,6 @@ should_gt() {
 }
 
 @test "compare: 0.0.1-beta+1 should > 0.0.1-alpha+1" {
-    skip "TODO implement"
-
     should_gt "0.0.1-beta+1" "0.0.1-alpha+1"
 }
 

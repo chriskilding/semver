@@ -10,13 +10,10 @@ use warnings;
 use feature qw(say);
 use Scalar::Util qw(looks_like_number);
 
-my $true = 1;
-my $false = 0;
-
 # Regex adapted from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\-([0-9a-zA-Z-]+(?:\.(?:0|[1-9a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
 
-my $semver_precedence_regex_head = '^([0-9a-zA-Z-])+';
+my $semver_precedence_regex_head = '^([0-9a-zA-Z-]*)';
 my $semver_precedence_regex_tail = '\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*)';
 
 sub usage() {
@@ -68,36 +65,6 @@ sub get {
     }
 }
 
-sub semver_compare_eq {
-    my ($a, $b) = @_;
-
-    my @a_matches = get($a);
-
-    my $a_major = $a_matches[0];
-    my $a_minor = $a_matches[1];
-    my $a_patch = $a_matches[2];
-    my $a_prerelease = $a_matches[3] if scalar(@a_matches) > 3;
-
-    my @b_matches = get($b);
-
-    my $b_major = $b_matches[0];
-    my $b_minor = $b_matches[1];
-    my $b_patch = $b_matches[2];
-    my $b_prerelease = $b_matches[3] if scalar(@b_matches) > 3;
-
-    if (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch)) {
-        if ((defined $a_prerelease) && (defined $b_prerelease) && ($a_prerelease eq $b_prerelease)) {
-            return $true;
-        } elsif ((!defined $a_prerelease) && (!defined $b_prerelease)) {
-            return $true;
-        } else {
-            return $false;
-        }
-    } else {
-        return $false;
-    }
-}
-
 sub semver_get_prerelease_identifiers {
     my ($prerelease) = @_;
 
@@ -109,7 +76,7 @@ sub semver_get_prerelease_identifiers {
     return @prerelease_identifiers_first;
 }
 
-sub semver_compare_gt {
+sub semver::compare {
     my ($a, $b) = @_;
 
     my @a_matches = get($a);
@@ -126,57 +93,79 @@ sub semver_compare_gt {
     my $b_patch = $b_matches[2];
     my $b_prerelease = $b_matches[3] if scalar(@b_matches) > 3;
 
-    if ($a_major > $b_major) {
-        return $true;
-    } elsif (($a_major eq $b_major) && ($a_minor > $b_minor)) {
-        return $true;
-    } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch > $b_patch)) {
-        return $true;
-    } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (!defined $a_prerelease) && (defined $b_prerelease)) {
-        return $true;
-    } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch) && (defined $a_prerelease) && (defined $b_prerelease)) {
-        my @a_prerelease_identifiers = semver_get_prerelease_identifiers($a_prerelease);
-        my $a_prerelease_identifiers_count = scalar(@a_prerelease_identifiers);
-        my @b_prerelease_identifiers = semver_get_prerelease_identifiers($b_prerelease);
-        my $b_prerelease_identifiers_count = scalar(@b_prerelease_identifiers);
+    my $gt = "1";
+    my $eq = "0";
+    my $lt = "-1";
 
-        if ($a_prerelease_identifiers_count > $b_prerelease_identifiers_count) {
-            return $true;
-        } elsif ($a_prerelease_identifiers_count eq $b_prerelease_identifiers_count) {
-            for (my $i = 0; $i <= $a_prerelease_identifiers_count; $i++) {
-                my $a_identifier = $a_prerelease_identifiers[$i];
-                my $b_identifier = $b_prerelease_identifiers[$i];
-                
-                if (looks_like_number($a_identifier) && looks_like_number($b_identifier) && ($a_identifier > $b_identifier)) {
-                	return $true;
-                } elsif (!looks_like_number($a_identifier) && looks_like_number($b_identifier)) {
-                    return $true;
-                } elsif (!looks_like_number($a_prerelease) && !looks_like_number($b_prerelease) && (($a_prerelease cmp $b_prerelease) eq 1)) {
-                    return $true;
+    if ($a_major > $b_major) {
+        return $gt;
+    } elsif ($a_major eq $b_major) {
+        if ($a_minor > $b_minor) {
+            return $gt;
+        } elsif ($a_minor eq $b_minor) {
+            if ($a_patch > $b_patch) {
+                return $gt;
+            } elsif ($a_patch eq $b_patch) {
+                if ((!defined $a_prerelease) && (defined $b_prerelease)) {
+                    return $gt;
+                } elsif ((defined $a_prerelease) && (!defined $b_prerelease)) {
+                    return $lt;
+                } elsif ((defined $a_prerelease) && (defined $b_prerelease)) {
+                    if ($a_prerelease eq $b_prerelease) {
+                        return $eq;
+                    } else {
+                        my @a_prerelease_identifiers = semver_get_prerelease_identifiers($a_prerelease);
+                        my $a_prerelease_identifiers_count = scalar(@a_prerelease_identifiers);
+                        my @b_prerelease_identifiers = semver_get_prerelease_identifiers($b_prerelease);
+                        my $b_prerelease_identifiers_count = scalar(@b_prerelease_identifiers);
+
+                        if ($a_prerelease_identifiers_count > $b_prerelease_identifiers_count) {
+                            # FIXME: A larger set of pre-release fields has a higher precedence than a smaller set, IF all of the preceding identifiers are equal.
+                            # Currently this does not check if all preceding identifiers are equal.
+                            return $gt;
+                        } elsif ($a_prerelease_identifiers_count eq $b_prerelease_identifiers_count) {
+                            for (my $i = 0; $i < $a_prerelease_identifiers_count; $i++) {
+                                my $a_identifier = $a_prerelease_identifiers[$i];
+                                my $b_identifier = $b_prerelease_identifiers[$i];
+#                                say "a: $a_identifier";
+#                                say "b: $b_identifier";
+                                if (looks_like_number($a_identifier) && looks_like_number($b_identifier)) {
+                                    if ($a_identifier > $b_identifier) {
+                                        return $gt;
+                                    } elsif ($a_identifier < $b_identifier) {
+                                        return $lt;
+                                    }
+                                } elsif (!looks_like_number($a_identifier) && looks_like_number($b_identifier)) {
+                                    return $gt;
+                                } else {
+                                    my $a_cmp_b = $a_identifier cmp $b_identifier;
+                                    if ($a_cmp_b eq 1) {
+                                        return $gt;
+                                    } elsif ($a_cmp_b eq -1) {
+                                        return $lt;
+                                    }
+                                }
+                            }
+                            return $lt;
+                        } else {
+                            return $lt;
+                        }
+                    }
+                } else {
+                    return $eq;
                 }
+            } else {
+                return $lt;
             }
-            return $false;
         } else {
-            return $false;
+            return $lt;
         }
     } else {
-        return $false;
+        return $lt;
     }
 }
 
-sub semver_compare {
-    my ($a, $b) = @_;
-
-    if (semver_compare_gt($a, $b)) {
-        say "1";
-    } elsif (semver_compare_eq($a, $b)) {
-        say "0";
-    } else {
-        say "-1";
-    }
-}
-
-sub semver_decrement_major {
+sub semver::decrement_major {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -191,7 +180,7 @@ sub semver_decrement_major {
     }
 }
 
-sub semver_decrement_minor {
+sub semver::decrement_minor {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -207,7 +196,7 @@ sub semver_decrement_minor {
     }
 }
 
-sub semver_decrement_patch {
+sub semver::decrement_patch {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -224,7 +213,7 @@ sub semver_decrement_patch {
     }
 }
 
-sub semver_get_major {
+sub semver::get_major {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -232,7 +221,7 @@ sub semver_get_major {
     say $matches[0];
 }
 
-sub semver_get_minor {
+sub semver::get_minor {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -240,7 +229,7 @@ sub semver_get_minor {
     say $matches[1];
 }
 
-sub semver_get_patch {
+sub semver::get_patch {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -248,7 +237,7 @@ sub semver_get_patch {
     say $matches[2];
 }
 
-sub semver_get_prerelease {
+sub semver::get_prerelease {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -256,7 +245,7 @@ sub semver_get_prerelease {
     say $matches[3];
 }
 
-sub semver_get_build {
+sub semver::get_build {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -264,7 +253,7 @@ sub semver_get_build {
     say $matches[4];
 }
 
-sub semver_grep {
+sub semver::grep {
     while (my $line = <STDIN>) {
         my @words = split(/\s+/, $line);
         foreach (@words) {
@@ -278,7 +267,7 @@ sub semver_grep {
     }
 }
 
-sub semver_increment_major {
+sub semver::increment_major {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -289,7 +278,7 @@ sub semver_increment_major {
     say "$new_major.0.0";
 }
 
-sub semver_increment_minor {
+sub semver::increment_minor {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -301,7 +290,7 @@ sub semver_increment_minor {
     say "$major.$new_minor.0";
 }
 
-sub semver_increment_patch {
+sub semver::increment_patch {
     my ($version) = @_;
 
     my @matches = get($version);
@@ -314,11 +303,11 @@ sub semver_increment_patch {
     say "$major.$minor.$new_patch";
 }
 
-sub semver_init {
+sub semver::init {
     say "0.0.0";
 }
 
-sub semver_validate {
+sub semver::validate {
     my ($str) = @_;
 
     ($str =~ /$semver_regex/) ? exit 0 : exit 1;
@@ -335,37 +324,37 @@ sub main {
     my $subcommand = $args[0];
 
     if ($subcommand eq "grep") {
-        semver_grep();
+        semver::grep();
     } elsif ($subcommand eq "init") {
-        semver_init();
+        semver::init();
     } elsif ($subcommand eq "decrement-major") {
-        semver_decrement_major($args[1]);
+        semver::decrement_major($args[1]);
     } elsif ($subcommand eq "decrement-minor") {
-        semver_decrement_minor($args[1]);
+        semver::decrement_minor($args[1]);
     } elsif ($subcommand eq "decrement-patch") {
-        semver_decrement_patch($args[1]);
+        semver::decrement_patch($args[1]);
     } elsif ($subcommand eq "get-major") {
-        semver_get_major($args[1]);
+        semver::get_major($args[1]);
     } elsif ($subcommand eq "get-minor") {
-        semver_get_minor($args[1]);
+        semver::get_minor($args[1]);
     } elsif ($subcommand eq "get-patch") {
-        semver_get_patch($args[1]);
+        semver::get_patch($args[1]);
     } elsif ($subcommand eq "get-prerelease") {
-        semver_get_prerelease($args[1]);
+        semver::get_prerelease($args[1]);
     } elsif ($subcommand eq "get-build") {
-        semver_get_build($args[1]);
+        semver::get_build($args[1]);
     } elsif (($subcommand eq "-h") || ($subcommand eq "--help")) {
         usage();
     } elsif ($subcommand eq "increment-major") {
-        semver_increment_major($args[1]);
+        semver::increment_major($args[1]);
     } elsif ($subcommand eq "increment-minor") {
-        semver_increment_minor($args[1]);
+        semver::increment_minor($args[1]);
     } elsif ($subcommand eq "increment-patch") {
-        semver_increment_patch($args[1]);
+        semver::increment_patch($args[1]);
     } elsif ($subcommand eq "validate") {
-        semver_validate($args[1]);
+        semver::validate($args[1]);
     } elsif ($subcommand eq "compare") {
-        semver_compare($args[1], $args[2]);
+        say semver::compare($args[1], $args[2]);
     } else {
         usage();
     }
