@@ -8,7 +8,6 @@
 .Nm
 compare
 .Ar version
-.Op Fl eq | Fl ne
 .Ar version
 .Nm
 decrement-major
@@ -65,29 +64,27 @@ and
 .Ar b
 for precedence.
 .Pp
-Standard shell
-.Sq test
-infix operators indicate the type of precedence comparison that you want. The supported operators are:
-.Bl -tag -width indent
-.It Fl eq
-Test if the versions
+The result of the comparison is a single number printed to STDOUT. The numbers are:
+.Bl -tag
+.It -1
 .Ar a
-and
+<
 .Ar b
-have equal precedence.
-.It Fl ne
-Test if the versions
+.It 0
 .Ar a
-and
+==
 .Ar b
-do not have equal precendence.
+.It 1
+.Ar a
+>
+.Ar b
 .El
 .Pp
 If either
 .Ar a
 or
 .Ar b
-are omitted, or an unsupported operator is provided, the utility will exit with an error code.
+are omitted, no result will be printed, and the utility will exit with an error code.
 .Pp
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
 .Ss decrement-major
@@ -136,7 +133,7 @@ is 0, the decrement operation will halt, and the utility will exit with an error
 .Nm
 can get the MAJOR component of a Semantic Version
 .Ar version
-and print it to STDOUT.
+\&.
 .Pp
 If
 .Ar version
@@ -145,7 +142,7 @@ is invalid, nothing will be printed, and the utility will exit with an error cod
 .Nm
 can get the MINOR component of a Semantic Version
 .Ar version
-and print it to STDOUT.
+\&.
 .Pp
 If
 .Ar version
@@ -154,7 +151,7 @@ is invalid, nothing will be printed, and the utility will exit with an error cod
 .Nm
 can get the PATCH component of a Semantic Version
 .Ar version
-and print it to STDOUT.
+\&.
 .Pp
 If
 .Ar version
@@ -163,7 +160,7 @@ is invalid, nothing will be printed, and the utility will exit with an error cod
 .Nm
 can get the PRERELEASE component of a Semantic Version
 .Ar version
-and print it to STDOUT. 
+\&.
 .Pp
 If
 .Ar version
@@ -176,7 +173,7 @@ is invalid, nothing will be printed, and the utility will exit with an error cod
 .Nm
 can get the BUILD component of a Semantic Version
 .Ar version
-and print it to STDOUT. 
+\&.
 .Pp
 If
 .Ar version
@@ -209,19 +206,25 @@ has whitespace immediately after it, OR its last character is also the last char
 .El
 .Ss increment-major
 .Nm
-can increment the MAJOR version of a Semantic Version string. The MINOR, PATCH, PRERELEASE, and BUILD will be reset when an increment occurs, per the Semver standard.
+can increment the MAJOR version of a Semantic Version string.
+.Pp
+The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when an increment occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
 .Ss increment-minor
 .Nm
-can increment the MINOR version of a Semantic Version string. The PATCH, PRERELEASE, and BUILD will be reset when an increment occurs, per the Semver standard.
+can increment the MINOR version of a Semantic Version string.
+.Pp
+The PATCH, PRERELEASE, and BUILD components will be reset when an increment occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
 .Ss increment-patch
 .Nm
-can increment the PATCH version of a Semantic Version string. The PRERELEASE and BUILD will be reset when an increment occurs, per the Semver standard.
+can increment the PATCH version of a Semantic Version string.
+.Pp
+The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
@@ -257,15 +260,16 @@ Display the usage screen.
 .Sh EXAMPLES
 .Ss Compare
 .Pp
-To compare the versions
-.Sq 1.0.0
-and
-.Sq 2.0.0
-for precedence:
+To compare version numbers for precedence:
 .Pp
-.Dl [ semver compare '1.0.0' -eq '2.0.0' ] # => false
+.Dl $ semver compare '1.0.0' '2.0.0'
+.Dl -1
 .Pp
-.Dl [ semver compare '1.0.0' -ne '2.0.0' ] # => true
+.Dl $ semver compare '1.0.0' '1.0.0'
+.Dl 0
+.Pp
+.Dl $ semver compare '2.0.0' '1.0.0'
+.Dl 1
 .Ss Decrement
 .Pp
 To decrement components of the version string
@@ -315,17 +319,21 @@ To increment components of the version string
 .Dl 1.2.4
 .Ss Validate
 .Pp
-To validate the version string
+To validate the (valid) version string
 .Sq 1.2.3
 :
 .Pp
-.Dl [ semver validate '1.2.3' ] # => true
+.Dl $ semver validate '1.2.3'
+.Dl $ echo $?
+.Dl 0
 .Pp
-To validate the version string
+To validate the (invalid) version string
 .Sq v1.0
 :
 .Pp
-.Dl [ semver validate 'v1.0' ] # => false
+.Dl $ semver validate 'v1.0'
+.Dl $ echo $?
+.Dl 1
 .Sh EXIT STATUS
 .Ex -std
 .Sh STANDARDS
