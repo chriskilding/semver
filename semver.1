@@ -48,6 +48,9 @@ increment-patch
 .Nm
 init
 .Nm
+sort
+.Fl
+.Nm
 validate
 .Ar string
 .Nm
@@ -55,7 +58,7 @@ validate
 .Sh DESCRIPTION
 The
 .Nm
-utility compares, generates, modifies, parses, and validates Semantic Version strings.
+utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
 .Ss compare
 .Nm
 can compare two Semantic Versions
@@ -184,7 +187,9 @@ If
 is invalid, nothing will be printed, and the utility will exit with an error code.
 .Ss grep
 .Nm
-can parse text from STDIN to extract zero or more Semantic Version strings, in the style of grep. It will tolerate quite noisy input.
+can parse text from STDIN to extract zero or more Semantic Version strings, in the style of
+.Sq grep
+\&. It will tolerate quite noisy input.
 .Pp
 A candidate version
 .Sq string
@@ -233,6 +238,17 @@ The formula is:
 can print the minimum acceptable Semantic Version
 .Sq 0.0.0
 to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
+.Ss sort
+.Nm
+can order a list of line-delimited Semantic Version strings from STDIN by precedence, in the style of
+.Sq sort
+\&.
+.Pp
+If the input is invalid (i.e. it contains anything besides Semantic Versions and line delimiter characters), nothing will be printed, and the utility will exit with an error code.
+.Pp
+Note: Some aspects of Semantic Version ordering are undefined in the specification. The
+.Nm
+utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
 .Ss validate
 .Nm
 can check if an input
@@ -317,6 +333,20 @@ To increment components of the version string
 .Pp
 .Dl $ semver increment-patch '1.2.3'
 .Dl 1.2.4
+.Ss Sort
+Given a line-separated list of version strings:
+.Pp
+.Dl $ semver sort <<EOF
+.Dl 2.2.2
+.Dl 1.1.1
+.Dl 4.4.4
+.Dl EOF
+.Pp
+The result will be:
+.Pp
+.Dl 1.1.1
+.Dl 2.2.2
+.Dl 4.4.4
 .Ss Validate
 .Pp
 To validate the (valid) version string
@@ -336,6 +366,10 @@ To validate the (invalid) version string
 .Dl 1
 .Sh EXIT STATUS
 .Ex -std
+.Sh WARNINGS
+The Semantic Versioning standard does not define an ordering for two versions that are precedence-equal but stringwise-unequal (for example the BUILD is different). To guarantee predictable ordering between executions, the
+.Nm
+utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
 .Sh STANDARDS
 The
 .Nm
