@@ -25,7 +25,7 @@ Invalid examples:
 - `v1.0.0`
 - `1.0`
 
-The `semver` utility is able to parse, modify, compare, and validate these Semantic Version strings.
+The `semver` utility compares, generates, modifies, parses, sorts, and validates these Semantic Version strings.
 
 ## Usage
 
