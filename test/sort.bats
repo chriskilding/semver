@@ -8,13 +8,22 @@ semver() {
     [[ "$(semver sort <<< "1.0.0")" = "1.0.0" ]]
 }
 
-@test "sort: should not handle invalid versions" {
+@test "sort: should not handle an invalid version" {
     run semver sort <<< "rubbish"
     [[ "$status" -eq 1 ]]
 }
 
+@test "sort: should not handle invalid versions" {
+    run semver sort <<EOF
+rubbish
+1.2.3
+EOF
+    [[ "$status" -eq 1 ]]
+}
+
 @test "sort: should handle empty input" {
-    [[ "$(semver sort <<< "")" = "" ]]
+    run printf '' | semver sort
+    [[ "$status" -eq 0 ]] && [[ "$output" = "" ]]
 }
 
 @test "sort: should handle multiple versions" {

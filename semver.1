@@ -240,9 +240,11 @@ can print the minimum acceptable Semantic Version
 to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
 .Ss sort
 .Nm
-can order Semantic Version strings from STDIN by precedence, in the style of
+can order a list of line-delimited Semantic Version strings from STDIN by precedence, in the style of
 .Sq sort
 \&.
+.Pp
+If the input is invalid (i.e. it contains anything besides Semantic Versions and line delimiter characters), nothing will be printed, and the utility will exit with an error code.
 .Pp
 Note: Some aspects of Semantic Version ordering are undefined in the specification. The
 .Nm
