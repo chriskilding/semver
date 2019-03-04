@@ -40,7 +40,7 @@ sub usage() {
     say STDERR "  $program (-h | --help)";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help  Show this screen.";
+    say STDERR "  -h --help  Show this help screen.";
 
     exit 1;
 }
