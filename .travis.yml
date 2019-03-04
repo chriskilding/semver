@@ -5,8 +5,8 @@ addons:
     packages:
     - libdevel-cover-perl
 
-# before_script: cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
+before_script: cpanm --sudo --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
 
 script: PERL5OPT=-MDevel::Cover make test
 
-after_success: cover
+after_success: cover -report codecov
