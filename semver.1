@@ -92,99 +92,131 @@ are omitted, no result will be printed, and the utility will exit with an error 
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
 .Ss decrement-major
 .Nm
-can decrement the MAJOR component of a Semantic Version
+can decrement the MAJOR component of a
 .Ar version
-\&.
+string.
 .Pp
 The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when a decrement occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR - 1).0.0
 .Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
 If the MAJOR component of
 .Ar version
-is 0, the decrement operation will halt, and the utility will exit with an error code.
+is already 0.
+.It
+If
+.Ar version
+is invalid.
+.El
 .Ss decrement-minor
 .Nm
-can decrement the MINOR component of a Semantic Version
+can decrement the MINOR component of a
 .Ar version
-\&.
+string.
 .Pp
 The PATCH, PRERELEASE, and BUILD components will be reset when a decrement occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR - 1).0
 .Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
 If the MINOR component of
 .Ar version
-is 0, the decrement operation will halt, and the utility will exit with an error code.
+is already 0.
+.It
+If
+.Ar version
+is invalid.
+.El
 .Ss decrement-patch
 .Nm
-can decrement the PATCH component of a Semantic Version
+can decrement the PATCH component of a
 .Ar version
-\&.
+string.
 .Pp
 The PRERELEASE and BUILD components will be reset when a decrement occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
 .Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
 If the PATCH component of
 .Ar version
-is 0, the decrement operation will halt, and the utility will exit with an error code.
-.Ss get-major
-.Nm
-can get the MAJOR component of a Semantic Version
-.Ar version
-\&.
-.Pp
+is already 0.
+.It
 If
 .Ar version
-is invalid, nothing will be printed, and the utility will exit with an error code.
+is invalid.
+.El
+.Ss get-major
+.Nm
+can get the MAJOR component of a
+.Ar version
+string.
+.Pp
+The operation will fail if
+.Ar version
+is invalid.
 .Ss get-minor
 .Nm
-can get the MINOR component of a Semantic Version
+can get the MINOR component of a
 .Ar version
-\&.
+string.
 .Pp
 If
 .Ar version
 is invalid, nothing will be printed, and the utility will exit with an error code.
 .Ss get-patch
 .Nm
-can get the PATCH component of a Semantic Version
+can get the PATCH component of a
 .Ar version
-\&.
+string.
 .Pp
-If
+The operation will fail if
 .Ar version
-is invalid, nothing will be printed, and the utility will exit with an error code.
+is invalid.
 .Ss get-prerelease
 .Nm
-can get the PRERELEASE component of a Semantic Version
+can get the PRERELEASE component of a
 .Ar version
-\&.
+string.
 .Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
 If
 .Ar version
-does not contain a PRERELEASE, nothing will be printed, and the utility will exit with an error code.
-.Pp
-If 
+does not contain a PRERELEASE.
+.It
+If
 .Ar version
-is invalid, nothing will be printed, and the utility will exit with an error code.
+is invalid.
+.El
 .Ss get-build
 .Nm
-can get the BUILD component of a Semantic Version
+can get the BUILD component of a
 .Ar version
-\&.
+string.
 .Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
 If
 .Ar version
-does not contain a BUILD, nothing will be printed, and the utility will exit with an error code.
-.Pp
-If 
+does not contain a BUILD.
+.It
+If
 .Ar version
-is invalid, nothing will be printed, and the utility will exit with an error code.
+is invalid.
+.El
 .Ss grep
 .Nm
 can parse text from STDIN to extract zero or more Semantic Version strings, in the style of
@@ -194,7 +226,6 @@ can parse text from STDIN to extract zero or more Semantic Version strings, in t
 A candidate version
 .Sq string
 will be matched within the text stream if it meets the following criteria:
-.Pp
 .Bl -bullet -compact
 .It
 .Sq string
@@ -211,31 +242,49 @@ has whitespace immediately after it, OR its last character is also the last char
 .El
 .Ss increment-major
 .Nm
-can increment the MAJOR version of a Semantic Version string.
+can increment the MAJOR component of a
+.Ar version
+string.
 .Pp
 The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when an increment occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
+.Pp
+The operation will fail if
+.Ar version
+is invalid.
 .Ss increment-minor
 .Nm
-can increment the MINOR version of a Semantic Version string.
+can increment the MINOR component of a
+.Ar version
+string.
 .Pp
 The PATCH, PRERELEASE, and BUILD components will be reset when an increment occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
+.Pp
+The operation will fail if
+.Ar version
+is invalid.
 .Ss increment-patch
 .Nm
-can increment the PATCH version of a Semantic Version string.
+can increment the PATCH component of a
+.Ar version
+string.
 .Pp
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
 The formula is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
+.Pp
+The operation will fail if
+.Ar version
+is invalid.
 .Ss init
 .Nm
-can print the minimum acceptable Semantic Version
+can print the minimum Semantic Version
 .Sq 0.0.0
 to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
 .Ss sort
