@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use feature qw(say);
 use Scalar::Util qw(looks_like_number);
+use List::Util qw(max);
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
@@ -109,7 +110,7 @@ sub semver_compare_prerelease {
         my @b_identifiers = semver_get_prerelease_identifiers($b);
         my $b_identifiers_count = scalar(@b_identifiers);
 
-        for (my $i = 0; $i < $b_identifiers_count; $i++) {
+        for (my $i = 0; $i < max($a_identifiers_count, $b_identifiers_count); $i++) {
             my $a_identifier = $a_identifiers[$i];
             my $b_identifier = $b_identifiers[$i];
 
@@ -126,8 +127,6 @@ sub semver_compare_prerelease {
             return $gt;
         } elsif ($a_identifiers_count eq $b_identifiers_count) {
             return $eq;
-        } elsif ($a_identifiers_count < $b_identifiers_count) {
-            return $lt;
         }
     } else {
         return $eq;
