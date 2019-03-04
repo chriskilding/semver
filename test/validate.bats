@@ -328,8 +328,6 @@ should_reject() {
 }
 
 @test 'validate: 1.0.0-01 should fail' {
-    skip 'TODO check - this might be allowed by the spec as it is not a dotted numeric identifier'
-
     should_reject '1.0.0-01'
 }
 
