@@ -3,3 +3,5 @@ language: minimal
 before_script: cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
 
 script: make test
+
+after_success: cover -report codecov
