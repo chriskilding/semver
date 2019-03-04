@@ -1,4 +1,9 @@
-language: perl
+language: minimal
+
+addons:
+  apt:
+    packages:
+    - libdevel-cover-perl
 
 before_script: cpanm --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
 
