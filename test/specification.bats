@@ -203,7 +203,7 @@ semver() {
 }
 
 @test 'A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.' {
-    [[ $(semver compare '1.0.0-1.1.1' '1.0.0-1.1') -eq 1 ]]
+    [[ $(semver compare '1.0.0-1.1.1' '1.0.0-1.1') -eq 1 ]] && [[ $(semver compare '1.0.0-1.1' '1.0.0-1.1.1') -eq -1 ]]
 }
 
 @test 'Example: 1.0.0-alpha < 1.0.0-alpha.1' {
