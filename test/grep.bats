@@ -8,6 +8,10 @@ semver() {
     [[ "$(semver grep <<< "1.0.0")" = "1.0.0" ]]
 }
 
+@test "grep should match optional semver fields" {
+    [[ "$(semver grep <<< "1.0.0-alpha+1")" = "1.0.0-alpha+1" ]]
+}
+
 @test "grep should not match non-semver version strings" {
     [[ "$(semver grep <<< "1 1.23 1.2.3.4.5.6.7")" = "" ]]
 }

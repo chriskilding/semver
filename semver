@@ -1,14 +1,10 @@
 #!/usr/bin/env perl
 
-##
-## semver
-## Semantic Version parser.
-##
-
 use strict;
 use warnings;
 use feature qw(say);
 use Scalar::Util qw(looks_like_number);
+use List::Util qw(max);
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
@@ -22,7 +18,7 @@ my $lt = -1;
 sub usage() {
     my $program = "semver";
 
-    say STDERR "Semantic Version parser.";
+    say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
     say STDERR "  $program compare <version> <version>";
@@ -110,11 +106,9 @@ sub semver_compare_prerelease {
         return $lt;
     } elsif ((defined $a) && (defined $b)) {
         my @a_identifiers = semver_get_prerelease_identifiers($a);
-        my $a_identifiers_count = scalar(@a_identifiers);
         my @b_identifiers = semver_get_prerelease_identifiers($b);
-        my $b_identifiers_count = scalar(@b_identifiers);
 
-        for (my $i = 0; $i < $b_identifiers_count; $i++) {
+        for (my $i = 0; $i < max(scalar(@a_identifiers), scalar(@b_identifiers)); $i++) {
             my $a_identifier = $a_identifiers[$i];
             my $b_identifier = $b_identifiers[$i];
 
@@ -127,13 +121,7 @@ sub semver_compare_prerelease {
             }
         }
 
-        if ($a_identifiers_count > $b_identifiers_count) {
-            return $gt;
-        } elsif ($a_identifiers_count eq $b_identifiers_count) {
-            return $eq;
-        } elsif ($a_identifiers_count < $b_identifiers_count) {
-            return $lt;
-        }
+        return $eq;
     } else {
         return $eq;
     }
