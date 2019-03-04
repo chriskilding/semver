@@ -1,10 +1,5 @@
 #!/usr/bin/env perl
 
-##
-## semver
-## Semantic Version parser.
-##
-
 use strict;
 use warnings;
 use feature qw(say);
@@ -22,7 +17,7 @@ my $lt = -1;
 sub usage() {
     my $program = "semver";
 
-    say STDERR "Semantic Version parser.";
+    say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
     say STDERR "  $program compare <version> <version>";
