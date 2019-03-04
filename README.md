@@ -1,8 +1,9 @@
 # semver
 
 [![Build Status](https://travis-ci.com/chriskilding/semver.svg?branch=master)](https://travis-ci.com/chriskilding/semver)
+[![Codecov](https://codecov.io/gh/chriskilding/semver/branch/master/graph/badge.svg)](https://codecov.io/gh/chriskilding/semver)
 
-Semantic Version parser.
+Semantic Version utility.
 
 ## Overview
 
