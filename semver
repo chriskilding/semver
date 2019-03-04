@@ -106,11 +106,9 @@ sub semver_compare_prerelease {
         return $lt;
     } elsif ((defined $a) && (defined $b)) {
         my @a_identifiers = semver_get_prerelease_identifiers($a);
-        my $a_identifiers_count = scalar(@a_identifiers);
         my @b_identifiers = semver_get_prerelease_identifiers($b);
-        my $b_identifiers_count = scalar(@b_identifiers);
 
-        for (my $i = 0; $i < max($a_identifiers_count, $b_identifiers_count); $i++) {
+        for (my $i = 0; $i < max(scalar(@a_identifiers), scalar(@b_identifiers)); $i++) {
             my $a_identifier = $a_identifiers[$i];
             my $b_identifier = $b_identifiers[$i];
 
@@ -123,11 +121,7 @@ sub semver_compare_prerelease {
             }
         }
 
-        if ($a_identifiers_count > $b_identifiers_count) {
-            return $gt;
-        } elsif ($a_identifiers_count eq $b_identifiers_count) {
-            return $eq;
-        }
+        return $eq;
     } else {
         return $eq;
     }
