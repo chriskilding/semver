@@ -18,3 +18,8 @@ semver() {
     run semver
     [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Version parser." ]]
 }
+
+@test "help: invalid subcommand should print usage" {
+    run semver foo
+    [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Version parser." ]]
+}
