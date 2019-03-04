@@ -16,4 +16,4 @@ install:
 
 uninstall:
 	-rm -f $(DESTDIR)$(prefix)/bin/semver
-	-rm -f $(DESTDIR)$(prefix)/share/man/man1
+	-rm -f $(DESTDIR)$(prefix)/share/man/man1/semver
