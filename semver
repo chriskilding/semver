@@ -301,31 +301,26 @@ sub semver::init {
 
 sub semver::sort {
     my @lines = <STDIN>;
+
     chomp(@lines);
 
-    if (scalar(@lines) eq 1) {
-        # Validate manually if just 1 line, because Perl sort does not kick in until it has at least 2 elements.
-        my $line = $lines[0];
-        if ($line =~ /$semver_regex/) {
-            say $line;
+    # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
+    if ((scalar(@lines) eq 1) && ($lines[0] !~ /$semver_regex/)) {
+        exit 1;
+    }
+
+    @lines = sort {
+        my $result = semver::compare($a, $b);
+
+        if ($result eq $eq) {
+            return $a cmp $b;
         } else {
-            exit 1;
+            return $result;
         }
-    } elsif (scalar(@lines) > 1) {
-        my @sorted_lines = sort {
-            my $res = semver::compare($a, $b);
+    } @lines;
 
-            if ($res eq $gt) {
-                return $gt;
-            } elsif ($res eq $lt) {
-                return $lt;
-            } else {
-                # Extra sorting for precedence-equal but stringwise-unequal version strings.
-                return $a cmp $b;
-            }
-        } @lines;
-
-        say join "\n", @sorted_lines;
+    foreach my $line (@lines) {
+        say $line;
     }
 }
 
