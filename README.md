@@ -51,9 +51,9 @@ $ semver --help
       semver increment-minor <version>
       semver increment-patch <version>
       semver init
-      semver sort -
+      semver sort [-r | --reverse] -
       semver validate <string>
-      semver (-h | --help)
+      semver [-h | --help]
     
     Options:
       -h --help  Show this help screen.
