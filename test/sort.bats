@@ -91,3 +91,23 @@ EOF
 
     [[ "$(semver sort <<< "$input")" = "$expected" ]]
 }
+
+@test "sort: should reverse ordering with the -r (--reverse) flag" {
+    input=$(cat <<EOF
+1.0.0
+2.0.0
+1.0.0-SNAPSHOT
+1.0.0+2008
+EOF
+)
+
+    expected=$(cat <<EOF
+2.0.0
+1.0.0+2008
+1.0.0
+1.0.0-SNAPSHOT
+EOF
+)
+
+    [[ "$(semver sort -r <<< "$input")" = "$expected" ]] && [[ "$(semver sort --reverse <<< "$input")" = "$expected" ]]
+}

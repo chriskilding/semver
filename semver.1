@@ -49,6 +49,7 @@ increment-patch
 init
 .Nm
 sort
+.Op Fl r | Fl -reverse
 .Fl
 .Nm
 validate
@@ -171,9 +172,9 @@ can get the MINOR component of a
 .Ar version
 string.
 .Pp
-If
+The operation will fail if
 .Ar version
-is invalid, nothing will be printed, and the utility will exit with an error code.
+is invalid.
 .Ss get-patch
 .Nm
 can get the PATCH component of a
@@ -219,9 +220,7 @@ is invalid.
 .El
 .Ss grep
 .Nm
-can parse text from STDIN to extract zero or more Semantic Version strings, in the style of
-.Sq grep
-\&. It will tolerate quite noisy input.
+can parse text from STDIN to extract zero or more Semantic Version strings. It will tolerate quite noisy input.
 .Pp
 A candidate version
 .Sq string
@@ -289,11 +288,15 @@ can print the minimum Semantic Version
 to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
 .Ss sort
 .Nm
-can order a list of line-delimited Semantic Version strings from STDIN by precedence, in the style of
-.Sq sort
-\&.
+can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high).
 .Pp
-If the input is invalid (i.e. it contains anything besides Semantic Versions and line delimiter characters), nothing will be printed, and the utility will exit with an error code.
+The sort subcommand understands the following options:
+.Bl -tag -width indent
+.It Fl r, Fl -reverse
+Sort in reverse order (high-to-low).
+.El
+.Pp
+The operation will fail if the input is invalid (i.e. it contains anything besides Semantic Versions and line delimiter characters).
 .Pp
 Note: Some aspects of Semantic Version ordering are undefined in the specification. The
 .Nm
@@ -319,7 +322,7 @@ The
 .Nm
 utility understands the following command-line options:
 .Bl -tag -width indent
-.It Fl h, Fl help
+.It Fl h, Fl -help
 Display the usage screen.
 .El
 .Sh EXAMPLES

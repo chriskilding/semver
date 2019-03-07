@@ -35,9 +35,9 @@ sub usage() {
     say STDERR "  $program increment-minor <version>";
     say STDERR "  $program increment-patch <version>";
     say STDERR "  $program init";
-    say STDERR "  $program sort -";
+    say STDERR "  $program sort [-r | --reverse] -";
     say STDERR "  $program validate <string>";
-    say STDERR "  $program (-h | --help)";
+    say STDERR "  $program [-h | --help]";
     say STDERR "";
     say STDERR "Options:";
     say STDERR "  -h --help  Show this help screen.";
@@ -299,7 +299,9 @@ sub semver::init {
     say "0.0.0";
 }
 
-sub semver::sort {
+sub semver::sort(&@) {
+    my ($sort_fn) = @_;
+
     my @lines = <STDIN>;
 
     chomp(@lines);
@@ -309,18 +311,22 @@ sub semver::sort {
         exit 1;
     }
 
-    @lines = sort {
-        my $result = semver::compare($a, $b);
-
-        if ($result eq $eq) {
-            return $a cmp $b;
-        } else {
-            return $result;
-        }
-    } @lines;
+    @lines = sort $sort_fn @lines;
 
     foreach my $line (@lines) {
         say $line;
+    }
+}
+
+sub semver::sort_pair {
+    my ($a, $b) = @_;
+
+    my $result = semver::compare($a, $b);
+
+    if ($result eq $eq) {
+        return $a cmp $b;
+    } else {
+        return $result;
     }
 }
 
@@ -368,7 +374,11 @@ sub main {
     } elsif ($subcommand eq "increment-patch") {
         semver::increment_patch($args[1]);
     } elsif ($subcommand eq "sort") {
-        semver::sort();
+        if (grep { $_ eq "-r" || $_ eq "--reverse" } @args) {
+            semver::sort { semver::sort_pair($b, $a) };
+        } else {
+            semver::sort { semver::sort_pair($a, $b) };
+        }
     } elsif ($subcommand eq "validate") {
         semver::validate($args[1]);
     } elsif ($subcommand eq "compare") {
