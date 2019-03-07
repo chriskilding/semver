@@ -11,6 +11,7 @@ test:
 	bats test
 
 install:
+	mkdir -p $(DESTDIR)$(prefix)/bin $(DESTDIR)$(prefix)/share/man/man1
 	install semver $(DESTDIR)$(prefix)/bin
 	install semver.1 $(DESTDIR)$(prefix)/share/man/man1
 
