@@ -15,11 +15,13 @@ The Semantic Versioning format is:
 
 Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3+2008`, `1.2.3-alpha+2008`.
 
-## Dependencies
+## Setup
+
+### Dependencies
 
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
 
-## Install
+### Install
 
 ```bash
 $ make install
