@@ -17,12 +17,12 @@ Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3+2008`, `1.2.3-alpha+2008`.
 
 ## Install
 
-### Source
-
 Dependencies:
 
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
 - [Bats](https://github.com/bats-core/bats-core) (test)
+
+### Source
 
 ```bash
 $ make
