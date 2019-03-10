@@ -15,17 +15,24 @@ The Semantic Versioning format is:
 
 Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3+2008`, `1.2.3-alpha+2008`.
 
-## Setup
+## Install
 
-### Dependencies
+### Source
+
+Dependencies:
 
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
-
-### Install
+- [Bats](https://github.com/bats-core/bats-core) (test)
 
 ```bash
+$ make
+$ make test # optional
 $ make install
 ```
+
+### Homebrew
+
+Coming soon.
 
 ## Usage
 
@@ -51,17 +58,4 @@ Man page:
 
 ```bash
 $ man semver
-```
-
-## Development
-
-### Dependencies
-
-- [Make](https://www.gnu.org/software/make/) (build)
-- [Bats](https://github.com/bats-core/bats-core) (test)
-
-### Testing
-
-```bash
-$ make test
 ```
