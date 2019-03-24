@@ -48,6 +48,7 @@ Coming soon.
     semver init
     semver sort [-r] -
     semver validate <string>
+    semver xargs <utility> <argument>...
     semver [-h]
 
 Man page:

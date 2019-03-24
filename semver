@@ -35,6 +35,7 @@ sub usage() {
     say STDERR "  $program init";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program validate <string>";
+    say STDERR "  $program xargs <utility> <argument>...";
     say STDERR "  $program [-h]";
     say STDERR "";
     say STDERR "Options:";
@@ -359,9 +360,18 @@ sub semver::validate {
 sub num_trues(@) {
     my $trues = 0;
     foreach (@_) {
-        $trues++ if ($_)
+        $trues++ if ($_);
     }
-    return $trues
+    return $trues;
+}
+
+sub semver::xargs {
+    my $utility = shift @_;
+    my @args = @_;
+
+    # FIXME: implement, and remove these debug lines
+    say "utility: $utility";
+    say "#args: " . scalar(@args);
 }
 
 sub main {
@@ -434,6 +444,9 @@ sub main {
         }
         when (/validate/) {
             semver::validate($args[0]);
+        }
+        when (/xargs/) {
+            semver::xargs();
         }
         when (/compare/) {
             say semver::compare($args[0], $args[1]);

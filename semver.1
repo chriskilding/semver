@@ -44,6 +44,10 @@ sort
 validate
 .Ar string
 .Nm
+xargs
+.Ar utility
+.Op Ar argument ...
+.Nm
 .Op Fl h
 .Sh DESCRIPTION
 The
@@ -296,6 +300,39 @@ is a valid Semantic Version.
 .Ar string
 is not a valid Semantic Version.
 .El
+.Ss xargs
+.Nm
+can generate a continuously incrementing sequence of Semantic Versions according to a user-supplied discovery function
+.Ar utility
+which returns 0 if the Semantic Version passes some user-defined existence check, or >0 if it fails.
+.Pp
+The
+.Ar utility
+may optionally take one or more custom
+.Ar argument
+values, which will be passed to it verbatim during execution.
+.Pp
+Each occurrence of
+.Ar replstring
+in the argument list of
+.Ar utility
+will be replaced with the generated Semantic Version value in each iteration. The default
+.Ar replstring
+is
+.Sq {}
+\&.
+.Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
+If
+.Nm
+cannot access or execute
+.Ar utility
+\&.
+.It
+TODO add
+.El
 .Sh OPTIONS
 .Pp
 The
@@ -402,6 +439,21 @@ To validate the (invalid) version string
 .Dl $ semver validate 'v1.0'
 .Dl $ echo $?
 .Dl 1
+.Ss Xargs
+.Pp
+To discover and download all versions of a hypothetical documentation site:
+.Pp
+.Dl $ semver xargs curl -f -q 'https://example.com/{}/docs/index.html' -o 'example-{}.html'
+.Dl $ ls
+.Dl example-0.0.1.html
+.Dl example-0.0.2.html
+.Dl example-0.1.0.html
+.Dl example-0.1.1.html
+.Dl example-0.2.0.html
+.Dl example-0.3.0.html
+.Dl example-1.0.0.html
+.Dl example-1.0.1.html
+.Dl example-1.1.0.html
 .Sh EXIT STATUS
 .Ex -std
 .Sh WARNINGS
