@@ -19,6 +19,9 @@ decrement-minor
 decrement-patch
 .Ar version
 .Nm
+get
+.Ar version
+.Nm
 get-major
 .Ar version
 .Nm
@@ -157,6 +160,15 @@ If
 .Ar version
 is invalid.
 .El
+.Ss get
+.Nm
+can get the MAJOR, MINOR, PATCH, PRERELEASE (optional), and BUILD (optional) components of a
+.Ar version
+string, and print them in tab-separated format to STDOUT. The output is suitable for post-processing by standard *nix tools like 'cut'.
+.Pp
+The operation will fail if
+.Ar version
+is invalid.
 .Ss get-major
 .Nm
 can get the MAJOR component of a
@@ -356,7 +368,10 @@ To decrement components of the version string
 .Pp
 To get components of the version string
 .Sq 1.2.3-SNAPSHOT+2019
-:
+(note: the output in the first example is an approximation of tab-separated value format):
+.Pp
+.Dl $ semver get '1.2.3-SNAPSHOT+2019'
+.Dl 1   2   3   SNAPSHOT    2019
 .Pp
 .Dl $ semver get-major '1.2.3-SNAPSHOT+2019'
 .Dl 1

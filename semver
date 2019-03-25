@@ -25,6 +25,7 @@ sub usage() {
     say STDERR "  $program decrement-major <version>";
     say STDERR "  $program decrement-minor <version>";
     say STDERR "  $program decrement-patch <version>";
+    say STDERR "  $program get <version>";
     say STDERR "  $program get-major <version>";
     say STDERR "  $program get-minor <version>";
     say STDERR "  $program get-patch <version>";
@@ -205,6 +206,20 @@ sub semver::decrement_patch {
     }
 }
 
+sub semver::get {
+    my ($version) = @_;
+
+    my @matches = semver_get($version);
+
+    my $major = $matches[0];
+    my $minor = $matches[1];
+    my $patch = $matches[2];
+    my $prerelease = $matches[3];
+    my $build = $matches[4];
+
+    say $major . "\t" . $minor . "\t" . $patch . "\t" . ($prerelease // '') . "\t" . ($build // '');
+}
+
 sub semver::get_major {
     my ($version) = @_;
 
@@ -355,6 +370,8 @@ sub main {
         semver::decrement_minor($args[1]);
     } elsif ($subcommand eq "decrement-patch") {
         semver::decrement_patch($args[1]);
+    } elsif ($subcommand eq "get") {
+        semver::get($args[1]);
     } elsif ($subcommand eq "get-major") {
         semver::get_major($args[1]);
     } elsif ($subcommand eq "get-minor") {

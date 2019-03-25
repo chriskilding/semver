@@ -40,6 +40,7 @@ Coming soon.
     semver decrement-major <version>
     semver decrement-minor <version>
     semver decrement-patch <version>
+    semver get <version>
     semver get-major <version>
     semver get-minor <version>
     semver get-patch <version>
