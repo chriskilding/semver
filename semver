@@ -2,9 +2,11 @@
 
 use strict;
 use warnings;
-use feature qw(say);
+use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
+use Getopt::Long qw(GetOptionsFromArray);
+no if $] >= 5.018, warnings => qw(experimental::smartmatch);
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
@@ -25,19 +27,15 @@ sub usage() {
     say STDERR "  $program decrement-major <version>";
     say STDERR "  $program decrement-minor <version>";
     say STDERR "  $program decrement-patch <version>";
-    say STDERR "  $program get-major <version>";
-    say STDERR "  $program get-minor <version>";
-    say STDERR "  $program get-patch <version>";
-    say STDERR "  $program get-prerelease <version>";
-    say STDERR "  $program get-build <version>";
+    say STDERR "  $program get [--major | --minor | --patch | --prerelease | --build] <version>";
     say STDERR "  $program grep -";
     say STDERR "  $program increment-major <version>";
     say STDERR "  $program increment-minor <version>";
     say STDERR "  $program increment-patch <version>";
     say STDERR "  $program init";
-    say STDERR "  $program sort [-r | --reverse] -";
+    say STDERR "  $program sort [-r] -";
     say STDERR "  $program validate <string>";
-    say STDERR "  $program [-h | --help]";
+    say STDERR "  $program [-h]";
     say STDERR "";
     say STDERR "Options:";
     say STDERR "  -h --help  Show this help screen.";
@@ -205,6 +203,28 @@ sub semver::decrement_patch {
     }
 }
 
+sub semver::get {
+    my ($version) = @_;
+
+    my @matches = semver_get($version);
+
+    my $major = $matches[0];
+    my $minor = $matches[1];
+    my $patch = $matches[2];
+    my $prerelease = $matches[3];
+    my $build = $matches[4];
+
+    print $major . "\t" . $minor . "\t" . $patch;
+
+    if ($build) {
+        print "\t" . ($prerelease // '') . "\t" . $build;
+    } elsif ($prerelease) {
+        print "\t" . $prerelease;
+    }
+
+    print "\n";
+}
+
 sub semver::get_major {
     my ($version) = @_;
 
@@ -336,55 +356,91 @@ sub semver::validate {
     ($str =~ /$semver_regex/) ? exit 0 : exit 1;
 }
 
+sub num_trues(@) {
+    my $trues = 0;
+    foreach (@_) {
+        $trues++ if ($_)
+    }
+    return $trues
+}
+
 sub main {
     my @args = @_;
 
-    if (scalar(@args) < 1) {
-        usage();
-    }
+    my $subcommand = shift @args // '';
 
-    my $subcommand = $args[0];
-
-    if ($subcommand eq "grep") {
-        semver::grep();
-    } elsif ($subcommand eq "init") {
-        semver::init();
-    } elsif ($subcommand eq "decrement-major") {
-        semver::decrement_major($args[1]);
-    } elsif ($subcommand eq "decrement-minor") {
-        semver::decrement_minor($args[1]);
-    } elsif ($subcommand eq "decrement-patch") {
-        semver::decrement_patch($args[1]);
-    } elsif ($subcommand eq "get-major") {
-        semver::get_major($args[1]);
-    } elsif ($subcommand eq "get-minor") {
-        semver::get_minor($args[1]);
-    } elsif ($subcommand eq "get-patch") {
-        semver::get_patch($args[1]);
-    } elsif ($subcommand eq "get-prerelease") {
-        semver::get_prerelease($args[1]);
-    } elsif ($subcommand eq "get-build") {
-        semver::get_build($args[1]);
-    } elsif (($subcommand eq "-h") || ($subcommand eq "--help")) {
-        usage();
-    } elsif ($subcommand eq "increment-major") {
-        semver::increment_major($args[1]);
-    } elsif ($subcommand eq "increment-minor") {
-        semver::increment_minor($args[1]);
-    } elsif ($subcommand eq "increment-patch") {
-        semver::increment_patch($args[1]);
-    } elsif ($subcommand eq "sort") {
-        if (grep { $_ eq "-r" || $_ eq "--reverse" } @args) {
-            semver::sort { semver::sort_pair($b, $a) };
-        } else {
-            semver::sort { semver::sort_pair($a, $b) };
+    for ($subcommand) {
+        when (/grep/) {
+            semver::grep();
         }
-    } elsif ($subcommand eq "validate") {
-        semver::validate($args[1]);
-    } elsif ($subcommand eq "compare") {
-        say semver::compare($args[1], $args[2]);
-    } else {
-        usage();
+        when (/init/) {
+            semver::init();
+        }
+        when (/decrement-major/) {
+            semver::decrement_major($args[0]);
+        }
+        when (/decrement-minor/) {
+            semver::decrement_minor($args[0]);
+        }
+        when (/decrement-patch/) {
+            semver::decrement_patch($args[0]);
+        }
+        when (/get/) {
+            my $major, my $minor, my $patch, my $prerelease, my $build;
+
+            GetOptionsFromArray(
+                \@args,
+                "major" => \$major,
+                "minor" => \$minor,
+                "patch" => \$patch,
+                "prerelease" => \$prerelease,
+                "build" => \$build,
+            ) or exit 1;
+
+            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
+
+            if ($major) {
+                semver::get_major($args[0]);
+            } elsif ($minor) {
+                semver::get_minor($args[0]);
+            } elsif ($patch) {
+                semver::get_patch($args[0]);
+            } elsif ($prerelease) {
+                semver::get_prerelease($args[0]);
+            } elsif ($build) {
+                semver::get_build($args[0]);
+            } else {
+                semver::get($args[0]);
+            }
+        }
+        when (/increment-major/) {
+            semver::increment_major($args[0]);
+        }
+        when (/increment-minor/) {
+            semver::increment_minor($args[0]);
+        }
+        when (/increment-patch/) {
+            semver::increment_patch($args[0]);
+        }
+        when (/sort/) {
+            my $reverse;
+            GetOptionsFromArray(\@args, "reverse|r" => \$reverse) or exit 1;
+
+            if ($reverse) {
+                semver::sort { semver::sort_pair($b, $a) };
+            } else {
+                semver::sort { semver::sort_pair($a, $b) };
+            }
+        }
+        when (/validate/) {
+            semver::validate($args[0]);
+        }
+        when (/compare/) {
+            say semver::compare($args[0], $args[1]);
+        }
+        default {
+            usage();
+        }
     }
 }
 
