@@ -68,6 +68,37 @@ join() {
     [[ $(semver get '1.0.0-a+1') = $(join '1' '0' '0' 'a' '1') ]]
 }
 
+# Option flags
+
+@test "get --major: 1.0.0 should be 1" {
+    [[ $(semver get --major '1.0.0') = '1' ]]
+}
+
+@test 'get --minor: 0.1.0 should be 1' {
+    [[ $(semver get --minor '0.1.0') = '1' ]]
+}
+
+@test 'get --patch: 0.0.1 should be 1' {
+    [[ $(semver get --patch '0.0.1') = '1' ]]
+}
+
+@test 'get --prerelease: 0.0.0-a should be a' {
+    [[ $(semver get --prerelease '0.0.0-a') = 'a' ]]
+}
+
+@test 'get --build: 0.0.0+a should be a' {
+    [[ $(semver get --build '0.0.0+a') = 'a' ]]
+}
+
+@test 'get: should allow flag permutation' {
+    [[ $(semver get '1.0.0' --major) = '1' ]]
+}
+
+@test 'get: should fail with multiple flags' {
+    run semver get --major --minor '1.0.0'
+    [[ "$status" -eq 1 ]]
+}
+
 # Negative numbers
 
 @test 'get: -1.0.0 should fail' {

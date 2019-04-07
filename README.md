@@ -40,20 +40,15 @@ Coming soon.
     semver decrement-major <version>
     semver decrement-minor <version>
     semver decrement-patch <version>
-    semver get <version>
-    semver get-major <version>
-    semver get-minor <version>
-    semver get-patch <version>
-    semver get-prerelease <version>
-    semver get-build <version>
+    semver get [--major | --minor | --patch | --prerelease | --build] <version>
     semver grep -
     semver increment-major <version>
     semver increment-minor <version>
     semver increment-patch <version>
     semver init
-    semver sort [-r | --reverse] -
+    semver sort [-r] -
     semver validate <string>
-    semver [-h | --help]
+    semver [-h]
 
 Man page:
 
