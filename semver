@@ -214,7 +214,15 @@ sub semver::get {
     my $prerelease = $matches[3];
     my $build = $matches[4];
 
-    say $major . "\t" . $minor . "\t" . $patch . "\t" . ($prerelease // '') . "\t" . ($build // '');
+    print $major . "\t" . $minor . "\t" . $patch;
+
+    if ($build) {
+        print "\t" . ($prerelease // '') . "\t" . $build;
+    } elsif ($prerelease) {
+        print "\t" . $prerelease;
+    }
+
+    print "\n";
 }
 
 sub semver::get_major {

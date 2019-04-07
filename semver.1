@@ -154,15 +154,17 @@ string, and print them in tab-separated format to STDOUT. The output is suitable
 .Pp
 The format looks like this:
 .Pp
-.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE+BUILD
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
+.Dl $ semver get MAJOR.MINOR.PATCH
+.Dl MAJOR\tMINOR\tPATCH
 .Pp
-If
-.Ar version
-does not contain a PRELEASE or BUILD component, the missing component will be printed as an empty string surrounded by delimiter characters to maintain consistency:
+.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE
+.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE
 .Pp
 .Dl $ semver get MAJOR.MINOR.PATCH+BUILD
 .Dl MAJOR\tMINOR\tPATCH\t\tBUILD
+.Pp
+.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE+BUILD
+.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
 .Pp
 The get subcommand understands the following (mutually exclusive) options:
 .Bl -tag -width indent

@@ -4,68 +4,76 @@ semver() {
     ./semver "$@"
 }
 
-join() {
+triple() {
+    printf "$1\t$2\t$3"
+}
+
+quad() {
+    printf "$1\t$2\t$3\t$4"
+}
+
+quintuple() {
     printf "$1\t$2\t$3\t$4\t$5"
 }
 
 @test 'get: 0.0.0 should be [0,0,0,_,_]' {
-    [[ $(semver get '0.0.0') = $(join '0' '0' '0') ]]
+    [[ $(semver get '0.0.0') = $(triple '0' '0' '0') ]]
 }
 
 @test 'get: 0.1.0 should be [0,1,0,_,_]' {
-    [[ $(semver get '0.1.0') = $(join '0' '1' '0') ]]
+    [[ $(semver get '0.1.0') = $(triple '0' '1' '0') ]]
 }
 
 @test 'get: 0.0.1 should be [0,0,1,_,_]' {
-    [[ $(semver get '0.0.1') = $(join '0' '0' '1') ]]
+    [[ $(semver get '0.0.1') = $(triple '0' '0' '1') ]]
 }
 
 @test 'get: 1.0.0 should be [1,0,0,_,_]' {
-    [[ $(semver get '1.0.0') = $(join '1' '0' '0') ]]
+    [[ $(semver get '1.0.0') = $(triple '1' '0' '0') ]]
 }
 
 @test 'get: 10.0.0 should be [10,0,0,_,_]' {
-    [[ $(semver get '10.0.0') = $(join '10' '0' '0') ]]
+    [[ $(semver get '10.0.0') = $(triple '10' '0' '0') ]]
 }
 
 @test 'get: 0.10.0 should be [0,10,0,_,_]' {
-    [[ $(semver get '0.10.0') = $(join '0' '10' '0') ]]
+    [[ $(semver get '0.10.0') = $(triple '0' '10' '0') ]]
 }
 
 @test 'get: 0.0.10 should be [0,0,10,_,_]' {
-    [[ $(semver get '0.0.10') = $(join '0' '0' '10') ]]
+    [[ $(semver get '0.0.10') = $(triple '0' '0' '10') ]]
 }
 
 @test 'get: 1.0.0-1 should be [1,0,0,1,_]' {
-    [[ $(semver get '1.0.0-1') = $(join '1' '0' '0' '1') ]]
+    [[ $(semver get '1.0.0-1') = $(quad '1' '0' '0' '1') ]]
 }
 
 @test 'get: 1.0.0-a should be [1,0,0,a,_]' {
-    [[ $(semver get '1.0.0-a') = $(join '1' '0' '0' 'a') ]]
+    [[ $(semver get '1.0.0-a') = $(quad '1' '0' '0' 'a') ]]
 }
 
 @test 'get: 1.0.0-a-1 should be [1,0,0,a-1,_]' {
-    [[ $(semver get '1.0.0-a-1') = $(join '1' '0' '0' 'a-1') ]]
+    [[ $(semver get '1.0.0-a-1') = $(quad '1' '0' '0' 'a-1') ]]
 }
 
 @test 'get: 1.0.0-1.2.3 should be [1,0,0,1.2.3,_]' {
-    [[ $(semver get '1.0.0-1.2.3') = $(join '1' '0' '0' '1.2.3') ]]
+    [[ $(semver get '1.0.0-1.2.3') = $(quad '1' '0' '0' '1.2.3') ]]
 }
 
 @test 'get: 1.0.0+1 should be [1,0,0,_,1]' {
-    [[ $(semver get '1.0.0+1') = $(join '1' '0' '0' '' '1') ]]
+    [[ $(semver get '1.0.0+1') = $(quintuple '1' '0' '0' '' '1') ]]
 }
 
 @test 'get: 1.0.0+a should be [1,0,0,_,a]' {
-    [[ $(semver get '1.0.0+a') = $(join '1' '0' '0' '' 'a') ]]
+    [[ $(semver get '1.0.0+a') = $(quintuple '1' '0' '0' '' 'a') ]]
 }
 
 @test 'get: 1.0.0+1.2.3 should be [1,0,0,_,1.2.3]' {
-    [[ $(semver get '1.0.0+1.2.3') = $(join '1' '0' '0' '' '1.2.3') ]]
+    [[ $(semver get '1.0.0+1.2.3') = $(quintuple '1' '0' '0' '' '1.2.3') ]]
 }
 
 @test 'get: 1.0.0-a+1 should be [1,0,0,a,1]' {
-    [[ $(semver get '1.0.0-a+1') = $(join '1' '0' '0' 'a' '1') ]]
+    [[ $(semver get '1.0.0-a+1') = $(quintuple '1' '0' '0' 'a' '1') ]]
 }
 
 # Option flags
