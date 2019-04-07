@@ -111,3 +111,8 @@ EOF
 
     [[ "$(semver sort -r <<< "$input")" = "$expected" ]] && [[ "$(semver sort --reverse <<< "$input")" = "$expected" ]]
 }
+
+@test "sort: should fail with invalid flags" {
+    run semver sort --foobar '1.0.0'
+    [[ "$status" -eq 1 ]]
+}

@@ -179,6 +179,11 @@ join() {
 
 # Whitespace
 
+@test 'get: should fail with an invalid flag' {
+    run semver get --foobar '1.0.0'
+    [[ "$status" -eq 1 ]]
+}
+
 @test "get: '' should fail" {
     run semver get ''
     [[ "$status" -eq 1 ]]
