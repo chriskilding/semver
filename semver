@@ -17,6 +17,9 @@ my $gt = 1;
 my $eq = 0;
 my $lt = -1;
 
+my $true = 1;
+my $false = 0;
+
 sub usage() {
     my $program = "semver";
 
@@ -357,17 +360,6 @@ sub semver::validate {
     ($str =~ /$semver_regex/) ? exit 0 : exit 1;
 }
 
-sub download {
-    my ($version) = @_;
-
-    say $version;
-
-    my $response = <STDIN>;
-    chomp $response;
-
-    return 1;
-}
-
 sub num_trues(@) {
     my $trues = 0;
     foreach (@_) {
@@ -376,25 +368,48 @@ sub num_trues(@) {
     return $trues;
 }
 
+sub xargs_test {
+    my ($version, $utility, $replstr) = @_;
+
+    my $substituted_command = $utility =~ s/${replstr}/${version}/gr;
+    system($substituted_command);
+    my $exit_val = $? >> 8;
+    return ($exit_val == 0);
+}
+
+sub xargs_test_minors {
+    my ($version, $utility, $replstr) = @_;
+
+    my $minors = 0;
+    while (xargs_test_patches($version, $utility, $replstr)) {
+        $minors++;
+        $version = semver::increment_minor($version);
+    }
+    return ($minors > 0);
+}
+
+sub xargs_test_patches {
+   my ($version, $utility, $replstr) = @_;
+
+    my $patches = 0;
+    while (xargs_test($version, $utility, $replstr)) {
+        $patches++;
+        $version = semver::increment_patch($version, $utility, $replstr);
+    }
+    return ($patches > 0);
+}
+
 sub semver::xargs {
-    my $utility = shift @_;
-    my @args = @_;
+    my ($utility) = @_;
+    my $replstr = "{}";
 
     my $version = "0.0.1";
 
-    while (download($version)) {
-        while (download($version)) {
-            while (download($version)) {
-                $version = semver::increment_patch($version);
-            }
-            $version = semver::increment_minor($version);
-        }
+    my $majors = 0;
+    while (xargs_test_minors($version, $utility, $replstr)) {
+        $majors++;
         $version = semver::increment_major($version);
     }
-
-    # FIXME: implement, and remove these debug lines
- #   say "utility: $utility";
-  #  say "#args: " . scalar(@args);
 }
 
 sub main {
@@ -469,7 +484,7 @@ sub main {
             semver::validate($args[0]);
         }
         when (/xargs/) {
-            semver::xargs();
+            semver::xargs($args[0]);
         }
         when (/compare/) {
             say semver::compare($args[0], $args[1]);
