@@ -165,7 +165,7 @@ sub semver::decrement_major {
 
     if ($major > 0) {
         my $new_major = $major - 1;
-        say "$new_major.0.0";
+        return "$new_major.0.0";
     } else {
         exit 1;
     }
@@ -181,7 +181,7 @@ sub semver::decrement_minor {
 
     if ($minor > 0) {
         my $new_minor = $minor - 1;
-        say "$major.$new_minor.0";
+        return "$major.$new_minor.0";
     } else {
         exit 1;
     }
@@ -198,7 +198,7 @@ sub semver::decrement_patch {
 
     if ($patch > 0) {
         my $new_patch = $patch - 1;
-        say "$major.$minor.$new_patch";
+        return "$major.$minor.$new_patch";
     } else {
         exit 1;
     }
@@ -288,7 +288,7 @@ sub semver::increment_major {
     my $major = $matches[0];
     my $new_major = $major + 1;
 
-    say "$new_major.0.0";
+    return "$new_major.0.0";
 }
 
 sub semver::increment_minor {
@@ -300,7 +300,7 @@ sub semver::increment_minor {
     my $minor = $matches[1];
     my $new_minor = $minor + 1;
 
-    say "$major.$new_minor.0";
+    return "$major.$new_minor.0";
 }
 
 sub semver::increment_patch {
@@ -313,7 +313,7 @@ sub semver::increment_patch {
     my $patch = $matches[2];
     my $new_patch = $patch + 1;
 
-    say "$major.$minor.$new_patch";
+    return "$major.$minor.$new_patch";
 }
 
 sub semver::init {
@@ -357,6 +357,17 @@ sub semver::validate {
     ($str =~ /$semver_regex/) ? exit 0 : exit 1;
 }
 
+sub download {
+    my ($version) = @_;
+
+    say $version;
+
+    my $response = <STDIN>;
+    chomp $response;
+
+    return 1;
+}
+
 sub num_trues(@) {
     my $trues = 0;
     foreach (@_) {
@@ -369,9 +380,21 @@ sub semver::xargs {
     my $utility = shift @_;
     my @args = @_;
 
+    my $version = "0.0.1";
+
+    while (download($version)) {
+        while (download($version)) {
+            while (download($version)) {
+                $version = semver::increment_patch($version);
+            }
+            $version = semver::increment_minor($version);
+        }
+        $version = semver::increment_major($version);
+    }
+
     # FIXME: implement, and remove these debug lines
-    say "utility: $utility";
-    say "#args: " . scalar(@args);
+ #   say "utility: $utility";
+  #  say "#args: " . scalar(@args);
 }
 
 sub main {
@@ -387,13 +410,13 @@ sub main {
             semver::init();
         }
         when (/decrement-major/) {
-            semver::decrement_major($args[0]);
+            say semver::decrement_major($args[0]);
         }
         when (/decrement-minor/) {
-            semver::decrement_minor($args[0]);
+            say semver::decrement_minor($args[0]);
         }
         when (/decrement-patch/) {
-            semver::decrement_patch($args[0]);
+            say semver::decrement_patch($args[0]);
         }
         when (/get/) {
             my $major, my $minor, my $patch, my $prerelease, my $build;
@@ -424,13 +447,13 @@ sub main {
             }
         }
         when (/increment-major/) {
-            semver::increment_major($args[0]);
+            say semver::increment_major($args[0]);
         }
         when (/increment-minor/) {
-            semver::increment_minor($args[0]);
+            say semver::increment_minor($args[0]);
         }
         when (/increment-patch/) {
-            semver::increment_patch($args[0]);
+            say semver::increment_patch($args[0]);
         }
         when (/sort/) {
             my $reverse;
