@@ -25,3 +25,29 @@ EOF
 
     [[ "$output" = "$expected" ]]
 }
+
+@test 'xargs: should support --replace option' {
+    run semver xargs 'if [ abc = "0.0.1" ] || [ abc = "0.1.0" ] || [ abc = "1.0.0" ]; then echo abc; else false; fi' --replace 'abc'
+
+    expected=$(cat <<EOF
+0.0.1
+0.1.0
+1.0.0
+EOF
+)
+
+    [[ "$output" = "$expected" ]]
+}
+
+@test 'xargs: should support -r option' {
+    run semver xargs 'if [ abc = "0.0.1" ] || [ abc = "0.1.0" ] || [ abc = "1.0.0" ]; then echo abc; else false; fi' -r 'abc'
+
+    expected=$(cat <<EOF
+0.0.1
+0.1.0
+1.0.0
+EOF
+)
+
+    [[ "$output" = "$expected" ]]
+}

@@ -400,13 +400,12 @@ sub xargs_test_patches {
 }
 
 sub semver::xargs {
-    my ($utility) = @_;
-    my $replstr = "{}";
+    my ($utility, $replace) = @_;
 
     my $version = "0.0.1";
 
     my $majors = 0;
-    while (xargs_test_minors($version, $utility, $replstr)) {
+    while (xargs_test_minors($version, $utility, $replace)) {
         $majors++;
         $version = semver::increment_major($version);
     }
@@ -484,7 +483,14 @@ sub main {
             semver::validate($args[0]);
         }
         when (/xargs/) {
-            semver::xargs($args[0]);
+            my $replace = "{}";
+
+            GetOptionsFromArray(
+                \@args,
+                "replace|r=s" => \$replace,
+            ) or exit 1;
+
+            semver::xargs($args[0], $replace);
         }
         when (/compare/) {
             say semver::compare($args[0], $args[1]);
