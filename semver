@@ -16,7 +16,6 @@ sub usage() {
     say STDERR "Usage:";
     say STDERR "  $program get [--major | --minor | --patch | --prerelease | --build] <version>";
     say STDERR "  $program grep -";
-    say STDERR "  $program validate <string>";
     say STDERR "  $program [-h]";
     say STDERR "";
     say STDERR "Options:";
@@ -101,12 +100,6 @@ sub _grep {
     }
 }
 
-sub _validate {
-    my ($str) = @_;
-
-    ($str =~ /$regex/) ? exit 0 : exit 1;
-}
-
 sub num_trues(@) {
     my $trues = 0;
     foreach (@_) {
@@ -151,9 +144,6 @@ sub main {
             } else {
                 _get($args[0]);
             }
-        }
-        when (/validate/) {
-            _validate($args[0]);
         }
         default {
             usage();

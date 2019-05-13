@@ -1,16 +1,12 @@
 #!/usr/bin/env bats
 
-semver() {
-    ./semver "$@"
-}
-
 should_allow() {
-    run semver validate "$1"
+    run ./semver-validate "$1"
     [[ "$status" -eq 0 ]]
 }
 
 should_reject() {
-    run semver validate "$1"
+    run ./semver-validate "$1"
     [[ "$status" -eq 1 ]]
 }
 

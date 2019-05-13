@@ -16,22 +16,26 @@ semver-increment() {
     ./semver-increment "$@"
 }
 
+semver-validate() {
+    ./semver-validate "$@"
+}
+
 ##
 ## Normal versions <https://semver.org/spec/v2.0.0.html#spec-item-2>
 ##
 
 @test "A normal version number MUST take the form X.Y.Z..." {
-    run semver validate "1.0.0"
+    run semver-validate "1.0.0"
     [[ "$status" -eq 0 ]]
 }
 
 @test "...where X, Y, and Z are non-negative integers..." {
-    run semver validate "-1.-1.-1"
+    run semver-validate "-1.-1.-1"
     [[ "$status" -eq 1 ]]
 }
 
 @test "...and MUST NOT contain leading zeroes." {
-    run semver validate "01.01.01"
+    run semver-validate "01.01.01"
     [[ "$status" -eq 1 ]]
 }
 
@@ -56,7 +60,7 @@ semver-increment() {
 ##
 
 @test "Major version zero (0.y.z) is for initial development." {
-    run semver validate "0.0.0"
+    run semver-validate "0.0.0"
     [[ "$status" -eq 0 ]]
 }
 
@@ -65,7 +69,7 @@ semver-increment() {
 ##
 
 @test "Version 1.0.0 defines the public API." {
-    run semver validate "1.0.0"
+    run semver-validate "1.0.0"
     [[ "$status" -eq 0 ]]
 }
 
@@ -114,12 +118,12 @@ semver-increment() {
 }
 
 @test "Pre-release identifiers MUST NOT be empty." {
-    run semver validate "0.0.0-a..c"
+    run semver-validate "0.0.0-a..c"
     [[ "$status" -eq 1 ]]
 }
 
 @test "Pre-release numeric identifiers MUST NOT include leading zeroes." {
-    run semver validate "0.0.0-1.02.3"
+    run semver-validate "0.0.0-1.02.3"
     [[ "$status" -eq 1 ]]
 }
 
@@ -156,7 +160,7 @@ semver-increment() {
 }
 
 @test "Build identifiers MUST NOT be empty." {
-    run semver validate "0.0.0+a..c"
+    run semver-validate "0.0.0+a..c"
     [[ "$status" -eq 1 ]]
 }
 

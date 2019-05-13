@@ -1,0 +1,43 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature qw(say);
+use Getopt::Long qw(GetOptionsFromArray);
+
+use Semver qw($regex);
+
+sub _usage() {
+    my $program = "semver-validate";
+
+    say STDERR "Semantic Versioning utility.";
+    say STDERR "";
+    say STDERR "Usage:";
+    say STDERR "  $program [-h] <string>";
+    say STDERR "";
+    say STDERR "Options:";
+    say STDERR "  -h --help  Show this help screen.";
+
+    exit 1;
+}
+
+sub _validate {
+    my ($str) = @_;
+
+    ($str =~ /$regex/) ? exit 0 : exit 1;
+}
+
+sub main {
+    my @args = @_;
+
+    my $help;
+    GetOptionsFromArray(\@args, "help|h" => \$help) or exit 1;
+
+    if ($help) {
+        _usage();
+    } else {
+        _validate($args[0]);
+    }
+}
+
+main(@ARGV);

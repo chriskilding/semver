@@ -38,7 +38,6 @@ Coming soon.
 
     semver get [--major | --minor | --patch | --prerelease | --build] <version>
     semver grep -
-    semver validate <string>
 
 Subcommands:
 
@@ -46,6 +45,7 @@ Subcommands:
     semver-decrement [ --major | --minor | --patch ] <version>
     semver-increment [--major | --minor | --patch] <version>
     semver-sort [-hr] -
+    semver-validate [-h] <string>
 
 Man page:
 
