@@ -1,0 +1,77 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature qw(say);
+use Getopt::Long qw(GetOptionsFromArray);
+use Semver qw(compare $regex);
+
+my $eq = 0;
+
+sub _usage() {
+    my $program = "semver-sort";
+
+    say STDERR "Semantic Versioning utility.";
+    say STDERR "";
+    say STDERR "Usage:";
+    say STDERR "  $program [options] -";
+    say STDERR "";
+    say STDERR "Options:";
+    say STDERR "  -h --help     Show this help screen.";
+    say STDERR "  -r --reverse  Reverse sort direction.";
+
+    exit 1;
+}
+
+sub _sort(&@) {
+    my ($sort_fn) = @_;
+
+    my @lines = <STDIN>;
+
+    chomp(@lines);
+
+    # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
+    my $reg = $regex;
+
+    if ((scalar(@lines) eq 1) && ($lines[0] !~ /$reg/)) {
+        exit 1;
+    }
+
+    @lines = sort $sort_fn @lines;
+
+    foreach my $line (@lines) {
+        say $line;
+    }
+}
+
+sub _sort_pair {
+    my ($a, $b) = @_;
+
+    my $result = compare($a, $b);
+
+    if ($result eq $eq) {
+        return $a cmp $b;
+    } else {
+        return $result;
+    }
+}
+
+
+sub main {
+    my @args = @_;
+
+    my $help, my $reverse;
+    GetOptionsFromArray(\@args, "help|h" => \$help, "reverse|r" => \$reverse) or exit 1;
+
+    if ($help) {
+        _usage();
+    } else {
+        if ($reverse) {
+            _sort { _sort_pair($b, $a) };
+        } else {
+            _sort { _sort_pair($a, $b) };
+        }
+    }
+}
+
+main(@ARGV);

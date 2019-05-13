@@ -1,0 +1,111 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature qw(say);
+use Getopt::Long qw(GetOptionsFromArray);
+use Semver;
+
+sub usage() {
+    my $program = "semver-decrement";
+
+    say STDERR "Semantic Versioning utility.";
+    say STDERR "";
+    say STDERR "Usage:";
+    say STDERR "  $program [options] <version>";
+    say STDERR "";
+    say STDERR "Options:";
+    say STDERR "  -h --help   Show this help screen.";
+    say STDERR "     --major  Decrement the MAJOR version.";
+    say STDERR "     --minor  Decrement the MINOR version.";
+    say STDERR "     --patch  Decrement the PATCH version.";
+
+    exit 1;
+}
+
+sub decrement_major {
+    my ($version) = @_;
+
+    my @matches = Semver::get($version);
+
+    my $major = $matches[0];
+
+    if ($major > 0) {
+        my $new_major = $major - 1;
+        say "$new_major.0.0";
+    } else {
+        exit 1;
+    }
+}
+
+sub decrement_minor {
+    my ($version) = @_;
+
+    my @matches = Semver::get($version);
+
+    my $major = $matches[0];
+    my $minor = $matches[1];
+
+    if ($minor > 0) {
+        my $new_minor = $minor - 1;
+        say "$major.$new_minor.0";
+    } else {
+        exit 1;
+    }
+}
+
+sub decrement_patch {
+    my ($version) = @_;
+
+    my @matches = Semver::get($version);
+
+    my $major = $matches[0];
+    my $minor = $matches[1];
+    my $patch = $matches[2];
+
+    if ($patch > 0) {
+        my $new_patch = $patch - 1;
+        say "$major.$minor.$new_patch";
+    } else {
+        exit 1;
+    }
+}
+
+sub num_trues(@) {
+    my $trues = 0;
+    foreach (@_) {
+        $trues++ if ($_)
+    }
+    return $trues
+}
+
+sub main {
+    my @args = @_;
+
+    my $major, my $minor, my $patch, my $help;
+
+    GetOptionsFromArray(
+        \@args,
+        "major" => \$major,
+        "minor" => \$minor,
+        "patch" => \$patch,
+        "help|h" => \$help
+    ) or exit 1;
+
+    usage() if (num_trues($major, $minor, $patch) > 1);
+
+    usage() if ($help);
+
+    if ($major) {
+        decrement_major($args[0]);
+    } elsif ($minor) {
+        decrement_minor($args[0]);
+    } elsif ($patch) {
+        decrement_patch($args[0]);
+    } else {
+        # FIXME fail
+    }
+
+}
+
+main(@ARGV);

@@ -1,0 +1,88 @@
+.Dd February 19, 2019
+.Dt SEMVER 1
+.Os
+.Sh NAME
+.Nm semver-decrement
+.Nd Semantic Versioning utility
+.Sh SYNOPSIS
+.Nm
+.Op options
+.Ar version
+.Sh DESCRIPTION
+The
+.Nm
+utility can decrement the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+.Pp
+The formula to decrement the MAJOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR - 1).0.0
+The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when a MAJOR decrement occurs.
+.Pp
+The formula to decrement the MINOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR - 1).0
+The PATCH, PRERELEASE, and BUILD components will be reset when a MINOR decrement occurs.
+.Pp
+The formula to decrement the PATCH component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
+The PRERELEASE and BUILD components will be reset when a PATCH decrement occurs.
+.Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
+If the specified component of
+.Ar version
+is already 0.
+.It
+If more than one mutually exclusive option is given.
+.It
+If
+.Ar version
+does not contain the specified component.
+.It
+If
+.Ar version
+is invalid.
+.El
+.Sh OPTIONS
+.Pp
+The
+.Nm
+utility understands the following command-line options:
+.Bl -tag -width indent
+.It Fl -major
+Decrement the MAJOR component of
+.Ar version
+.It Fl -minor
+Decrement the MINOR component of
+.Ar version
+.It Fl -patch
+Decrement the PATCH component of
+.Ar version
+.It Fl h, Fl -help
+Display the usage screen.
+.El
+.Sh EXAMPLES
+To decrement components of the version string
+.Sq 2.3.4
+:
+.Pp
+.Dl $ semver-decrement --major '2.3.4'
+.Dl 1.0.0
+.Pp
+.Dl $ semver-decrement --minor '2.3.4'
+.Dl 2.2.0
+.Pp
+.Dl $ semver-decrement --patch '2.3.4'
+.Dl 2.3.3
+.Sh EXIT STATUS
+.Ex -std
+.Sh STANDARDS
+The
+.Nm
+utility is expected to conform to the Semantic Versioning standard,
+defined at https://semver.org.

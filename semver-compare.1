@@ -1,0 +1,75 @@
+.Dd February 19, 2019
+.Dt SEMVER 1
+.Os
+.Sh NAME
+.Nm semver-compare
+.Nd Semantic Versioning utility
+.Sh SYNOPSIS
+.Nm
+.Op options
+.Ar version
+.Ar version
+.Sh DESCRIPTION
+The
+.Nm
+utility compares two Semantic Versions
+.Ar a
+and
+.Ar b
+for precedence.
+.Pp
+The result of the comparison is a single number printed to STDOUT. The numbers are:
+.Bl -tag
+.It -1
+.Ar a
+<
+.Ar b
+.It 0
+.Ar a
+==
+.Ar b
+.It 1
+.Ar a
+>
+.Ar b
+.El
+.Pp
+If either
+.Ar a
+or
+.Ar b
+are omitted, no result will be printed, and the utility will exit with an error code.
+.Pp
+Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+.Sh OPTIONS
+.Pp
+The
+.Nm
+utility understands the following command-line options:
+.Bl -tag -width indent
+.It Fl h, Fl -help
+Display the usage screen.
+.El
+.Sh EXAMPLES
+.Pp
+Precedence comparisons:
+.Pp
+.Dl $ semver-compare '1.0.0' '2.0.0'
+.Dl -1
+.Pp
+.Dl $ semver-compare '1.0.0' '1.0.0'
+.Dl 0
+.Pp
+.Dl $ semver-compare '2.0.0' '1.0.0'
+.Dl 1
+.Sh EXIT STATUS
+.Ex -std
+.Sh WARNINGS
+The Semantic Versioning standard does not define an ordering for two versions that are precedence-equal but stringwise-unequal (for example the BUILD is different). To guarantee predictable ordering between executions, the
+.Nm
+utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
+.Sh STANDARDS
+The
+.Nm
+utility is expected to conform to the Semantic Versioning standard,
+defined at https://semver.org.

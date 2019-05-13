@@ -4,23 +4,20 @@ use strict;
 use warnings;
 use feature qw(say);
 use Getopt::Long qw(GetOptionsFromArray);
+use Semver;
 
-sub semver::usage() {
-    my $program = "semver-init";
+sub usage() {
+    my $program = "semver-compare";
 
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program [-h]";
+    say STDERR "  $program [options] <version> <version>";
     say STDERR "";
     say STDERR "Options:";
     say STDERR "  -h --help  Show this help screen.";
 
     exit 1;
-}
-
-sub semver::init {
-    say "0.0.0";
 }
 
 sub main {
@@ -30,9 +27,9 @@ sub main {
     GetOptionsFromArray(\@args, "help|h" => \$help) or exit 1;
 
     if ($help) {
-        semver::usage();
+        usage();
     } else {
-        semver::init();
+        say Semver::compare($args[0], $args[1]);
     }
 }
 

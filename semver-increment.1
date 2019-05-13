@@ -1,0 +1,84 @@
+.Dd February 19, 2019
+.Dt SEMVER 1
+.Os
+.Sh NAME
+.Nm semver-increment
+.Nd Semantic Versioning utility
+.Sh SYNOPSIS
+.Nm
+.Op options
+.Ar version
+.Sh DESCRIPTION
+The
+.Nm
+utility can increment the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+.Pp
+The formula to increment the MAJOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
+The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when a MAJOR increment occurs.
+.Pp
+The formula to increment the MINOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
+The PATCH, PRERELEASE, and BUILD components will be reset when a MINOR increment occurs.
+.Pp
+The formula to increment the PATCH component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
+The PRERELEASE and BUILD components will be reset when a PATCH increment occurs.
+.Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
+If more than one mutually exclusive option is given.
+.It
+If
+.Ar version
+does not contain the specified component.
+.It
+If
+.Ar version
+is invalid.
+.El
+.Sh OPTIONS
+.Pp
+The
+.Nm
+utility understands the following command-line options:
+.Bl -tag -width indent
+.It Fl -major
+Increment the MAJOR component of
+.Ar version
+.It Fl -minor
+Increment the MINOR component of
+.Ar version
+.It Fl -patch
+Increment the PATCH component of
+.Ar version
+.It Fl h, Fl -help
+Display the usage screen.
+.El
+.Sh EXAMPLES
+To increment components of the version string
+.Sq 1.2.3
+:
+.Pp
+.Dl $ semver-increment --major '1.2.3'
+.Dl 2.0.0
+.Pp
+.Dl $ semver-increment --minor '1.2.3'
+.Dl 1.3.0
+.Pp
+.Dl $ semver-increment --patch '1.2.3'
+.Dl 1.2.4
+.Sh EXIT STATUS
+.Ex -std
+.Sh STANDARDS
+The
+.Nm
+utility is expected to conform to the Semantic Versioning standard,
+defined at https://semver.org.

@@ -1,32 +1,32 @@
 #!/usr/bin/env bats
 
-semver() {
-    ./semver "$@"
+semver-sort() {
+    ./semver-sort "$@"
 }
 
-@test "sort: should handle a single version" {
-    [[ "$(semver sort <<< "1.0.0")" = "1.0.0" ]]
+@test "semver-sort: should handle a single version" {
+    [[ "$(semver-sort <<< "1.0.0")" = "1.0.0" ]]
 }
 
-@test "sort: should not handle an invalid version" {
-    run semver sort <<< "rubbish"
+@test "semver-sort: should not handle an invalid version" {
+    run semver-sort <<< "rubbish"
     [[ "$status" -eq 1 ]]
 }
 
-@test "sort: should not handle invalid versions" {
-    run semver sort <<EOF
+@test "semver-sort: should not handle invalid versions" {
+    run semver-sort <<EOF
 rubbish
 1.2.3
 EOF
     [[ "$status" -eq 1 ]]
 }
 
-@test "sort: should handle empty input" {
-    run printf '' | semver sort
+@test "semver-sort: should handle empty input" {
+    run printf '' | semver-sort
     [[ "$status" -eq 0 ]] && [[ "$output" = "" ]]
 }
 
-@test "sort: should handle multiple versions" {
+@test "semver-sort: should handle multiple versions" {
     input=$(cat <<EOF
 2.2.2
 1.1.1
@@ -41,10 +41,10 @@ EOF
 EOF
 )
 
-    [[ "$(semver sort <<< "$input")" = "$expected" ]]
+    [[ "$(semver-sort <<< "$input")" = "$expected" ]]
 }
 
-@test "sort: should obey Semantic Version precedence rules" {
+@test "semver-sort: should obey Semantic Version precedence rules" {
     input=$(cat <<EOF
 1.0.0
 1.0.0-SNAPSHOT
@@ -59,10 +59,10 @@ EOF
 EOF
 )
 
-    [[ "$(semver sort <<< "$input")" = "$expected" ]]
+    [[ "$(semver-sort <<< "$input")" = "$expected" ]]
 }
 
-@test "sort: should apply lexicographic ordering when multiple versions are precedence-equal" {
+@test "semver-sort: should apply lexicographic ordering when multiple versions are precedence-equal" {
     input=$(cat <<EOF
 1.0.0+1
 1.0.0
@@ -89,10 +89,10 @@ EOF
 EOF
 )
 
-    [[ "$(semver sort <<< "$input")" = "$expected" ]]
+    [[ "$(semver-sort <<< "$input")" = "$expected" ]]
 }
 
-@test "sort: should reverse ordering with the -r (--reverse) flag" {
+@test "semver-sort: should reverse ordering with the -r (--reverse) flag" {
     input=$(cat <<EOF
 1.0.0
 2.0.0
@@ -109,10 +109,15 @@ EOF
 EOF
 )
 
-    [[ "$(semver sort -r <<< "$input")" = "$expected" ]] && [[ "$(semver sort --reverse <<< "$input")" = "$expected" ]]
+    [[ "$(semver-sort -r <<< "$input")" = "$expected" ]] && [[ "$(semver-sort --reverse <<< "$input")" = "$expected" ]]
 }
 
-@test "sort: should fail with invalid flags" {
-    run semver sort --foobar '1.0.0'
+@test "semver-sort: should fail with invalid flags" {
+    run semver-sort --foobar '1.0.0'
     [[ "$status" -eq 1 ]]
+}
+
+@test "semver-sort: -h should print usage" {
+    run semver-sort -h
+    [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]
 }
