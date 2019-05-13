@@ -1,0 +1,60 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature qw(say);
+use Getopt::Long qw(GetOptionsFromArray);
+
+use Semver qw($regex);
+
+sub usage() {
+    my $program = "semver-grep";
+
+    say STDERR "Semantic Versioning utility.";
+    say STDERR "";
+    say STDERR "Usage:";
+    say STDERR "  $program [options] -";
+    say STDERR "";
+    say STDERR "Options:";
+    say STDERR "  -h --help        Show this help screen.";
+
+    exit 1;
+}
+
+sub _grep {
+    while (my $line = <STDIN>) {
+        my @words = split(/\s+/, $line);
+        foreach (@words) {
+            if (/$regex/) {
+                print "$1.$2.$3";
+                print "-$4" if (length $4 // '');
+                print "+$5" if (length $5 // '');
+                print "\n";
+            }
+        }
+    }
+}
+
+sub num_trues(@) {
+    my $trues = 0;
+    foreach (@_) {
+        $trues++ if ($_)
+    }
+    return $trues
+}
+
+sub main {
+    my @args = @_;
+
+    my $help;
+    GetOptionsFromArray(
+        \@args,
+        "help|h" => \$help
+    ) or exit 1;
+
+    usage() if $help;
+
+    _grep();
+}
+
+main(@ARGV);

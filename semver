@@ -2,9 +2,8 @@
 
 use strict;
 use warnings;
-use feature qw(say switch);
+use feature qw(say);
 use Getopt::Long qw(GetOptionsFromArray);
-no if $] >= 5.018, warnings => qw(experimental::smartmatch);
 
 use Semver qw($regex);
 
@@ -14,12 +13,15 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program get [--major | --minor | --patch | --prerelease | --build] <version>";
-    say STDERR "  $program grep -";
-    say STDERR "  $program [-h]";
+    say STDERR "  $program [options] <version>";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help  Show this help screen.";
+    say STDERR "  -h --help        Show this help screen.";
+    say STDERR "     --major       Get the MAJOR version.";
+    say STDERR "     --minor       Get the MINOR version.";
+    say STDERR "     --patch       Get the PATCH version.";
+    say STDERR "     --prerelease  Get the PRE-RELEASE version.";
+    say STDERR "     --build       Get the BUILD version.";
 
     exit 1;
 }
@@ -86,20 +88,6 @@ sub _get_build {
     say $matches[4];
 }
 
-sub _grep {
-    while (my $line = <STDIN>) {
-        my @words = split(/\s+/, $line);
-        foreach (@words) {
-            if (/$regex/) {
-                print "$1.$2.$3";
-                print "-$4" if (length $4 // '');
-                print "+$5" if (length $5 // '');
-                print "\n";
-            }
-        }
-    }
-}
-
 sub num_trues(@) {
     my $trues = 0;
     foreach (@_) {
@@ -111,43 +99,34 @@ sub num_trues(@) {
 sub main {
     my @args = @_;
 
-    my $subcommand = shift @args // '';
+    my $major, my $minor, my $patch, my $prerelease, my $build, my $help;
 
-    for ($subcommand) {
-        when (/grep/) {
-            _grep();
-        }
-        when (/get/) {
-            my $major, my $minor, my $patch, my $prerelease, my $build;
+    GetOptionsFromArray(
+        \@args,
+        "major" => \$major,
+        "minor" => \$minor,
+        "patch" => \$patch,
+        "prerelease" => \$prerelease,
+        "build" => \$build,
+        "help|h" => \$help
+    ) or exit 1;
 
-            GetOptionsFromArray(
-                \@args,
-                "major" => \$major,
-                "minor" => \$minor,
-                "patch" => \$patch,
-                "prerelease" => \$prerelease,
-                "build" => \$build,
-            ) or exit 1;
+    usage() if $help;
 
-            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
+    usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
 
-            if ($major) {
-                _get_major($args[0]);
-            } elsif ($minor) {
-                _get_minor($args[0]);
-            } elsif ($patch) {
-                _get_patch($args[0]);
-            } elsif ($prerelease) {
-                _get_prerelease($args[0]);
-            } elsif ($build) {
-                _get_build($args[0]);
-            } else {
-                _get($args[0]);
-            }
-        }
-        default {
-            usage();
-        }
+    if ($major) {
+        _get_major($args[0]);
+    } elsif ($minor) {
+        _get_minor($args[0]);
+    } elsif ($patch) {
+        _get_patch($args[0]);
+    } elsif ($prerelease) {
+        _get_prerelease($args[0]);
+    } elsif ($build) {
+        _get_build($args[0]);
+    } else {
+        _get($args[0]);
     }
 }
 

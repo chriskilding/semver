@@ -40,15 +40,15 @@ semver-validate() {
 }
 
 @test "X is the major version..." {
-    [[ $(semver get --major "1.9.0") = "1" ]]
+    [[ $(semver --major "1.9.0") = "1" ]]
 }
 
 @test "...Y is the minor version..." {
-    [[ $(semver get --minor "1.9.0") = "9" ]]
+    [[ $(semver --minor "1.9.0") = "9" ]]
 }
 
 @test "...and Z is the patch version." {
-    [[ $(semver get --patch "1.9.0") = "0" ]]
+    [[ $(semver --patch "1.9.0") = "0" ]]
 }
 
 @test "Each element MUST increase numerically. For instance: 1.9.0 -> 1.10.0 -> 1.11.0." {
@@ -110,11 +110,11 @@ semver-validate() {
 ##
 
 @test "A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version." {
-    [[ $(semver get --prerelease "0.0.0-a.b.c") = "a.b.c" ]]
+    [[ $(semver --prerelease "0.0.0-a.b.c") = "a.b.c" ]]
 }
 
 @test "Pre-release identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-]." {
-    [[ $(semver get --prerelease "0.0.0-09AZaz-") = "09AZaz-" ]]
+    [[ $(semver --prerelease "0.0.0-09AZaz-") = "09AZaz-" ]]
 }
 
 @test "Pre-release identifiers MUST NOT be empty." {
@@ -132,19 +132,19 @@ semver-validate() {
 }
 
 @test "Example: 1.0.0-alpha" {
-    [[ $(semver get --prerelease "1.0.0-alpha") = "alpha" ]]
+    [[ $(semver --prerelease "1.0.0-alpha") = "alpha" ]]
 }
 
 @test "Example: 1.0.0-alpha.1" {
-    [[ $(semver get --prerelease "1.0.0-alpha.1") = "alpha.1" ]]
+    [[ $(semver --prerelease "1.0.0-alpha.1") = "alpha.1" ]]
 }
 
 @test "Example: 1.0.0-0.3.7" {
-    [[ $(semver get --prerelease "1.0.0-0.3.7") = "0.3.7" ]]
+    [[ $(semver --prerelease "1.0.0-0.3.7") = "0.3.7" ]]
 }
 
 @test "Example: 1.0.0-x.7.z.92" {
-    [[ $(semver get --prerelease "1.0.0-x.7.z.92") = "x.7.z.92" ]]
+    [[ $(semver --prerelease "1.0.0-x.7.z.92") = "x.7.z.92" ]]
 }
 
 ##
@@ -152,11 +152,11 @@ semver-validate() {
 ##
 
 @test "Build metadata MAY be denoted by appending a plus sign and a series of dot separated identifiers immediately following the patch or pre-release version." {
-    [[ $(semver get --build "0.0.0+a.b.c") = "a.b.c" ]]
+    [[ $(semver --build "0.0.0+a.b.c") = "a.b.c" ]]
 }
 
 @test "Build identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-]." {
-    [[ $(semver get --build "0.0.0+09AZaz-") = "09AZaz-" ]]
+    [[ $(semver --build "0.0.0+09AZaz-") = "09AZaz-" ]]
 }
 
 @test "Build identifiers MUST NOT be empty." {
@@ -169,15 +169,15 @@ semver-validate() {
 }
 
 @test "Example: 1.0.0-alpha+001" {
-    [[ $(semver get --build "1.0.0-alpha+001") = "001" ]]
+    [[ $(semver --build "1.0.0-alpha+001") = "001" ]]
 }
 
 @test "Example: 1.0.0+20130313144700" {
-    [[ $(semver get --build "1.0.0+20130313144700") = "20130313144700" ]]
+    [[ $(semver --build "1.0.0+20130313144700") = "20130313144700" ]]
 }
 
 @test "Example: 1.0.0-beta+exp.sha.5114f85" {
-    [[ $(semver get --build "1.0.0-beta+exp.sha.5114f85") = "exp.sha.5114f85" ]]
+    [[ $(semver --build "1.0.0-beta+exp.sha.5114f85") = "exp.sha.5114f85" ]]
 }
 
 ##
