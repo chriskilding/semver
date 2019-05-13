@@ -1,0 +1,30 @@
+.Dd February 19, 2019
+.Dt SEMVER 1
+.Os
+.Sh NAME
+.Nm semver-init
+.Nd Semantic Versioning utility
+.Sh SYNOPSIS
+.Nm
+.Op Fl h
+.Sh DESCRIPTION
+.Nm
+can print the minimum Semantic Version
+.Sq 0.0.0
+to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
+.Sh OPTIONS
+.Pp
+The
+.Nm
+utility understands the following command-line options:
+.Bl -tag -width indent
+.It Fl h, Fl -help
+Display the usage screen.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh STANDARDS
+The
+.Nm
+utility is expected to conform to the Semantic Versioning standard,
+defined at https://semver.org.

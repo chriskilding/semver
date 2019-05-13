@@ -1,0 +1,39 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature qw(say);
+use Getopt::Long qw(GetOptionsFromArray);
+
+sub semver::usage() {
+    my $program = "semver-init";
+
+    say STDERR "Semantic Versioning utility.";
+    say STDERR "";
+    say STDERR "Usage:";
+    say STDERR "  $program [-h]";
+    say STDERR "";
+    say STDERR "Options:";
+    say STDERR "  -h --help  Show this help screen.";
+
+    exit 1;
+}
+
+sub semver::init {
+    say "0.0.0";
+}
+
+sub main {
+    my @args = @_;
+
+    my $help;
+    GetOptionsFromArray(\@args, "help|h" => \$help) or exit 1;
+
+    if ($help) {
+        semver::usage();
+    } else {
+        semver::init();
+    }
+}
+
+main(@ARGV);
