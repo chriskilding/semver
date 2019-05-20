@@ -63,3 +63,12 @@ Validate a candidate version string:
 ```bash
 [[ $(semver grep <<< "1.2.3-alpha+1") ]] && echo "Valid"
 ```
+
+Download all artifacts in a version range:
+
+```bash
+version="0.0.1"
+while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
+    version=$(semver increment --patch ${version})
+done
+```
