@@ -35,8 +35,6 @@ increment-minor
 increment-patch
 .Ar version
 .Nm
-init
-.Nm
 sort
 .Op Fl r
 .Fl
@@ -261,11 +259,6 @@ The formula is:
 The operation will fail if
 .Ar version
 is invalid.
-.Ss init
-.Nm
-can print the minimum Semantic Version
-.Sq 0.0.0
-to STDOUT. You can use this as a base-case initializer, for example in a script which fails to find any Semantic Versions in its input.
 .Ss sort
 .Nm
 can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high).
