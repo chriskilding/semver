@@ -32,7 +32,6 @@ sub usage() {
     say STDERR "  $program increment-major <version>";
     say STDERR "  $program increment-minor <version>";
     say STDERR "  $program increment-patch <version>";
-    say STDERR "  $program init";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program validate <string>";
     say STDERR "  $program [-h]";
@@ -315,10 +314,6 @@ sub semver::increment_patch {
     say "$major.$minor.$new_patch";
 }
 
-sub semver::init {
-    say "0.0.0";
-}
-
 sub semver::sort(&@) {
     my ($sort_fn) = @_;
 
@@ -372,9 +367,6 @@ sub main {
     for ($subcommand) {
         when (/grep/) {
             semver::grep();
-        }
-        when (/init/) {
-            semver::init();
         }
         when (/decrement-major/) {
             semver::decrement_major($args[0]);
