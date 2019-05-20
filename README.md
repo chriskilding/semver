@@ -36,8 +36,8 @@ Coming soon.
 
 ## Usage
 
-    semver awk [--major | --minor | --patch | --prerelease | --build] -
     semver compare <version> <version>
+    semver cut [--major | --minor | --patch | --prerelease | --build] -
     semver decrement [--major | --minor | --patch] <version>
     semver grep [-o] -
     semver increment [--major | --minor | --patch] <version>
@@ -52,10 +52,10 @@ $ man semver
 
 ## Examples
 
-Find the current version of something:
+Find the latest Git tag:
 
 ```bash
-curl -s https://example.com/input.txt | semver grep -o | semver sort -r | head -n 1
+git tag | semver grep -o | semver sort -r | head -n 1
 ```    
 
 Validate a candidate version string:

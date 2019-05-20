@@ -23,7 +23,7 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program awk [--major | --minor | --patch | --prerelease | --build] -";
+    say STDERR "  $program cut [--major | --minor | --patch | --prerelease | --build] -";
     say STDERR "  $program compare <version> <version>";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
     say STDERR "  $program grep [-o] -";
@@ -197,60 +197,38 @@ sub semver::decrement_patch {
     }
 }
 
-sub semver::awk {
-    while (my $line = <STDIN>) {
-        my @matches = semver_get($line);
-
-        my $major = $matches[0];
-        my $minor = $matches[1];
-        my $patch = $matches[2];
-        my $prerelease = $matches[3];
-        my $build = $matches[4];
-
-        print $major . "\t" . $minor . "\t" . $patch;
-
-        if ($build) {
-            print "\t" . ($prerelease // '') . "\t" . $build;
-        } elsif ($prerelease) {
-            print "\t" . $prerelease;
-        }
-
-        print "\n";
-    }
-}
-
-sub semver::awk_major {
+sub semver::cut_major {
     while (my $line = <STDIN>) {
         my @matches = semver_get($line);
         say $matches[0];
     }
 }
 
-sub semver::awk_minor {
+sub semver::cut_minor {
     while (my $line = <STDIN>) {
         my @matches = semver_get($line);
         say $matches[1];
     }
 }
 
-sub semver::awk_patch {
+sub semver::cut_patch {
     while (my $line = <STDIN>) {
         my @matches = semver_get($line);
         say $matches[2];
     }
 }
 
-sub semver::awk_prerelease {
+sub semver::cut_prerelease {
     while (my $line = <STDIN>) {
         my @matches = semver_get($line);
-        say $matches[3];
+        say $matches[3] // '';
     }
 }
 
-sub semver::awk_build {
+sub semver::cut_build {
     while (my $line = <STDIN>) {
         my @matches = semver_get($line);
-        say $matches[4];
+        say $matches[4] // '';
     }
 }
 
@@ -365,7 +343,10 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/awk/) {
+        when (/compare/) {
+            say semver::compare($args[0], $args[1]);
+        }
+        when (/cut/) {
             my $major, my $minor, my $patch, my $prerelease, my $build;
 
             GetOptionsFromArray(
@@ -377,20 +358,18 @@ sub main {
                 "build" => \$build,
             ) or exit 1;
 
-            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
+            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) != 1);
 
             if ($major) {
-                semver::awk_major();
+                semver::cut_major();
             } elsif ($minor) {
-                semver::awk_minor();
+                semver::cut_minor();
             } elsif ($patch) {
-                semver::awk_patch();
+                semver::cut_patch();
             } elsif ($prerelease) {
-                semver::awk_prerelease();
+                semver::cut_prerelease();
             } elsif ($build) {
-                semver::awk_build();
-            } else {
-                semver::awk();
+                semver::cut_build();
             }
         }
         when (/decrement/) {
@@ -461,9 +440,6 @@ sub main {
             } else {
                 semver::sort { semver::sort_pair($a, $b) };
             }
-        }
-        when (/compare/) {
-            say semver::compare($args[0], $args[1]);
         }
         default {
             usage();

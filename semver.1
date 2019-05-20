@@ -6,7 +6,7 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
-awk
+cut
 .Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
 .Fl
 .Nm
@@ -35,15 +35,11 @@ sort
 The
 .Nm
 utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
-.Ss awk
+.Ss cut
 .Nm
-can scan the standard input for lines that contain
-.Ar version
-strings, extract their components, and print the components in tab-separated format to the standard output, in the style of Awk.
+can cut out selected components of Semantic Version strings provided on the standard input, and write them to the standard output, in the style of Cut.
 .Pp
-The main difference from Awk is that the pattern to match is baked in to
-.Nm
-- you can think of this subcommand as a partially applied Awk function dedicated to finding Semantic Version strings, where you may only tweak certain parameters.
+The main difference from Cut is that the fields to select are the Semantic Version component names, not character or byte positions.
 .Pp
 It is not an error to select an optional component that is not present in the input
 .Ar version
@@ -51,19 +47,19 @@ string.
 .Pp
 The format looks like this:
 .Pp
-.Dl $ semver awk <<< MAJOR.MINOR.PATCH
+.Dl $ semver cut <<< MAJOR.MINOR.PATCH
 .Dl MAJOR\tMINOR\tPATCH
 .Pp
-.Dl $ semver awk <<< MAJOR.MINOR.PATCH-PRERELEASE
+.Dl $ semver cut <<< MAJOR.MINOR.PATCH-PRERELEASE
 .Dl MAJOR\tMINOR\tPATCH\tPRERELEASE
 .Pp
-.Dl $ semver awk <<< MAJOR.MINOR.PATCH+BUILD
+.Dl $ semver cut <<< MAJOR.MINOR.PATCH+BUILD
 .Dl MAJOR\tMINOR\tPATCH\t\tBUILD
 .Pp
-.Dl $ semver awk <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
+.Dl $ semver cut <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
 .Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
 .Pp
-The awk subcommand understands the following (mutually exclusive) options:
+The cut subcommand understands the following (mutually exclusive) options:
 .Bl -tag -width indent
 .It Fl -major
 Get only the MAJOR component of
@@ -286,28 +282,25 @@ utility understands the following command-line options:
 Display the usage screen.
 .El
 .Sh EXAMPLES
-.Ss Awk
+.Ss Cut
 .Pp
 To parse the version string
 .Sq 1.2.3-SNAPSHOT+2019
 :
 .Pp
-.Dl $ semver awk <<< '1.2.3-SNAPSHOT+2019'
-.Dl 1\t2\t3\tSNAPSHOT\t2019
-.Pp
-.Dl $ semver awk --major <<< '1.2.3-SNAPSHOT+2019'
+.Dl $ semver cut --major <<< '1.2.3-SNAPSHOT+2019'
 .Dl 1
 .Pp
-.Dl $ semver awk --minor <<< '1.2.3-SNAPSHOT+2019'
+.Dl $ semver cut --minor <<< '1.2.3-SNAPSHOT+2019'
 .Dl 2
 .Pp
-.Dl $ semver awk --patch <<< '1.2.3-SNAPSHOT+2019'
+.Dl $ semver cut --patch <<< '1.2.3-SNAPSHOT+2019'
 .Dl 3
 .Pp
-.Dl $ semver awk --prerelease <<< '1.2.3-SNAPSHOT+2019'
+.Dl $ semver cut --prerelease <<< '1.2.3-SNAPSHOT+2019'
 .Dl SNAPSHOT
 .Pp
-.Dl $ semver awk --build <<< '1.2.3-SNAPSHOT+2019'
+.Dl $ semver cut --build <<< '1.2.3-SNAPSHOT+2019'
 .Dl 2019
 .Ss Compare
 .Pp
