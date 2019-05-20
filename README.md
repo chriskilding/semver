@@ -37,14 +37,10 @@ Coming soon.
 ## Usage
 
     semver compare <version> <version>
-    semver decrement-major <version>
-    semver decrement-minor <version>
-    semver decrement-patch <version>
+    semver decrement [--major | --minor | --patch] <version>
     semver get [--major | --minor | --patch | --prerelease | --build] <version>
     semver grep -
-    semver increment-major <version>
-    semver increment-minor <version>
-    semver increment-patch <version>
+    semver increment [--major | --minor | --patch] <version>
     semver sort [-r] -
     semver validate <string>
     semver [-h]

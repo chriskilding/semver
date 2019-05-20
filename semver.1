@@ -10,13 +10,8 @@ compare
 .Ar version
 .Ar version
 .Nm
-decrement-major
-.Ar version
-.Nm
-decrement-minor
-.Ar version
-.Nm
-decrement-patch
+decrement
+.Op Fl -major | Fl -minor | Fl -patch
 .Ar version
 .Nm
 get
@@ -26,13 +21,8 @@ get
 grep
 .Fl
 .Nm
-increment-major
-.Ar version
-.Nm
-increment-minor
-.Ar version
-.Nm
-increment-patch
+increment
+.Op Fl -major | Fl -minor | Fl -patch
 .Ar version
 .Nm
 sort
@@ -78,67 +68,55 @@ or
 are omitted, no result will be printed, and the utility will exit with an error code.
 .Pp
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
-.Ss decrement-major
+.Ss decrement
+The
 .Nm
-can decrement the MAJOR component of a
+utility can decrement the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+.Pp
+The formula to decrement the MAJOR component of
 .Ar version
-string.
-.Pp
-The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when a decrement occurs.
-.Pp
-The formula is:
+is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR - 1).0.0
 .Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If the MAJOR component of
+The formula to decrement the MINOR component of
 .Ar version
-is already 0.
-.It
-If
-.Ar version
-is invalid.
-.El
-.Ss decrement-minor
-.Nm
-can decrement the MINOR component of a
-.Ar version
-string.
-.Pp
-The PATCH, PRERELEASE, and BUILD components will be reset when a decrement occurs.
-.Pp
-The formula is:
+is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR - 1).0
 .Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If the MINOR component of
+The formula to decrement the PATCH component of
 .Ar version
-is already 0.
-.It
-If
-.Ar version
-is invalid.
-.El
-.Ss decrement-patch
-.Nm
-can decrement the PATCH component of a
-.Ar version
-string.
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
 .Pp
 The PRERELEASE and BUILD components will be reset when a decrement occurs.
 .Pp
-The formula is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
+The decrement subcommand understands the following mutually exclusive options:
+.Bl -tag -width indent
+.It Fl -major
+Decrement the MAJOR component of
+.Ar version
+.It Fl -minor
+Decrement the MINOR component of
+.Ar version
+.It Fl -patch
+Decrement the PATCH component of
+.Ar version
+.El
 .Pp
 The operation will fail:
 .Bl -bullet -compact
 .It
-If the PATCH component of
+If the specified component of
 .Ar version
 is already 0.
+.It
+If more than one mutually exclusive option is given.
+.It
+If a required option is missing.
+.It
+If
+.Ar version
+does not contain the specified component.
 .It
 If
 .Ar version
@@ -188,6 +166,8 @@ The operation will fail:
 .It
 If more than one mutually exclusive option is given.
 .It
+If a required option is missing.
+.It
 If
 .Ar version
 does not contain the specified component.
@@ -217,48 +197,56 @@ has whitespace immediately before it, OR its first character is also the first c
 .Sq string
 has whitespace immediately after it, OR its last character is also the last character of the line.
 .El
-.Ss increment-major
+.Ss increment
+The
 .Nm
-can increment the MAJOR component of a
+utility can increment the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+.Pp
+The formula to increment the MAJOR component of
 .Ar version
-string.
-.Pp
-The MINOR, PATCH, PRERELEASE, and BUILD components will be reset when an increment occurs.
-.Pp
-The formula is:
+is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
 .Pp
-The operation will fail if
+The formula to increment the MINOR component of
 .Ar version
-is invalid.
-.Ss increment-minor
-.Nm
-can increment the MINOR component of a
-.Ar version
-string.
-.Pp
-The PATCH, PRERELEASE, and BUILD components will be reset when an increment occurs.
-.Pp
-The formula is:
+is:
 .Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
 .Pp
-The operation will fail if
+The formula to increment the PATCH component of
 .Ar version
-is invalid.
-.Ss increment-patch
-.Nm
-can increment the PATCH component of a
-.Ar version
-string.
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
 .Pp
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
-The formula is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
+The increment subcommand understands the following mutually exclusive options:
+.Bl -tag -width indent
+.It Fl -major
+Increment the MAJOR component of
+.Ar version
+.It Fl -minor
+Increment the MINOR component of
+.Ar version
+.It Fl -patch
+Increment the PATCH component of
+.Ar version
+.El
 .Pp
-The operation will fail if
+The operation will fail:
+.Bl -bullet -compact
+.It
+If more than one mutually exclusive option is given.
+.It
+If a required option is missing.
+.It
+If
+.Ar version
+does not contain the specified component.
+.It
+If
 .Ar version
 is invalid.
+.El
 .Ss sort
 .Nm
 can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high).
@@ -317,13 +305,13 @@ To decrement components of the version string
 .Sq 2.3.4
 :
 .Pp
-.Dl $ semver decrement-major '2.3.4'
+.Dl $ semver decrement --major '2.3.4'
 .Dl 1.0.0
 .Pp
-.Dl $ semver decrement-minor '2.3.4'
+.Dl $ semver decrement --minor '2.3.4'
 .Dl 2.2.0
 .Pp
-.Dl $ semver decrement-patch '2.3.4'
+.Dl $ semver decrement --patch '2.3.4'
 .Dl 2.3.3
 .Ss Get
 .Pp
@@ -356,13 +344,13 @@ To increment components of the version string
 .Sq 1.2.3
 :
 .Pp
-.Dl $ semver increment-major '1.2.3'
+.Dl $ semver increment --major '1.2.3'
 .Dl 2.0.0
 .Pp
-.Dl $ semver increment-minor '1.2.3'
+.Dl $ semver increment --minor '1.2.3'
 .Dl 1.3.0
 .Pp
-.Dl $ semver increment-patch '1.2.3'
+.Dl $ semver increment --patch '1.2.3'
 .Dl 1.2.4
 .Ss Sort
 Given a line-separated list of version strings:

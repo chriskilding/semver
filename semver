@@ -24,14 +24,10 @@ sub usage() {
     say STDERR "";
     say STDERR "Usage:";
     say STDERR "  $program compare <version> <version>";
-    say STDERR "  $program decrement-major <version>";
-    say STDERR "  $program decrement-minor <version>";
-    say STDERR "  $program decrement-patch <version>";
+    say STDERR "  $program decrement [--major | --minor | --patch] <version>";
     say STDERR "  $program get [--major | --minor | --patch | --prerelease | --build] <version>";
     say STDERR "  $program grep -";
-    say STDERR "  $program increment-major <version>";
-    say STDERR "  $program increment-minor <version>";
-    say STDERR "  $program increment-patch <version>";
+    say STDERR "  $program increment [--major | --minor | --patch] <version>";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program validate <string>";
     say STDERR "  $program [-h]";
@@ -368,14 +364,28 @@ sub main {
         when (/grep/) {
             semver::grep();
         }
-        when (/decrement-major/) {
-            semver::decrement_major($args[0]);
-        }
-        when (/decrement-minor/) {
-            semver::decrement_minor($args[0]);
-        }
-        when (/decrement-patch/) {
-            semver::decrement_patch($args[0]);
+        when (/decrement/) {
+            my $major, my $minor, my $patch, my $help;
+
+            GetOptionsFromArray(
+                \@args,
+                "major" => \$major,
+                "minor" => \$minor,
+                "patch" => \$patch,
+                "help|h" => \$help
+            ) or exit 1;
+
+            usage() if (num_trues($major, $minor, $patch) > 1);
+
+            if ($major) {
+                semver::decrement_major($args[0]);
+            } elsif ($minor) {
+                semver::decrement_minor($args[0]);
+            } elsif ($patch) {
+                semver::decrement_patch($args[0]);
+            } else {
+                usage();
+            }
         }
         when (/get/) {
             my $major, my $minor, my $patch, my $prerelease, my $build;
@@ -405,14 +415,28 @@ sub main {
                 semver::get($args[0]);
             }
         }
-        when (/increment-major/) {
-            semver::increment_major($args[0]);
-        }
-        when (/increment-minor/) {
-            semver::increment_minor($args[0]);
-        }
-        when (/increment-patch/) {
-            semver::increment_patch($args[0]);
+        when (/increment/) {
+            my $major, my $minor, my $patch, my $help;
+
+            GetOptionsFromArray(
+                \@args,
+                "major" => \$major,
+                "minor" => \$minor,
+                "patch" => \$patch,
+                "help|h" => \$help
+            ) or exit 1;
+
+            usage() if (num_trues($major, $minor, $patch) > 1);
+
+            if ($major) {
+                semver::increment_major($args[0]);
+            } elsif ($minor) {
+                semver::increment_minor($args[0]);
+            } elsif ($patch) {
+                semver::increment_patch($args[0]);
+            } else {
+                usage();
+            }
         }
         when (/sort/) {
             my $reverse;
