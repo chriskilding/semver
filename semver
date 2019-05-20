@@ -23,8 +23,8 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program cut [--major | --minor | --patch | --prerelease | --build] -";
     say STDERR "  $program compare <version> <version>";
+    say STDERR "  $program cut [--major | --minor | --patch | --prerelease | --build] -";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
     say STDERR "  $program grep [-o] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";

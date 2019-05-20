@@ -430,12 +430,3 @@ should_reject() {
 @test 'validate: 1.0.0+a,a should fail' {
     should_reject '1.0.0+a,a'
 }
-
-##
-## I/O concerns
-##
-
-@test 'validate: should not tolerate missing operand' {
-    should_reject ''
-}
-

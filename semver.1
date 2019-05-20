@@ -6,13 +6,13 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
-cut
-.Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
-.Fl
-.Nm
 compare
 .Ar version
 .Ar version
+.Nm
+cut
+.Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
+.Fl
 .Nm
 decrement
 .Op Fl -major | Fl -minor | Fl -patch
@@ -35,58 +35,6 @@ sort
 The
 .Nm
 utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
-.Ss cut
-.Nm
-can cut out selected components of Semantic Version strings provided on the standard input, and write them to the standard output, in the style of Cut.
-.Pp
-The main difference from Cut is that the fields to select are the Semantic Version component names, not character or byte positions.
-.Pp
-It is not an error to select an optional component that is not present in the input
-.Ar version
-string.
-.Pp
-The format looks like this:
-.Pp
-.Dl $ semver cut <<< MAJOR.MINOR.PATCH
-.Dl MAJOR\tMINOR\tPATCH
-.Pp
-.Dl $ semver cut <<< MAJOR.MINOR.PATCH-PRERELEASE
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE
-.Pp
-.Dl $ semver cut <<< MAJOR.MINOR.PATCH+BUILD
-.Dl MAJOR\tMINOR\tPATCH\t\tBUILD
-.Pp
-.Dl $ semver cut <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
-.Pp
-The cut subcommand understands the following (mutually exclusive) options:
-.Bl -tag -width indent
-.It Fl -major
-Get only the MAJOR component of
-.Ar version
-.It Fl -minor
-Get only the MINOR component of
-.Ar version
-.It Fl -patch
-Get only the PATCH component of
-.Ar version
-.It Fl -prerelease
-Get only the PRERELEASE component of
-.Ar version
-.It Fl -build
-Get only the BUILD component of
-.Ar version
-.El
-.Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If more than one mutually exclusive option is given.
-.It
-If
-.Ar version
-is invalid.
-.El
 .Ss compare
 .Nm
 can compare two Semantic Versions
@@ -118,6 +66,49 @@ or
 are omitted, no result will be printed, and the utility will exit with an error code.
 .Pp
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+.Ss cut
+.Nm
+can cut out selected components of Semantic Version strings provided on the standard input, and write them to the standard output, in the style of Cut.
+.Pp
+The main difference from Cut is that the fields to select are the Semantic Version component names, not character or byte positions.
+.Pp
+It is not an error to select an optional component (prerelease or build) that is not present in the input
+.Ar version
+string.
+.Pp
+The format looks like this:
+.Pp
+.Dl $ semver cut --major <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
+.Dl MAJOR
+.Pp
+The cut subcommand understands the following (mutually exclusive) options:
+.Bl -tag -width indent
+.It Fl -major
+Get the MAJOR component of
+.Ar version
+.It Fl -minor
+Get the MINOR component of
+.Ar version
+.It Fl -patch
+Get the PATCH component of
+.Ar version
+.It Fl -prerelease
+Get the PRERELEASE component of
+.Ar version
+.It Fl -build
+Get the BUILD component of
+.Ar version
+.El
+.Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
+If more than one mutually exclusive option is given.
+.It
+If
+.Ar version
+is invalid.
+.El
 .Ss decrement
 The
 .Nm
@@ -259,7 +250,7 @@ is invalid.
 .El
 .Ss sort
 .Nm
-can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high).
+can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of Sort.
 .Pp
 The sort subcommand understands the following options:
 .Bl -tag -width indent
@@ -282,6 +273,18 @@ utility understands the following command-line options:
 Display the usage screen.
 .El
 .Sh EXAMPLES
+.Ss Compare
+.Pp
+To compare version numbers for precedence:
+.Pp
+.Dl $ semver compare '1.0.0' '2.0.0'
+.Dl -1
+.Pp
+.Dl $ semver compare '1.0.0' '1.0.0'
+.Dl 0
+.Pp
+.Dl $ semver compare '2.0.0' '1.0.0'
+.Dl 1
 .Ss Cut
 .Pp
 To parse the version string
@@ -302,18 +305,6 @@ To parse the version string
 .Pp
 .Dl $ semver cut --build <<< '1.2.3-SNAPSHOT+2019'
 .Dl 2019
-.Ss Compare
-.Pp
-To compare version numbers for precedence:
-.Pp
-.Dl $ semver compare '1.0.0' '2.0.0'
-.Dl -1
-.Pp
-.Dl $ semver compare '1.0.0' '1.0.0'
-.Dl 0
-.Pp
-.Dl $ semver compare '2.0.0' '1.0.0'
-.Dl 1
 .Ss Decrement
 .Pp
 To decrement components of the version string

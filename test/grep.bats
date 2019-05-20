@@ -33,7 +33,8 @@ semver() {
 }
 
 @test "grep: should handle empty input" {
-    [[ "$(semver grep <<< "")" = "" ]]
+    run semver grep <<< ""
+    [[ "$status" -eq 1 ]] && [[ "$output" = "" ]]
 }
 
 @test "grep: should exit 1 when no input lines are selected" {
