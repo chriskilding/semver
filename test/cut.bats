@@ -98,6 +98,41 @@ EOF
     [[ $(semver cut --major <<< "$input") = "$(printf "$expected")" ]]
 }
 
+@test "cut: should handle multiple lines and pass through erroneous lines unmodified" {
+    input=$(cat <<EOF
+1.0.0-alpha+1
+rubbish
+3.0.0-alpha+1
+EOF
+)
+
+    expected=$(cat <<EOF
+1
+rubbish
+3
+EOF
+)
+
+    [[ $(semver cut --major <<< "$input") = "$(printf "$expected")" ]]
+}
+
+@test "cut -s: should handle multiple lines and suppress erroneous lines" {
+    input=$(cat <<EOF
+1.0.0-alpha+1
+rubbish
+3.0.0-alpha+1
+EOF
+)
+
+    expected=$(cat <<EOF
+1
+3
+EOF
+)
+
+    [[ $(semver cut -s --major <<< "$input") = "$(printf "$expected")" ]]
+}
+
 # Flags
 
 @test "cut: --major 1.0.0 should be 1" {
