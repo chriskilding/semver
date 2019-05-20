@@ -9,7 +9,7 @@ semver() {
 }
 
 @test "grep: should match optional semver fields" {
-    [[ "$(semver grep <<< "1.0.0-alpha+1")" = "1.0.0-alpha+1" ]]
+    [[ "$(semver grep -o <<< "1.0.0-alpha+1")" = "1.0.0-alpha+1" ]]
 }
 
 @test "grep: should not match non-semver version strings" {
@@ -58,4 +58,9 @@ EOF
 )
 
     [[ "$(semver grep <<< "$input")" = "$expected" ]]
+}
+
+@test "grep: -h should print usage" {
+    run semver grep -h
+    [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]
 }
