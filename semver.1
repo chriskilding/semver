@@ -30,9 +30,6 @@ sort
 .Op Fl r
 .Fl
 .Nm
-validate
-.Ar string
-.Nm
 .Op Fl h
 .Sh DESCRIPTION
 The
@@ -181,7 +178,7 @@ is invalid.
 .El
 .Ss grep
 .Nm
-can search text from STDIN, and select any lines that contain one or more Semantic Version strings. Each input line that has at least one Semantic Version string is written to the standard output.
+can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of Grep. Each input line that has at least one Semantic Version string is written to the standard output.
 .Pp
 A line containing a
 .Sq version
@@ -205,6 +202,14 @@ The grep subcommand understands the following options:
 .Bl -tag -width indent
 .It Fl o, Fl -only-matching
 Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
+.El
+.Pp
+The grep subcommand exits with one of the following values:
+.Bl -tag
+.It 0
+One or more lines were selected (i.e. there was at least one valid Semantic Version).
+.It 1
+No lines were selected (i.e. there were no valid Semantic Versions), or an error occurred.
 .El
 .Ss increment
 The
@@ -271,21 +276,6 @@ The operation will fail if the input is invalid (i.e. it contains anything besid
 Note: Some aspects of Semantic Version ordering are undefined in the specification. The
 .Nm
 utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
-.Ss validate
-.Nm
-can check if an input
-.Ar string
-is a valid Semantic Version.
-.Pp
-It will return the result using an exit code. The exit codes are:
-.Bl -tag 
-.It 0
-.Ar string
-is a valid Semantic Version.
-.It 1
-.Ar string
-is not a valid Semantic Version.
-.El
 .Sh OPTIONS
 .Pp
 The
@@ -364,6 +354,10 @@ With the -o flag the result will be:
 .Dl 1.1.1
 .Dl 2.2.2
 .Dl 3.3.3
+.Pp
+To validate a candidate version string, feed the version string directly to the command and use the exit code:
+.Pp
+.Dl [[ $(semver grep <<< '1.2.3-alpha+1') ]]
 .Ss Increment
 To increment components of the version string
 .Sq 1.2.3
@@ -391,23 +385,6 @@ The result will be:
 .Dl 1.1.1
 .Dl 2.2.2
 .Dl 4.4.4
-.Ss Validate
-.Pp
-To validate the (valid) version string
-.Sq 1.2.3
-:
-.Pp
-.Dl $ semver validate '1.2.3'
-.Dl $ echo $?
-.Dl 0
-.Pp
-To validate the (invalid) version string
-.Sq v1.0
-:
-.Pp
-.Dl $ semver validate 'v1.0'
-.Dl $ echo $?
-.Dl 1
 .Sh EXIT STATUS
 .Ex -std
 .Sh WARNINGS

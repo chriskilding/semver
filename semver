@@ -29,7 +29,6 @@ sub usage() {
     say STDERR "  $program grep [-o] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
     say STDERR "  $program sort [-r] -";
-    say STDERR "  $program validate <string>";
     say STDERR "  $program [-h]";
     say STDERR "";
     say STDERR "Options:";
@@ -258,11 +257,14 @@ sub semver::awk_build {
 sub semver::grep {
     my ($only_matching) = @_;
 
+    my $num_matches = 0;
+
     while (my $line = <STDIN>) {
         my @words = split(/\s+/, $line);
         if ($only_matching) {
             foreach (@words) {
                 if (/$semver_regex/) {
+                    $num_matches++;
                     print "$1.$2.$3";
                     print "-$4" if (length $4 // '');
                     print "+$5" if (length $5 // '');
@@ -271,9 +273,14 @@ sub semver::grep {
             }
         } else {
             if (grep(/$semver_regex/, @words)) {
+                $num_matches++;
                 print $line;
             }
         }
+    }
+
+    if ($num_matches < 1) {
+        exit 1;
     }
 }
 
@@ -342,12 +349,6 @@ sub semver::sort_pair {
     } else {
         return $result;
     }
-}
-
-sub semver::validate {
-    my ($str) = @_;
-
-    ($str =~ /$semver_regex/) ? exit 0 : exit 1;
 }
 
 sub num_trues(@) {
@@ -460,9 +461,6 @@ sub main {
             } else {
                 semver::sort { semver::sort_pair($a, $b) };
             }
-        }
-        when (/validate/) {
-            semver::validate($args[0]);
         }
         when (/compare/) {
             say semver::compare($args[0], $args[1]);

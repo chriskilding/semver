@@ -36,6 +36,11 @@ semver() {
     [[ "$(semver grep <<< "")" = "" ]]
 }
 
+@test "grep: should exit 1 when no input lines are selected" {
+    run semver grep <<< "abc"
+    [[ "$status" -eq 1 ]]
+}
+
 @test "grep: should handle spaces between versions" {
     [[ "$(semver grep -o <<< "1.0.0 2.0.0")" = "$(printf "1.0.0\n2.0.0")" ]]
 }

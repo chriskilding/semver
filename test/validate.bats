@@ -5,12 +5,12 @@ semver() {
 }
 
 should_allow() {
-    run semver validate "$1"
+    run semver grep <<< "$1"
     [[ "$status" -eq 0 ]]
 }
 
 should_reject() {
-    run semver validate "$1"
+    run semver grep <<< "$1"
     [[ "$status" -eq 1 ]]
 }
 
@@ -437,9 +437,5 @@ should_reject() {
 
 @test 'validate: should not tolerate missing operand' {
     should_reject ''
-}
-
-@test 'validate: should not tolerate whitespace' {
-    should_reject ' 0.0.0' && should_reject '0.0.0 '
 }
 

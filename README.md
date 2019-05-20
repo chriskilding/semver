@@ -42,11 +42,24 @@ Coming soon.
     semver grep [-o] -
     semver increment [--major | --minor | --patch] <version>
     semver sort [-r] -
-    semver validate <string>
     semver [-h]
 
 Man page:
 
 ```bash
 $ man semver
+```
+
+## Examples
+
+Find the current version of something:
+
+```bash
+curl -s https://example.com/input.txt | semver grep -o | semver sort -r | head -n 1
+```    
+
+Validate a candidate version string:
+
+```bash
+[[ $(semver grep <<< "1.2.3-alpha+1") ]] && echo "Valid"
 ```
