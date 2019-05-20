@@ -6,6 +6,10 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
+awk
+.Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
+.Fl
+.Nm
 compare
 .Ar version
 .Ar version
@@ -14,11 +18,8 @@ decrement
 .Op Fl -major | Fl -minor | Fl -patch
 .Ar version
 .Nm
-get
-.Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
-.Ar version
-.Nm
 grep
+.Op Fl o
 .Fl
 .Nm
 increment
@@ -37,6 +38,62 @@ validate
 The
 .Nm
 utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
+.Ss awk
+.Nm
+can scan the standard input for lines that contain
+.Ar version
+strings, extract their components, and print the components in tab-separated format to the standard output, in the style of Awk.
+.Pp
+The main difference from Awk is that the pattern to match is baked in to
+.Nm
+- you can think of this subcommand as a partially applied Awk function dedicated to finding Semantic Version strings, where you may only tweak certain parameters.
+.Pp
+It is not an error to select an optional component that is not present in the input
+.Ar version
+string.
+.Pp
+The format looks like this:
+.Pp
+.Dl $ semver awk <<< MAJOR.MINOR.PATCH
+.Dl MAJOR\tMINOR\tPATCH
+.Pp
+.Dl $ semver awk <<< MAJOR.MINOR.PATCH-PRERELEASE
+.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE
+.Pp
+.Dl $ semver awk <<< MAJOR.MINOR.PATCH+BUILD
+.Dl MAJOR\tMINOR\tPATCH\t\tBUILD
+.Pp
+.Dl $ semver awk <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
+.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
+.Pp
+The awk subcommand understands the following (mutually exclusive) options:
+.Bl -tag -width indent
+.It Fl -major
+Get only the MAJOR component of
+.Ar version
+.It Fl -minor
+Get only the MINOR component of
+.Ar version
+.It Fl -patch
+Get only the PATCH component of
+.Ar version
+.It Fl -prerelease
+Get only the PRERELEASE component of
+.Ar version
+.It Fl -build
+Get only the BUILD component of
+.Ar version
+.El
+.Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
+If more than one mutually exclusive option is given.
+.It
+If
+.Ar version
+is invalid.
+.El
 .Ss compare
 .Nm
 can compare two Semantic Versions
@@ -122,80 +179,32 @@ If
 .Ar version
 is invalid.
 .El
-.Ss get
-.Nm
-can get the components of a
-.Ar version
-string, and print them in tab-separated format to STDOUT. The output is suitable for post-processing by standard *nix tools like 'cut'.
-.Pp
-The format looks like this:
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH
-.Dl MAJOR\tMINOR\tPATCH
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH+BUILD
-.Dl MAJOR\tMINOR\tPATCH\t\tBUILD
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE+BUILD
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
-.Pp
-The get subcommand understands the following (mutually exclusive) options:
-.Bl -tag -width indent
-.It Fl -major
-Get only the MAJOR component of
-.Ar version
-.It Fl -minor
-Get only the MINOR component of
-.Ar version
-.It Fl -patch
-Get only the PATCH component of
-.Ar version
-.It Fl -prerelease
-Get only the PRERELEASE component of
-.Ar version
-.It Fl -build
-Get only the BUILD component of
-.Ar version
-.El
-.Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If more than one mutually exclusive option is given.
-.It
-If a required option is missing.
-.It
-If
-.Ar version
-does not contain the specified component.
-.It
-If
-.Ar version
-is invalid.
-.El
 .Ss grep
 .Nm
-can parse text from STDIN to extract zero or more Semantic Version strings. It will tolerate quite noisy input.
+can search text from STDIN, and select any lines that contain one or more Semantic Version strings. Each input line that has at least one Semantic Version string is written to the standard output.
 .Pp
-A candidate version
-.Sq string
-will be matched within the text stream if it meets the following criteria:
+A line containing a
+.Sq version
+string will be matched within the text stream if the following criteria are met:
 .Bl -bullet -compact
 .It
-.Sq string
+.Sq version
 is a valid Semantic Version.
 .It
-.Sq string
+.Sq version
 is a whole word.
 .It
-.Sq string
+.Sq version
 has whitespace immediately before it, OR its first character is also the first character of the line.
 .It
-.Sq string
+.Sq version
 has whitespace immediately after it, OR its last character is also the last character of the line.
+.El
+.Pp
+The grep subcommand understands the following options:
+.Bl -tag -width indent
+.It Fl o, Fl -only-matching
+Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
 .El
 .Ss increment
 The
@@ -287,6 +296,29 @@ utility understands the following command-line options:
 Display the usage screen.
 .El
 .Sh EXAMPLES
+.Ss Awk
+.Pp
+To parse the version string
+.Sq 1.2.3-SNAPSHOT+2019
+:
+.Pp
+.Dl $ semver awk <<< '1.2.3-SNAPSHOT+2019'
+.Dl 1\t2\t3\tSNAPSHOT\t2019
+.Pp
+.Dl $ semver awk --major <<< '1.2.3-SNAPSHOT+2019'
+.Dl 1
+.Pp
+.Dl $ semver awk --minor <<< '1.2.3-SNAPSHOT+2019'
+.Dl 2
+.Pp
+.Dl $ semver awk --patch <<< '1.2.3-SNAPSHOT+2019'
+.Dl 3
+.Pp
+.Dl $ semver awk --prerelease <<< '1.2.3-SNAPSHOT+2019'
+.Dl SNAPSHOT
+.Pp
+.Dl $ semver awk --build <<< '1.2.3-SNAPSHOT+2019'
+.Dl 2019
 .Ss Compare
 .Pp
 To compare version numbers for precedence:
@@ -313,32 +345,25 @@ To decrement components of the version string
 .Pp
 .Dl $ semver decrement --patch '2.3.4'
 .Dl 2.3.3
-.Ss Get
+.Ss Grep
+Given a line-separated text stream:
 .Pp
-To get components of the version string
-.Sq 1.2.3-SNAPSHOT+2019
-:
+.Dl $ semver grep <<EOF
+.Dl foo 1.1.1
+.Dl bar
+.Dl baz 2.2.2 qux 3.3.3
+.Dl EOF
 .Pp
-.Dl $ semver get '1.2.3-SNAPSHOT+2019'
-.Dl 1\t2\t3\tSNAPSHOT\t2019
+The result will be:
 .Pp
-.Dl $ semver get '1.2.3-SNAPSHOT+2019' | cut -f 1-3
-.Dl 1\t2\t3
+.Dl foo 1.1.1
+.Dl baz 2.2.2 qux 3.3.3
 .Pp
-.Dl $ semver get --major '1.2.3-SNAPSHOT+2019'
-.Dl 1
+With the -o flag the result will be:
 .Pp
-.Dl $ semver get --minor '1.2.3-SNAPSHOT+2019'
-.Dl 2
-.Pp
-.Dl $ semver get --patch '1.2.3-SNAPSHOT+2019'
-.Dl 3
-.Pp
-.Dl $ semver get --prerelease '1.2.3-SNAPSHOT+2019'
-.Dl SNAPSHOT
-.Pp
-.Dl $ semver get --build '1.2.3-SNAPSHOT+2019'
-.Dl 2019
+.Dl 1.1.1
+.Dl 2.2.2
+.Dl 3.3.3
 .Ss Increment
 To increment components of the version string
 .Sq 1.2.3

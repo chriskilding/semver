@@ -36,10 +36,10 @@ Coming soon.
 
 ## Usage
 
+    semver awk [--major | --minor | --patch | --prerelease | --build] -
     semver compare <version> <version>
     semver decrement [--major | --minor | --patch] <version>
-    semver get [--major | --minor | --patch | --prerelease | --build] <version>
-    semver grep -
+    semver grep [-o] -
     semver increment [--major | --minor | --patch] <version>
     semver sort [-r] -
     semver validate <string>

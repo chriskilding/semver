@@ -23,10 +23,10 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
+    say STDERR "  $program awk [--major | --minor | --patch | --prerelease | --build] -";
     say STDERR "  $program compare <version> <version>";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
-    say STDERR "  $program get [--major | --minor | --patch | --prerelease | --build] <version>";
-    say STDERR "  $program grep -";
+    say STDERR "  $program grep [-o] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program validate <string>";
@@ -198,77 +198,80 @@ sub semver::decrement_patch {
     }
 }
 
-sub semver::get {
-    my ($version) = @_;
+sub semver::awk {
+    while (my $line = <STDIN>) {
+        my @matches = semver_get($line);
 
-    my @matches = semver_get($version);
+        my $major = $matches[0];
+        my $minor = $matches[1];
+        my $patch = $matches[2];
+        my $prerelease = $matches[3];
+        my $build = $matches[4];
 
-    my $major = $matches[0];
-    my $minor = $matches[1];
-    my $patch = $matches[2];
-    my $prerelease = $matches[3];
-    my $build = $matches[4];
+        print $major . "\t" . $minor . "\t" . $patch;
 
-    print $major . "\t" . $minor . "\t" . $patch;
+        if ($build) {
+            print "\t" . ($prerelease // '') . "\t" . $build;
+        } elsif ($prerelease) {
+            print "\t" . $prerelease;
+        }
 
-    if ($build) {
-        print "\t" . ($prerelease // '') . "\t" . $build;
-    } elsif ($prerelease) {
-        print "\t" . $prerelease;
+        print "\n";
     }
-
-    print "\n";
 }
 
-sub semver::get_major {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[0];
+sub semver::awk_major {
+    while (my $line = <STDIN>) {
+        my @matches = semver_get($line);
+        say $matches[0];
+    }
 }
 
-sub semver::get_minor {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[1];
+sub semver::awk_minor {
+    while (my $line = <STDIN>) {
+        my @matches = semver_get($line);
+        say $matches[1];
+    }
 }
 
-sub semver::get_patch {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[2];
+sub semver::awk_patch {
+    while (my $line = <STDIN>) {
+        my @matches = semver_get($line);
+        say $matches[2];
+    }
 }
 
-sub semver::get_prerelease {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[3];
+sub semver::awk_prerelease {
+    while (my $line = <STDIN>) {
+        my @matches = semver_get($line);
+        say $matches[3];
+    }
 }
 
-sub semver::get_build {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[4];
+sub semver::awk_build {
+    while (my $line = <STDIN>) {
+        my @matches = semver_get($line);
+        say $matches[4];
+    }
 }
 
 sub semver::grep {
+    my ($only_matching) = @_;
+
     while (my $line = <STDIN>) {
         my @words = split(/\s+/, $line);
-        foreach (@words) {
-            if (/$semver_regex/) {
-                print "$1.$2.$3";
-                print "-$4" if (length $4 // '');
-                print "+$5" if (length $5 // '');
-                print "\n";
+        if ($only_matching) {
+            foreach (@words) {
+                if (/$semver_regex/) {
+                    print "$1.$2.$3";
+                    print "-$4" if (length $4 // '');
+                    print "+$5" if (length $5 // '');
+                    print "\n";
+                }
+            }
+        } else {
+            if (grep(/$semver_regex/, @words)) {
+                print $line;
             }
         }
     }
@@ -361,8 +364,33 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/grep/) {
-            semver::grep();
+        when (/awk/) {
+            my $major, my $minor, my $patch, my $prerelease, my $build;
+
+            GetOptionsFromArray(
+                \@args,
+                "major" => \$major,
+                "minor" => \$minor,
+                "patch" => \$patch,
+                "prerelease" => \$prerelease,
+                "build" => \$build,
+            ) or exit 1;
+
+            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
+
+            if ($major) {
+                semver::awk_major();
+            } elsif ($minor) {
+                semver::awk_minor();
+            } elsif ($patch) {
+                semver::awk_patch();
+            } elsif ($prerelease) {
+                semver::awk_prerelease();
+            } elsif ($build) {
+                semver::awk_build();
+            } else {
+                semver::awk();
+            }
         }
         when (/decrement/) {
             my $major, my $minor, my $patch, my $help;
@@ -387,33 +415,18 @@ sub main {
                 usage();
             }
         }
-        when (/get/) {
-            my $major, my $minor, my $patch, my $prerelease, my $build;
+        when (/grep/) {
+            my $only_matching, my $help;
 
             GetOptionsFromArray(
                 \@args,
-                "major" => \$major,
-                "minor" => \$minor,
-                "patch" => \$patch,
-                "prerelease" => \$prerelease,
-                "build" => \$build,
+                "only-matching|o" => \$only_matching,
+                "help|h" => \$help,
             ) or exit 1;
 
-            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
+            usage() if $help;
 
-            if ($major) {
-                semver::get_major($args[0]);
-            } elsif ($minor) {
-                semver::get_minor($args[0]);
-            } elsif ($patch) {
-                semver::get_patch($args[0]);
-            } elsif ($prerelease) {
-                semver::get_prerelease($args[0]);
-            } elsif ($build) {
-                semver::get_build($args[0]);
-            } else {
-                semver::get($args[0]);
-            }
+            semver::grep($only_matching);
         }
         when (/increment/) {
             my $major, my $minor, my $patch, my $help;
