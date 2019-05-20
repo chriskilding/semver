@@ -45,7 +45,6 @@ Coming soon.
     semver increment-major <version>
     semver increment-minor <version>
     semver increment-patch <version>
-    semver init
     semver sort [-r] -
     semver validate <string>
     semver [-h]
