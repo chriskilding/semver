@@ -60,7 +60,12 @@ EOF
     [[ "$(semver grep <<< "$input")" = "$expected" ]]
 }
 
+@test "grep: invalid option should fail" {
+    run semver grep --rubbish <<< "1.2.3"
+    [[ "$status" -eq 1 ]]
+}
+
 @test "grep: -h should print usage" {
-    run semver grep -h
+    run semver grep -h <<< "1.2.3"
     [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]
 }
