@@ -11,6 +11,7 @@ compare
 .Ar version
 .Nm
 cut
+.Op Fl s
 .Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
 .Fl
 .Nm
@@ -72,6 +73,10 @@ can cut out selected components of Semantic Version strings provided on the stan
 .Pp
 The main difference from Cut is that the fields to select are the Semantic Version component names, not character or byte positions.
 .Pp
+This subcommand is somewhat tolerant of whitespace in the input, but to guarantee reliable execution the data fed to this subcommand should be clean (comprising only valid Semantic Version strings). Unclean data should be piped through
+.Sq semver grep
+before being piped into this subcommand.
+.Pp
 It is not an error to select an optional component (prerelease or build) that is not present in the input
 .Ar version
 string.
@@ -81,7 +86,7 @@ The format looks like this:
 .Dl $ semver cut --major <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
 .Dl MAJOR
 .Pp
-The cut subcommand understands the following (mutually exclusive) options:
+The cut subcommand understands the following options:
 .Bl -tag -width indent
 .It Fl -major
 Get the MAJOR component of
@@ -98,6 +103,8 @@ Get the PRERELEASE component of
 .It Fl -build
 Get the BUILD component of
 .Ar version
+.It Fl s
+Suppress invalid lines, and only print lines which are valid Semantic Version strings
 .El
 .Pp
 The operation will fail:
@@ -105,9 +112,7 @@ The operation will fail:
 .It
 If more than one mutually exclusive option is given.
 .It
-If
-.Ar version
-is invalid.
+If an invalid option is given.
 .El
 .Ss decrement
 The

@@ -156,11 +156,11 @@ EOF
 }
 
 @test "cut: --prerelease should tolerate a missing prerelease" {
-    [[ $(semver cut --prerelease <<< '1.0.0') = '' ]]
+    [[ -z $(semver cut --prerelease <<< '1.0.0') ]]
 }
 
 @test "cut: --build should tolerate a missing build" {
-    [[ $(semver cut --build <<< '1.0.0') = '' ]]
+    [[ -z $(semver cut --build <<< '1.0.0') ]]
 }
 
 @test 'cut: should allow flag permutation' {
@@ -174,80 +174,66 @@ EOF
 
 # Negative numbers
 
-@test 'cut: -1.0.0 should fail' {
-    run semver cut --major <<< '-1.0.0'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: -1.0.0 should be suppressed' {
+    [[ -z $(semver cut -s --major <<< '-1.0.0') ]]
 }
 
-@test "cut: 0.-1.0 should fail" {
-    run semver cut --major <<< '0.-1.0'
-    [[ "$status" -eq 1 ]]
+@test "cut -s: 0.-1.0 should be suppressed" {
+    [[ -z $(semver cut -s --minor <<< '0.-1.0') ]]
 }
 
-@test "cut: 0.0.-1 should fail" {
-    run semver cut --major <<< '0.0.-1'
-    [[ "$status" -eq 1 ]]
+@test "cut -s: 0.0.-1 should be suppressed" {
+    [[ -z $(semver cut -s --patch <<< '0.0.-1') ]]
 }
 
 # Numeric identifiers with preceding zeroes
 
-@test 'cut: 01.0.0 should fail' {
-    run semver cut --major <<< '01.0.0'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: 01.0.0 should be suppressed' {
+    [[ -z $(semver cut -s --major <<< '01.0.0') ]]
 }
 
-@test 'cut: 0.01.0 should fail' {
-    run semver cut --major <<< '0.01.0'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: 0.01.0 should be suppressed' {
+    [[ -z $(semver cut -s --minor <<< '0.01.0') ]]
 }
 
-@test 'cut: 0.0.01 should fail' {
-    run semver cut --major <<< '0.0.01'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: 0.0.01 should be suppressed' {
+    [[ -z $(semver cut -s --patch <<< '0.0.01') ]]
 }
 
 # Non-numeric characters in numeric identifiers
 
-@test 'cut: a.0.0 should fail' {
-    run semver cut --major <<< 'a.0.0'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: a.0.0 should be suppressed' {
+    [[ -z $(semver cut -s --major <<< 'a.0.0') ]]
 }
 
-@test 'cut: 0.a.0 should fail' {
-    run semver cut --major <<< '0.a.0'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: 0.a.0 should be suppressed' {
+    [[ -z $(semver cut -s --minor <<< '0.a.0') ]]
 }
 
-@test 'cut: 0.0.a should fail' {
-    run semver cut --major <<< '0.0.a'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: 0.0.a should be suppressed' {
+    [[ -z $(semver cut -s --patch <<< '0.0.a') ]]
 }
 
 # Missing identifiers
 
-@test 'cut: .0.0 should fail' {
-    run semver cut --major <<< '.0.0'
-    [[ "$status" -eq 1 ]]
+@test 'cut: .0.0 should be suppressed' {
+    [[ -z $(semver cut -s --major <<< '.0.0') ]]
 }
 
-@test 'cut: 0..0 should fail' {
-    run semver cut --major <<< '0..0'
-    [[ "$status" -eq 1 ]]
+@test 'cut: 0..0 should be suppressed' {
+    [[ -z $(semver cut -s --minor <<< '0..0') ]]
 }
 
-@test 'cut: 0.0. should fail' {
-    run semver cut --major <<< '0.0.'
-    [[ "$status" -eq 1 ]]
+@test 'cut -s: 0.0. should be suppressed' {
+    [[ -z $(semver cut -s --patch <<< '0.0.') ]]
 }
 
-@test "cut: 0.0.0- should fail" {
-    run semver cut --major <<< '0.0.0-'
-    [[ "$status" -eq 1 ]]
+@test "cut -s: 0.0.0- should be suppressed" {
+    [[ -z $(semver cut -s --major <<< '0.0.0-') ]]
 }
 
-@test "cut: 0.0.0+ should fail" {
-    run semver cut --major <<< '0.0.0+'
-    [[ "$status" -eq 1 ]]
+@test "cut -s: 0.0.0+ should be suppressed" {
+    [[ -z $(semver cut -s --major <<< '0.0.0+') ]]
 }
 
 # Whitespace
@@ -257,11 +243,13 @@ EOF
     [[ "$status" -eq 1 ]]
 }
 
-@test "cut: '' should fail" {
-    run semver cut --major <<< ''
-    [[ "$status" -eq 1 ]]
+# FIXME this should fail, there should not be a newline in the output if the input is a zero-length string
+@test "cut: '' should be ''" {
+    [[ -z "$(semver cut --major <<< '')" ]]
+    [[ 0 -eq 1 ]]
 }
 
+# FIXME regular 'cut' can tolerate whitespace - maybe we should too?
 @test 'cut: should not tolerate whitespace' {
     run semver cut --major <<< ' 0.0.0 '
     [[ "$status" -eq 1 ]]

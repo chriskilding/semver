@@ -37,7 +37,7 @@ Coming soon.
 ## Usage
 
     semver compare <version> <version>
-    semver cut [--major | --minor | --patch | --prerelease | --build] -
+    semver cut [-s] [--major | --minor | --patch | --prerelease | --build] -
     semver decrement [--major | --minor | --patch] <version>
     semver grep [-o] -
     semver increment [--major | --minor | --patch] <version>

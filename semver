@@ -24,7 +24,7 @@ sub usage() {
     say STDERR "";
     say STDERR "Usage:";
     say STDERR "  $program compare <version> <version>";
-    say STDERR "  $program cut [--major | --minor | --patch | --prerelease | --build] -";
+    say STDERR "  $program cut [-s] [--major | --minor | --patch | --prerelease | --build] -";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
     say STDERR "  $program grep [-o] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
@@ -197,38 +197,25 @@ sub semver::decrement_patch {
     }
 }
 
-sub semver::cut_major {
-    while (my $line = <STDIN>) {
-        my @matches = semver_get($line);
-        say $matches[0];
-    }
-}
+sub semver::cut {
+    my ($major, $minor, $patch, $prerelease, $build, $s) = @_;
 
-sub semver::cut_minor {
     while (my $line = <STDIN>) {
-        my @matches = semver_get($line);
-        say $matches[1];
-    }
-}
-
-sub semver::cut_patch {
-    while (my $line = <STDIN>) {
-        my @matches = semver_get($line);
-        say $matches[2];
-    }
-}
-
-sub semver::cut_prerelease {
-    while (my $line = <STDIN>) {
-        my @matches = semver_get($line);
-        say $matches[3] // '';
-    }
-}
-
-sub semver::cut_build {
-    while (my $line = <STDIN>) {
-        my @matches = semver_get($line);
-        say $matches[4] // '';
+        if (my @matches = $line =~ /$semver_regex/) {
+            if ($major) {
+                say $matches[0];
+            } elsif ($minor) {
+                say $matches[1];
+            } elsif ($patch) {
+                say $matches[2];
+            } elsif ($prerelease) {
+                say $matches[3] // '';
+            } elsif ($build) {
+                say $matches[4] // '';
+            }
+        } elsif (!$s) {
+            print $line;
+        }
     }
 }
 
@@ -347,7 +334,7 @@ sub main {
             say semver::compare($args[0], $args[1]);
         }
         when (/cut/) {
-            my $major, my $minor, my $patch, my $prerelease, my $build;
+            my $major, my $minor, my $patch, my $prerelease, my $build, my $s;
 
             GetOptionsFromArray(
                 \@args,
@@ -356,21 +343,12 @@ sub main {
                 "patch" => \$patch,
                 "prerelease" => \$prerelease,
                 "build" => \$build,
+                "s" => \$s,
             ) or exit 1;
 
             usage() if (num_trues($major, $minor, $patch, $prerelease, $build) != 1);
 
-            if ($major) {
-                semver::cut_major();
-            } elsif ($minor) {
-                semver::cut_minor();
-            } elsif ($patch) {
-                semver::cut_patch();
-            } elsif ($prerelease) {
-                semver::cut_prerelease();
-            } elsif ($build) {
-                semver::cut_build();
-            }
+            semver::cut($major, $minor, $patch, $prerelease, $build, $s);
         }
         when (/decrement/) {
             my $major, my $minor, my $patch, my $help;
