@@ -10,11 +10,6 @@ compare
 .Ar version
 .Ar version
 .Nm
-cut
-.Op Fl s
-.Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
-.Fl
-.Nm
 decrement
 .Op Fl -major | Fl -minor | Fl -patch
 .Ar version
@@ -25,6 +20,10 @@ grep
 .Nm
 increment
 .Op Fl -major | Fl -minor | Fl -patch
+.Ar version
+.Nm
+printf
+.Ar format
 .Ar version
 .Nm
 sort
@@ -67,53 +66,6 @@ or
 are omitted, no result will be printed, and the utility will exit with an error code.
 .Pp
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
-.Ss cut
-.Nm
-can cut out selected components of Semantic Version strings provided on the standard input, and write them to the standard output, in the style of Cut.
-.Pp
-The main difference from Cut is that the fields to select are the Semantic Version component names, not character or byte positions.
-.Pp
-This subcommand is somewhat tolerant of whitespace in the input, but to guarantee reliable execution the data fed to this subcommand should be clean (comprising only valid Semantic Version strings). Unclean data should be piped through
-.Sq semver grep
-before being piped into this subcommand.
-.Pp
-It is not an error to select an optional component (prerelease or build) that is not present in the input
-.Ar version
-string.
-.Pp
-The format looks like this:
-.Pp
-.Dl $ semver cut --major <<< MAJOR.MINOR.PATCH-PRERELEASE+BUILD
-.Dl MAJOR
-.Pp
-The cut subcommand understands the following options:
-.Bl -tag -width indent
-.It Fl -major
-Get the MAJOR component of
-.Ar version
-.It Fl -minor
-Get the MINOR component of
-.Ar version
-.It Fl -patch
-Get the PATCH component of
-.Ar version
-.It Fl -prerelease
-Get the PRERELEASE component of
-.Ar version
-.It Fl -build
-Get the BUILD component of
-.Ar version
-.It Fl s
-Suppress invalid lines, and only print lines which are valid Semantic Version strings
-.El
-.Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If more than one mutually exclusive option is given.
-.It
-If an invalid option is given.
-.El
 .Ss decrement
 The
 .Nm
@@ -170,7 +122,7 @@ is invalid.
 .El
 .Ss grep
 .Nm
-can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of Grep. Each input line that has at least one Semantic Version string is written to the standard output.
+can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of grep(1). Each input line that has at least one Semantic Version string is written to the standard output.
 .Pp
 A line containing a
 .Sq version
@@ -253,9 +205,100 @@ If
 .Ar version
 is invalid.
 .El
+.Ss printf
+.Nm
+can format and print a
+.Ar version
+string under control of the
+.Ar format
+string, in the style of printf(1).
+.Pp
+The
+.Ar format
+is a character string which contains three types of objects: plain characters, which are simply copied to standard output, character escape sequences which are converted and copied to the standard output, and format specifications, each of which causes printing of the relevant component of the
+.Ar version
+that was given.
+.Pp
+Character escape sequences are in backslash notation as defined in the
+.St -ansiC ,
+with extensions.
+The characters and their meanings
+are as follows:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It Cm \ea
+Write a <bell> character.
+.It Cm \eb
+Write a <backspace> character.
+.It Cm \ec
+Ignore remaining characters in this string.
+.It Cm \ef
+Write a <form-feed> character.
+.It Cm \en
+Write a <new-line> character.
+.It Cm \er
+Write a <carriage return> character.
+.It Cm \et
+Write a <tab> character.
+.It Cm \ev
+Write a <vertical tab> character.
+.It Cm \e\'
+Write a <single quote> character.
+.It Cm \e\e
+Write a backslash character.
+.It Cm \e Ns Ar num
+Write a byte whose
+value is the 1-, 2-, or 3-digit
+octal number
+.Ar num .
+Multibyte characters can be constructed using multiple
+.Cm \e Ns Ar num
+sequences.
+.El
+.Pp
+Each format specifier is introduced by the percent ('%') character. The format specifiers and their meanings are:
+.Bl -tag -width Fl
+.It Cm major
+Print the major component of
+.Ar version
+.It Cm minor
+Print the minor component of
+.Ar version
+.It Cm patch
+Print the patch component of
+.Ar version
+.It Cm prerelease
+Print the prerelease component of
+.Ar version
+.It Cm build
+Print the build component of
+.Ar version
+.El
+.Pp
+It is not an error to provide the format specifiers
+.Sq %prerelease
+or
+.Sq %build
+in the
+.Ar format
+string when the
+.Ar version
+does not contain a prerelease or build.
+.Pp
+The operation will fail:
+.Bl -bullet -compact
+.It
+If
+.Ar version
+is invalid (unclean data should therefore be piped through 'semver grep' before being piped into 'semver printf').
+.It
+If invalid format specifiers are given in the
+.Ar format
+string.
+.El
 .Ss sort
 .Nm
-can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of Sort.
+can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of sort(1).
 .Pp
 The sort subcommand understands the following options:
 .Bl -tag -width indent
@@ -290,26 +333,6 @@ To compare version numbers for precedence:
 .Pp
 .Dl $ semver compare '2.0.0' '1.0.0'
 .Dl 1
-.Ss Cut
-.Pp
-To parse the version string
-.Sq 1.2.3-SNAPSHOT+2019
-:
-.Pp
-.Dl $ semver cut --major <<< '1.2.3-SNAPSHOT+2019'
-.Dl 1
-.Pp
-.Dl $ semver cut --minor <<< '1.2.3-SNAPSHOT+2019'
-.Dl 2
-.Pp
-.Dl $ semver cut --patch <<< '1.2.3-SNAPSHOT+2019'
-.Dl 3
-.Pp
-.Dl $ semver cut --prerelease <<< '1.2.3-SNAPSHOT+2019'
-.Dl SNAPSHOT
-.Pp
-.Dl $ semver cut --build <<< '1.2.3-SNAPSHOT+2019'
-.Dl 2019
 .Ss Decrement
 .Pp
 To decrement components of the version string
@@ -344,7 +367,7 @@ With the -o flag the result will be:
 .Dl 2.2.2
 .Dl 3.3.3
 .Pp
-To validate a candidate version string, feed the version string directly to the command and use the exit code:
+To validate a candidate version string, use the command's exit code:
 .Pp
 .Dl [[ $(semver grep <<< '1.2.3-alpha+1') ]]
 .Ss Increment
@@ -360,6 +383,14 @@ To increment components of the version string
 .Pp
 .Dl $ semver increment --patch '1.2.3'
 .Dl 1.2.4
+.Ss Printf
+.Pp
+To format and print the version string
+.Sq 1.2.3-SNAPSHOT+2019
+as CSV:
+.Pp
+.Dl $ semver printf '%major,%minor,%patch,%prerelease,%build' '1.2.3-SNAPSHOT+2019'
+.Dl 1,2,3,SNAPSHOT,2019
 .Ss Sort
 Given a line-separated list of version strings:
 .Pp

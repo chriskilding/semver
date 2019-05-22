@@ -28,15 +28,15 @@ semver() {
 }
 
 @test "X is the major version..." {
-    [[ $(semver cut --major <<< "1.9.0") = "1" ]]
+    [[ $(semver printf "%major" "1.9.0") = "1" ]]
 }
 
 @test "...Y is the minor version..." {
-    [[ $(semver cut --minor <<< "1.9.0") = "9" ]]
+    [[ $(semver printf "%minor" "1.9.0") = "9" ]]
 }
 
 @test "...and Z is the patch version." {
-    [[ $(semver cut --patch <<< "1.9.0") = "0" ]]
+    [[ $(semver printf "%patch" "1.9.0") = "0" ]]
 }
 
 @test "Each element MUST increase numerically. For instance: 1.9.0 -> 1.10.0 -> 1.11.0." {
@@ -98,11 +98,11 @@ semver() {
 ##
 
 @test "A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version." {
-    [[ $(semver cut --prerelease <<< "0.0.0-a.b.c") = "a.b.c" ]]
+    [[ $(semver printf "%prerelease" "0.0.0-a.b.c") = "a.b.c" ]]
 }
 
 @test "Pre-release identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-]." {
-    [[ $(semver cut --prerelease <<< "0.0.0-09AZaz-") = "09AZaz-" ]]
+    [[ $(semver printf "%prerelease" "0.0.0-09AZaz-") = "09AZaz-" ]]
 }
 
 @test "Pre-release identifiers MUST NOT be empty." {
@@ -120,19 +120,19 @@ semver() {
 }
 
 @test "Example: 1.0.0-alpha" {
-    [[ $(semver cut --prerelease <<< "1.0.0-alpha") = "alpha" ]]
+    [[ $(semver printf "%prerelease" "1.0.0-alpha") = "alpha" ]]
 }
 
 @test "Example: 1.0.0-alpha.1" {
-    [[ $(semver cut --prerelease <<< "1.0.0-alpha.1") = "alpha.1" ]]
+    [[ $(semver printf "%prerelease" "1.0.0-alpha.1") = "alpha.1" ]]
 }
 
 @test "Example: 1.0.0-0.3.7" {
-    [[ $(semver cut --prerelease <<< "1.0.0-0.3.7") = "0.3.7" ]]
+    [[ $(semver printf "%prerelease" "1.0.0-0.3.7") = "0.3.7" ]]
 }
 
 @test "Example: 1.0.0-x.7.z.92" {
-    [[ $(semver cut --prerelease <<< "1.0.0-x.7.z.92") = "x.7.z.92" ]]
+    [[ $(semver printf "%prerelease" "1.0.0-x.7.z.92") = "x.7.z.92" ]]
 }
 
 ##
@@ -140,11 +140,11 @@ semver() {
 ##
 
 @test "Build metadata MAY be denoted by appending a plus sign and a series of dot separated identifiers immediately following the patch or pre-release version." {
-    [[ $(semver cut --build <<< "0.0.0+a.b.c") = "a.b.c" ]]
+    [[ $(semver printf "%build" "0.0.0+a.b.c") = "a.b.c" ]]
 }
 
 @test "Build identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-]." {
-    [[ $(semver cut --build <<< "0.0.0+09AZaz-") = "09AZaz-" ]]
+    [[ $(semver printf "%build" "0.0.0+09AZaz-") = "09AZaz-" ]]
 }
 
 @test "Build identifiers MUST NOT be empty." {
@@ -157,15 +157,15 @@ semver() {
 }
 
 @test "Example: 1.0.0-alpha+001" {
-    [[ $(semver cut --build <<< "1.0.0-alpha+001") = "001" ]]
+    [[ $(semver printf "%build" "1.0.0-alpha+001") = "001" ]]
 }
 
 @test "Example: 1.0.0+20130313144700" {
-    [[ $(semver cut --build <<< "1.0.0+20130313144700") = "20130313144700" ]]
+    [[ $(semver printf "%build" "1.0.0+20130313144700") = "20130313144700" ]]
 }
 
 @test "Example: 1.0.0-beta+exp.sha.5114f85" {
-    [[ $(semver cut --build <<< "1.0.0-beta+exp.sha.5114f85") = "exp.sha.5114f85" ]]
+    [[ $(semver printf "%build" "1.0.0-beta+exp.sha.5114f85") = "exp.sha.5114f85" ]]
 }
 
 ##

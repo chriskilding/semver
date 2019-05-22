@@ -37,10 +37,10 @@ Coming soon.
 ## Usage
 
     semver compare <version> <version>
-    semver cut [-s] [--major | --minor | --patch | --prerelease | --build] -
     semver decrement [--major | --minor | --patch] <version>
     semver grep [-o] -
     semver increment [--major | --minor | --patch] <version>
+    semver printf <format> <version>
     semver sort [-r] -
     semver [-h]
 
@@ -71,4 +71,10 @@ version="0.0.1"
 while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
     version=$(semver increment --patch ${version})
 done
+```
+
+Format a list of version strings as CSV:
+
+```bash
+git tag | semver grep -o | xargs semver printf "%major,%minor,%patch,%prerelease,%build" {}
 ```
