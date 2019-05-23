@@ -5,7 +5,7 @@ use warnings;
 use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
-use Getopt::Long qw(GetOptionsFromArray);
+use Getopt::Long qw(GetOptionsFromArray GetOptionsFromString);
 no if $] >= 5.018, warnings => qw(experimental::smartmatch);
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
@@ -13,9 +13,9 @@ my $semver_regex = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|
 my $semver_precedence_regex_head = '^([0-9a-zA-Z-]*)';
 my $semver_precedence_regex_tail = '\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*)';
 
-my $gt = 1;
-my $eq = 0;
-my $lt = -1;
+my $greater_than = 1;
+my $equal_to = 0;
+my $less_than = -1;
 
 sub usage() {
     my $program = "semver";
@@ -23,7 +23,6 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program compare <version> <version>";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
     say STDERR "  $program grep [-co] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
@@ -66,26 +65,26 @@ sub semver_compare_prerelease_identifier {
     if ((defined $a) && (defined $b)) {
         if (looks_like_number($a) && looks_like_number($b)) {
             if ($a > $b) {
-                return $gt;
+                return $greater_than;
             } elsif ($a < $b) {
-                return $lt;
+                return $less_than;
             }
         } elsif (!looks_like_number($a) && looks_like_number($b)) {
-            return $gt;
+            return $greater_than;
         } else {
             my $a_cmp_b = $a cmp $b;
 
             if ($a_cmp_b eq 1) {
-                return $gt;
+                return $greater_than;
             } elsif ($a_cmp_b eq -1) {
-                return $lt;
+                return $less_than;
             }
         }
-        return $eq;
+        return $equal_to;
     } elsif ((defined $a) && (!defined $b)) {
-        return $gt;
+        return $greater_than;
     } elsif ((!defined $a) && (defined $b)) {
-        return $lt;
+        return $less_than;
     }
 }
 
@@ -93,9 +92,9 @@ sub semver_compare_prerelease {
     my ($a, $b) = @_;
 
     if ((!defined $a) && (defined $b)) {
-        return $gt;
+        return $greater_than;
     } elsif ((defined $a) && (!defined $b)) {
-        return $lt;
+        return $less_than;
     } elsif ((defined $a) && (defined $b)) {
         my @a_identifiers = semver_get_prerelease_identifiers($a);
         my @b_identifiers = semver_get_prerelease_identifiers($b);
@@ -107,15 +106,15 @@ sub semver_compare_prerelease {
             my $a_cmp_b = semver_compare_prerelease_identifier($a_identifier, $b_identifier);
 
             if ($a_cmp_b eq 1) {
-                return $gt;
+                return $greater_than;
             } elsif ($a_cmp_b eq -1) {
-                return $lt;
+                return $less_than;
             }
         }
 
-        return $eq;
+        return $equal_to;
     } else {
-        return $eq;
+        return $equal_to;
     }
 }
 
@@ -137,15 +136,15 @@ sub semver::compare {
     my $b_prerelease = $b_matches[3];
 
     if ($a_major > $b_major) {
-        return $gt;
+        return $greater_than;
     } elsif (($a_major eq $b_major) && ($a_minor > $b_minor)) {
-        return $gt;
+        return $greater_than;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch > $b_patch)) {
-        return $gt;
+        return $greater_than;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch)) {
         return semver_compare_prerelease($a_prerelease, $b_prerelease);
     } else {
-        return $lt;
+        return $less_than;
     }
 }
 
@@ -341,7 +340,7 @@ sub semver::sort_pair {
 
     my $result = semver::compare($a, $b);
 
-    if ($result eq $eq) {
+    if ($result eq $equal_to) {
         return $a cmp $b;
     } else {
         return $result;
@@ -362,9 +361,6 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/compare/) {
-            say semver::compare($args[0], $args[1]);
-        }
         when (/decrement/) {
             my $major, my $minor, my $patch, my $help;
 

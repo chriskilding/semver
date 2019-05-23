@@ -7,7 +7,7 @@ Semantic Versioning utility.
 
 ## Overview
 
-The `semver` command line utility compares, generates, modifies, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
+The `semver` command line utility generates, modifies, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
 
 The Semantic Versioning format is:
 
@@ -36,7 +36,6 @@ Coming soon.
 
 ## Usage
 
-    semver compare <version> <version>
     semver decrement [--major | --minor | --patch] <version>
     semver grep [-co] -
     semver increment [--major | --minor | --patch] <version>

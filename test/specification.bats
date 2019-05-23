@@ -8,6 +8,10 @@ semver() {
     ./semver "$@"
 }
 
+seq() {
+    printf "$1\n$2\n"
+}
+
 ##
 ## Normal versions <https://semver.org/spec/v2.0.0.html#spec-item-2>
 ##
@@ -116,7 +120,19 @@ semver() {
 }
 
 @test "Pre-release versions have a lower precedence than the associated normal version." {
-    [[ $(semver compare "0.0.1-alpha" "0.0.1") -eq -1 ]]
+    expected=$(cat <<EOF
+0.0.1-alpha
+0.0.1
+EOF
+)
+
+    actual=$(semver sort <<EOF
+0.0.1
+0.0.1-alpha
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
 @test "Example: 1.0.0-alpha" {
@@ -153,7 +169,19 @@ semver() {
 }
 
 @test "Build metadata SHOULD be ignored when determining version precedence. Thus two versions that differ only in the build metadata, have the same precedence." {
-    [[ $(semver compare "0.0.1+2008" "0.0.1+2009") -eq 0 ]]
+    expected=$(cat <<EOF
+0.0.1+2008
+0.0.1+2009
+EOF
+)
+
+    actual=$(semver sort <<EOF
+0.0.1+2009
+0.0.1+2008
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
 @test "Example: 1.0.0-alpha+001" {
@@ -173,67 +201,150 @@ semver() {
 ##
 
 @test 'Major, minor, and patch versions are always compared numerically [not lexicographically].' {
-    [[ $(semver compare '19999.0.0' '200.0.0') -eq 1 ]]
+    expected=$(cat <<EOF
+200.0.0
+19999.0.0
+EOF
+)
+
+    actual=$(semver sort <<EOF
+19999.0.0
+200.0.0
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
-@test 'Example: 1.0.0 < 2.0.0' {
-    [[ $(semver compare '1.0.0' '2.0.0') -eq -1 ]]
+@test 'Example: 1.0.0 < 2.0.0 < 2.1.0 < 2.1.1' {
+    expected=$(cat <<EOF
+1.0.0
+2.0.0
+2.1.0
+2.1.1
+EOF
+)
+
+    actual=$(semver sort <<EOF
+2.1.0
+1.0.0
+2.1.1
+2.0.0
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
-@test 'Example: 2.0.0 < 2.1.0' {
-    [[ $(semver compare '2.0.0' '2.1.0') -eq -1 ]]
-}
-
-@test 'Example: 2.1.0 < 2.1.1' {
-    [[ $(semver compare '2.1.0' '2.1.1') -eq -1 ]]
-}
-
-# TODO Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows...
+#
+# Precedence for two pre-release versions with the same major, minor, and patch version MUST be determined by comparing
+# each dot separated identifier from left to right until a difference is found as follows...
+#
 
 @test 'Identifiers consisting of only digits are compared numerically.' {
-    [[ $(semver compare '1.0.0-2' '1.0.0-1') -eq 1 ]]
+    expected=$(cat <<EOF
+1.0.0-1
+1.0.0-2
+EOF
+)
+
+    actual=$(semver sort <<EOF
+1.0.0-2
+1.0.0-1
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
 @test 'Identifiers with letters or hyphens are compared lexically in ASCII sort order.' {
-    [[ $(semver compare '1.0.0-a-b' '1.0.0-a-a') -eq 1 ]]
+    expected=$(cat <<EOF
+1.0.0-a-a
+1.0.0-a-b
+EOF
+)
+
+    actual=$(semver sort <<EOF
+1.0.0-a-b
+1.0.0-a-a
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
 @test 'Numeric identifiers always have lower precedence than non-numeric identifiers.' {
-    [[ $(semver compare '1.0.0-a' '1.0.0-1') -eq 1 ]]
+    expected=$(cat <<EOF
+1.0.0-1
+1.0.0-a
+EOF
+)
+
+    actual=$(semver sort <<EOF
+1.0.0-a
+1.0.0-1
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
 @test 'A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.' {
-    [[ $(semver compare '1.0.0-1.1.1' '1.0.0-1.1') -eq 1 ]] && [[ $(semver compare '1.0.0-1.1' '1.0.0-1.1.1') -eq -1 ]]
+    expected=$(cat <<EOF
+1.0.0-1.1
+1.0.0-1.1.1
+EOF
+)
+
+    actual=$(semver sort <<EOF
+1.0.0-1.1.1
+1.0.0-1.1
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
-@test 'Example: 1.0.0-alpha < 1.0.0-alpha.1' {
-    [[ $(semver compare '1.0.0-alpha' '1.0.0-alpha.1') -eq -1 ]]
-}
+@test 'Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0' {
+    expected=$(cat <<EOF
+1.0.0-alpha
+1.0.0-alpha.1
+1.0.0-alpha.beta
+1.0.0-beta
+1.0.0-beta.2
+1.0.0-beta.11
+1.0.0-rc.1
+1.0.0
+EOF
+)
 
-@test 'Example: 1.0.0-alpha.1 < 1.0.0-alpha.beta' {
-    [[ $(semver compare '1.0.0-alpha.1' '1.0.0-alpha.beta') -eq -1 ]]
-}
+    actual=$(semver sort <<EOF
+1.0.0-beta.11
+1.0.0-alpha.1
+1.0.0-beta.2
+1.0.0
+1.0.0-alpha
+1.0.0-rc.1
+1.0.0-alpha.beta
+1.0.0-beta
+EOF
+)
 
-@test 'Example: 1.0.0-alpha.beta < 1.0.0-beta' {
-    [[ $(semver compare '1.0.0-alpha.beta' '1.0.0-beta') -eq -1 ]] && [[ $(semver compare '1.0.0-beta' '1.0.0-alpha.beta' ) -eq 1 ]]
-}
-
-@test 'Example: 1.0.0-beta < 1.0.0-beta.2' {
-    [[ $(semver compare '1.0.0-beta' '1.0.0-beta.2') -eq -1 ]]
-}
-
-@test 'Example: 1.0.0-beta.2 < 1.0.0-beta.11' {
-    [[ $(semver compare '1.0.0-beta.2' '1.0.0-beta.11') -eq -1 ]]
-}
-
-@test 'Example: 1.0.0-beta.11 < 1.0.0-rc.1' {
-    [[ $(semver compare '1.0.0-beta.11' '1.0.0-rc.1') -eq -1 ]]
-}
-
-@test 'Example: 1.0.0-rc.1 < 1.0.0' {
-    [[ $(semver compare '1.0.0-rc.1' '1.0.0') -eq -1 ]]
+    [[ ${actual} = ${expected} ]]
 }
 
 @test 'When major, minor, and patch are equal, a pre-release version has lower precedence than a normal version. Example: 1.0.0-alpha < 1.0.0.' {
-    [[ $(semver compare '1.0.0-alpha' '1.0.0') -eq -1 ]]
+    expected=$(cat <<EOF
+1.0.0-alpha
+1.0.0
+EOF
+)
+
+    actual=$(semver sort <<EOF
+1.0.0
+1.0.0-alpha
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
