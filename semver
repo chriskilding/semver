@@ -5,7 +5,7 @@ use warnings;
 use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
-use Getopt::Long qw(GetOptionsFromArray GetOptionsFromString);
+use Getopt::Long qw(GetOptionsFromArray);
 no if $] >= 5.018, warnings => qw(experimental::smartmatch);
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
@@ -23,9 +23,9 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program decrement [--major | --minor | --patch] <version>";
+    say STDERR "  $program decrement [-major | -minor | -patch] <version>";
     say STDERR "  $program grep [-co] -";
-    say STDERR "  $program increment [--major | --minor | --patch] <version>";
+    say STDERR "  $program increment [-major | -minor | -patch] <version>";
     say STDERR "  $program printf <format> <version>";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program [-h]";
@@ -347,44 +347,34 @@ sub semver::sort_pair {
     }
 }
 
-sub num_trues(@) {
-    my $trues = 0;
-    foreach (@_) {
-        $trues++ if ($_)
-    }
-    return $trues
-}
-
 sub main {
     my @args = @_;
 
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/decrement/) {
-            my $major, my $minor, my $patch, my $help;
+        when (/^decrement$/) {
+            my $operator = $args[0];
+            my $version = $args[1];
 
-            GetOptionsFromArray(
-                \@args,
-                "major" => \$major,
-                "minor" => \$minor,
-                "patch" => \$patch,
-                "help|h" => \$help
-            ) or exit 1;
+            usage() if (scalar(@args) != 2);
 
-            usage() if (num_trues($major, $minor, $patch) > 1);
-
-            if ($major) {
-                semver::decrement_major($args[0]);
-            } elsif ($minor) {
-                semver::decrement_minor($args[0]);
-            } elsif ($patch) {
-                semver::decrement_patch($args[0]);
-            } else {
-                usage();
+            for ($operator) {
+                when (/^-major$/) {
+                    semver::decrement_major($version);
+                }
+                when (/^-minor$/) {
+                    semver::decrement_minor($version);
+                }
+                when (/^-patch$/) {
+                    semver::decrement_patch($version);
+                }
+                default {
+                    usage();
+                }
             }
         }
-        when (/grep/) {
+        when (/^grep$/) {
             my $count, my $only_matching, my $help;
 
             GetOptionsFromArray(
@@ -402,30 +392,28 @@ sub main {
                 semver::grep($only_matching);
             }
         }
-        when (/increment/) {
-            my $major, my $minor, my $patch, my $help;
+        when (/^increment$/) {
+            my $operator = $args[0];
+            my $version = $args[1];
 
-            GetOptionsFromArray(
-                \@args,
-                "major" => \$major,
-                "minor" => \$minor,
-                "patch" => \$patch,
-                "help|h" => \$help
-            ) or exit 1;
+            usage() if (scalar(@args) != 2);
 
-            usage() if (num_trues($major, $minor, $patch) > 1);
-
-            if ($major) {
-                semver::increment_major($args[0]);
-            } elsif ($minor) {
-                semver::increment_minor($args[0]);
-            } elsif ($patch) {
-                semver::increment_patch($args[0]);
-            } else {
-                usage();
+            for ($operator) {
+                when (/^-major$/) {
+                    semver::increment_major($version);
+                }
+                when (/^-minor$/) {
+                    semver::increment_minor($version);
+                }
+                when (/^-patch$/) {
+                    semver::increment_patch($version);
+                }
+                default {
+                    usage();
+                }
             }
         }
-        when (/printf/) {
+        when (/^printf$/) {
             usage() if (scalar(@args) < 2);
 
             my $format = $args[0];
@@ -433,7 +421,7 @@ sub main {
 
             semver::printf($format, $version);
         }
-        when (/sort/) {
+        when (/^sort$/) {
             my $reverse;
             GetOptionsFromArray(\@args, "reverse|r" => \$reverse) or exit 1;
 
