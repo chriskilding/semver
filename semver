@@ -347,14 +347,6 @@ sub semver::sort_pair {
     }
 }
 
-sub num_trues(@) {
-    my $trues = 0;
-    foreach (@_) {
-        $trues++ if ($_)
-    }
-    return $trues
-}
-
 sub main {
     my @args = @_;
 
