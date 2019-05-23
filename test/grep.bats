@@ -28,18 +28,35 @@ semver() {
     [[ "$(semver grep -o <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" = "$(printf "1.0.0\n2.0.0")" ]]
 }
 
+@test "grep -c: should print a count of selected lines when there are matches" {
+    [[ "$(semver grep -c <<< "the cow jumped 1.0.0 over the moon")" -eq 1 ]]
+}
+
+@test "grep -c: should print a count of selected lines (not a count of the semvers in those lines)" {
+    [[ "$(semver grep -c <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" -eq 1 ]]
+}
+
+@test "grep -co: should print a count of selected lines (not a count of the semvers in those lines)" {
+    [[ "$(semver grep -co <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" -eq 1 ]]
+}
+
 @test "grep: should not match semver strings inside other words" {
     [[ "$(semver grep <<< "v1.2.3 foo1.2.3bar 1.2.3bar")" = "" ]]
 }
 
-@test "grep: should handle empty input" {
-    run semver grep <<< ""
-    [[ "$status" -eq 1 ]] && [[ "$output" = "" ]]
+@test "grep: should print nothing and exit 1 on empty input" {
+    run semver grep <<< ''
+    [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
 }
 
-@test "grep: should exit 1 when no input lines are selected" {
-    run semver grep <<< "abc"
-    [[ "$status" -eq 1 ]]
+@test "grep: should print nothing and exit 1 when no matches" {
+    run semver grep <<< 'abc'
+    [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
+}
+
+@test "grep -c: should print 0 and exit 1 when no matches" {
+    run semver grep -c <<< 'hello'
+    [[ "$output" -eq 0 ]] && [[ "$status" -eq 1 ]]
 }
 
 @test "grep: should handle spaces between versions" {

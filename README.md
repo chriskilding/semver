@@ -38,7 +38,7 @@ Coming soon.
 
     semver compare <version> <version>
     semver decrement [--major | --minor | --patch] <version>
-    semver grep [-o] -
+    semver grep [-co] -
     semver increment [--major | --minor | --patch] <version>
     semver printf <format> <version>
     semver sort [-r] -

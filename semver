@@ -25,7 +25,7 @@ sub usage() {
     say STDERR "Usage:";
     say STDERR "  $program compare <version> <version>";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
-    say STDERR "  $program grep [-o] -";
+    say STDERR "  $program grep [-co] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
     say STDERR "  $program printf <format> <version>";
     say STDERR "  $program sort [-r] -";
@@ -234,6 +234,23 @@ sub semver::printf {
     printf $format;
 }
 
+sub semver::grep_count {
+    my $num_matches = 0;
+
+    while (my $line = <STDIN>) {
+        my @words = split(/\s+/, $line);
+        if (grep(/$semver_regex/, @words)) {
+            $num_matches++;
+        }
+    }
+
+    if ($num_matches < 1) {
+        exit 1;
+    }
+
+    say $num_matches;
+}
+
 sub semver::grep {
     my ($only_matching) = @_;
 
@@ -372,17 +389,22 @@ sub main {
             }
         }
         when (/grep/) {
-            my $only_matching, my $help;
+            my $count, my $only_matching, my $help;
 
             GetOptionsFromArray(
                 \@args,
+                "count|c" => \$count,
                 "only-matching|o" => \$only_matching,
                 "help|h" => \$help,
             ) or exit 1;
 
             usage() if $help;
 
-            semver::grep($only_matching);
+            if ($count) {
+                semver::grep_count();
+            } else {
+                semver::grep($only_matching);
+            }
         }
         when (/increment/) {
             my $major, my $minor, my $patch, my $help;

@@ -15,7 +15,7 @@ decrement
 .Ar version
 .Nm
 grep
-.Op Fl o
+.Op Fl co
 .Fl
 .Nm
 increment
@@ -42,10 +42,12 @@ utility can compare two Semantic Versions
 .Ar a
 and
 .Ar b
-for precedence.
+for precedence, and print the result to the standard output.
 .Pp
-The result of the comparison is a single number printed to STDOUT. The numbers are:
-.Bl -tag
+Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+.Pp
+Result:
+.Bl -tag -width Ds -offset indent -compact
 .It -1
 .Ar a
 <
@@ -60,13 +62,17 @@ The result of the comparison is a single number printed to STDOUT. The numbers a
 .Ar b
 .El
 .Pp
-If either
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+Either
 .Ar a
 or
 .Ar b
-are omitted, no result will be printed, and the utility will exit with an error code.
-.Pp
-Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+were missing or invalid.
+.El
 .Ss decrement
 The
 .Nm
@@ -89,8 +95,8 @@ is:
 .Pp
 The PRERELEASE and BUILD components will be reset when a decrement occurs.
 .Pp
-The decrement subcommand understands the following mutually exclusive options:
-.Bl -tag -width indent
+Operators:
+.Bl -tag -width Fl -offset indent
 .It Fl -major
 Decrement the MAJOR component of
 .Ar version
@@ -102,24 +108,18 @@ Decrement the PATCH component of
 .Ar version
 .El
 .Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If the specified component of
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+The specified component of
 .Ar version
-is already 0.
-.It
-If more than one mutually exclusive option is given.
-.It
-If a required option is missing.
-.It
-If
+was already 0, or more than one operator was given, or
 .Ar version
-does not contain the specified component.
-.It
-If
+was invalid, or
 .Ar version
-is invalid.
+did not contain the specified component.
 .El
 .Ss grep
 The
@@ -146,18 +146,20 @@ has whitespace immediately before it, OR its first character is also the first c
 has whitespace immediately after it, OR its last character is also the last character of the line.
 .El
 .Pp
-The grep subcommand understands the following options:
-.Bl -tag -width indent
+Options:
+.Bl -tag -width Fl -offset indent
+.It Fl c, Fl -count
+Only a count of selected lines is written to standard output.
 .It Fl o, Fl -only-matching
 Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
 .El
 .Pp
-The grep subcommand exits with one of the following values:
-.Bl -tag
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
 .It 0
 One or more lines were selected (i.e. there was at least one valid Semantic Version).
 .It 1
-No lines were selected (i.e. there were no valid Semantic Versions), or an error occurred.
+No lines were selected (i.e. there were no valid Semantic Versions), or an invalid option was specified.
 .El
 .Ss increment
 The
@@ -181,8 +183,8 @@ is:
 .Pp
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
-The increment subcommand understands the following mutually exclusive options:
-.Bl -tag -width indent
+Operators:
+.Bl -tag -width Fl -offset indent
 .It Fl -major
 Increment the MAJOR component of
 .Ar version
@@ -194,20 +196,16 @@ Increment the PATCH component of
 .Ar version
 .El
 .Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If more than one mutually exclusive option is given.
-.It
-If a required option is missing.
-.It
-If
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+More than one operator was given, or
 .Ar version
-does not contain the specified component.
-.It
-If
+was invalid, or
 .Ar version
-is invalid.
+did not contain the specified component.
 .El
 .Ss printf
 The
@@ -221,15 +219,31 @@ string, in the style of
 .Pp
 The
 .Ar format
-is a character string which contains three types of objects: plain characters, which are simply copied to standard output, character escape sequences which are converted and copied to the standard output, and format specifications, each of which causes printing of the relevant component of the
+is a character string which contains three types of objects:
+.Bl -bullet -compact
+.It
+Plain characters, which are simply copied to standard output.
+.It
+Character escape sequences (in
+.St -ansiC
+backslash notation), which are converted and copied to the standard output.
+.It
+Format specifiers (prefixed by the '%' character), each of which causes printing of the relevant component of the
 .Ar version
 that was given.
+.El
 .Pp
-Character escape sequences are in backslash notation as defined in the
-.St -ansiC ,
-with extensions.
-The supported characters and their meanings are:
+Note: It is not an error to provide the format specifiers
+.Cm %prerelease
+or
+.Cm %build
+in the
+.Ar format
+string when the
+.Ar version
+does not contain a prerelease or build.
 .Pp
+Escape characters:
 .Bl -tag -width Ds -offset indent -compact
 .It Cm \ea
 Write a <bell> character.
@@ -251,45 +265,35 @@ Write a <single quote> character.
 Write a backslash character.
 .El
 .Pp
-Each format specifier is introduced by the percent ('%') character. The format specifiers and their meanings are:
-.Bl -tag -width Fl
-.It Cm major
+Format specifiers:
+.Bl -tag -offset indent -compact
+.It Cm %major
 Print the major component of
 .Ar version
-.It Cm minor
+.It Cm %minor
 Print the minor component of
 .Ar version
-.It Cm patch
+.It Cm %patch
 Print the patch component of
 .Ar version
-.It Cm prerelease
+.It Cm %prerelease
 Print the prerelease component of
 .Ar version
-.It Cm build
+.It Cm %build
 Print the build component of
 .Ar version
 .El
 .Pp
-It is not an error to provide the format specifiers
-.Cm %prerelease
-or
-.Cm %build
-in the
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+The
 .Ar format
-string when the
+string contained invalid specifiers, or
 .Ar version
-does not contain a prerelease or build.
-.Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If
-.Ar version
-is invalid.
-.It
-If invalid format specifiers are given in the
-.Ar format
-string.
+was invalid.
 .El
 .Ss sort
 The
@@ -297,17 +301,23 @@ The
 utility can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of
 .Xr sort 1 .
 .Pp
-The sort subcommand understands the following options:
-.Bl -tag -width indent
+Note: Some aspects of Semantic Version ordering are undefined in the specification. The
+.Nm
+utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
+.Pp
+Options:
+.Bl -tag -width Fl -offset indent
 .It Fl r, Fl -reverse
 Sort in reverse order (high-to-low).
 .El
 .Pp
-The operation will fail if the input is invalid (i.e. it contains anything besides Semantic Versions and line delimiter characters).
-.Pp
-Note: Some aspects of Semantic Version ordering are undefined in the specification. The
-.Nm
-utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+An invalid option was specified, or the input was invalid (i.e. it contained something besides Semantic Versions and line delimiter characters).
+.El
 .Sh OPTIONS
 .Pp
 The
@@ -364,7 +374,7 @@ With the -o flag the result will be:
 .Dl 2.2.2
 .Dl 3.3.3
 .Pp
-To validate a candidate version string, use the command's exit code:
+To validate a candidate version string, use the command's exit status:
 .Pp
 .Dl [[ $(semver grep <<< '1.2.3-alpha+1') ]]
 .Ss Increment
