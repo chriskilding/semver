@@ -66,7 +66,7 @@ semver() {
 
 # Individual format specifiers
 
-@test "printf %major: 1.0.0 should be 1" {
+@test 'printf %major: 1.0.0 should be 1' {
     [[ $(semver printf '%major' '1.0.0') = '1' ]]
 }
 
@@ -103,12 +103,12 @@ semver() {
     [[ "$status" -eq 1 ]]
 }
 
-@test "printf: 0.-1.0 should fail" {
+@test 'printf: 0.-1.0 should fail' {
     run semver printf "%major %minor %patch" '0.-1.0'
     [[ "$status" -eq 1 ]]
 }
 
-@test "printf: 0.0.-1 should fail" {
+@test 'printf: 0.0.-1 should fail' {
     run semver printf "%major %minor %patch" '0.0.-1'
     [[ "$status" -eq 1 ]]
 }
@@ -164,19 +164,22 @@ semver() {
     [[ "$status" -eq 1 ]]
 }
 
-@test "printf: 0.0.0- should fail" {
+@test 'printf: 0.0.0- should fail' {
     run semver printf "%major %minor %patch" '0.0.0-'
     [[ "$status" -eq 1 ]]
 }
 
-@test "printf: 0.0.0+ should fail" {
+@test 'printf: 0.0.0+ should fail' {
     run semver printf "%major %minor %patch" '0.0.0+'
     [[ "$status" -eq 1 ]]
 }
 
-# Whitespace
+@test 'printf: should not tolerate missing arguments' {
+    run semver printf ''
+    [[ "$status" -eq 1 ]]
+}
 
-@test "printf: should not tolerate empty version string" {
+@test 'printf: should not tolerate empty version string' {
     run semver printf "%major %minor %patch" ''
     [[ "$status" -eq 1 ]]
 }
@@ -186,51 +189,51 @@ semver() {
     [[ "$status" -eq 1 ]]
 }
 
-# TODO test escape of percent characters
+@test 'printf: should not tolerate invalid format specifiers' {
+    run semver printf "hello %s" '0.0.1'
+    [[ "$status" -eq 1 ]] && [[ "$output" = "Invalid format specifier detected (valid specifiers: %major, %minor, %patch, %prerelease, %build)" ]]
+}
 
-# Test that printf supports character escape sequences in backslash notation, as defined in ANSI
-# X3.159-1989 (“ANSI C89”).
+@test 'printf: \% should not escape the format specifier' {
+    [[ "$(semver printf '\%patch' '0.0.1')" = '\1' ]]
+}
 
 @test 'printf: \a should write a <bell> character' {
-    [[ "$(semver printf '\a' '0.0.1')" = 'bell' ]]
+    [[ "$(semver printf '\a' '0.0.1')" = "$(printf '\a')" ]]
 }
 
 @test 'printf: \b should write a <backspace> character' {
-    [[ "$(semver printf '\b' '0.0.1')" = 'backspace' ]]
+    [[ "$(semver printf '\b' '0.0.1')" = "$(printf '\b')" ]]
 }
 
 @test 'printf: \e should write an <escape> character' {
-    [[ "$(semver printf '\e' '0.0.1')" = 'escape' ]]
+    [[ "$(semver printf '\e' '0.0.1')" = "$(printf '\e')" ]]
 }
 
 @test 'printf: \f should write a <form-feed> character' {
-    [[ "$(semver printf '\f' '0.0.1')" = 'form-feed' ]]
+    [[ "$(semver printf '\f' '0.0.1')" = "$(printf '\f')" ]]
 }
 
 @test 'printf: \n should write a <new-line> character' {
-    [[ "$(semver printf '\n' '0.0.1')" = 'new-line' ]]
+    expected=$(cat <<EOF
+
+EOF
+)
+    [[ "$(semver printf '\n' '0.0.1')" = ${expected} ]]
 }
 
 @test 'printf: \r should write a <carriage return> character' {
-    [[ "$(semver printf '\r' '0.0.1')" = 'carriage return' ]]
+    [[ "$(semver printf '\r' '0.0.1')" = "$(printf '\r')" ]]
 }
 
 @test 'printf: \t should write a <tab> character' {
-    [[ "$(semver printf '\t' '0.0.1')" = 'tab' ]]
+    [[ "$(semver printf '\t' '0.0.1')" = "$(printf '\t')" ]]
 }
 
-@test 'printf: \v should write a <vertical tab> character' {
-    [[ "$(semver printf '\v' '0.0.1')" = 'vertical tab' ]]
-}
-
-@test 'printf: \´ should write a <single quote> character' {
-    [[ "$(semver printf '\´' '0.0.1')" = 'single quote' ]]
+@test "printf: \' should write a <single quote> character" {
+    [[ "$(semver printf "\'" '0.0.1')" = "'" ]]
 }
 
 @test 'printf: \\ should write a backslash character' {
-    [[ "$(semver printf '\\' '0.0.1')" = 'backslash' ]]
-}
-
-@test 'printf: \num should write an 8-bit character whose ASCII value is the 1-, 2-, or 3-digit octal number num' {
-    [[ "$(semver printf '\101' '0.0.1')" = 'the capital letter A' ]]
+    [[ "$(semver printf '\\' '0.0.1')" = '\' ]]
 }

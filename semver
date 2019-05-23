@@ -208,13 +208,30 @@ sub semver::printf {
     my $prerelease = $matches[3] // '';
     my $build = $matches[4] // '';
 
+    # Version components
     $format =~ s/%major/$major/g;
     $format =~ s/%minor/$minor/g;
     $format =~ s/%patch/$patch/g;
     $format =~ s/%prerelease/$prerelease/g;
     $format =~ s/%build/$build/g;
 
-    print $format;
+    if ($format =~ m/%/) {
+        say STDERR "Invalid format specifier detected (valid specifiers: %major, %minor, %patch, %prerelease, %build)";
+        exit 1;
+    }
+
+    # ASCII escape characters
+    $format =~ s/\\a/\a/g;
+    $format =~ s/\\b/\b/g;
+    $format =~ s/\\e/\e/g;
+    $format =~ s/\\f/\f/g;
+    $format =~ s/\\n/\n/g;
+    $format =~ s/\\r/\r/g;
+    $format =~ s/\\t/\t/g;
+    $format =~ s/\\'/\'/g;
+    $format =~ s/\\\\/\\/g;
+
+    printf $format;
 }
 
 sub semver::grep {
@@ -391,7 +408,8 @@ sub main {
             }
         }
         when (/printf/) {
-            # TODO validate existence
+            usage() if (scalar(@args) < 2);
+
             my $format = $args[0];
             my $version = $args[1];
 

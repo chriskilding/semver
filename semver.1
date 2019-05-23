@@ -36,8 +36,9 @@ The
 .Nm
 utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
 .Ss compare
+The
 .Nm
-can compare two Semantic Versions
+utility can compare two Semantic Versions
 .Ar a
 and
 .Ar b
@@ -121,8 +122,11 @@ If
 is invalid.
 .El
 .Ss grep
+The
 .Nm
-can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of grep(1). Each input line that has at least one Semantic Version string is written to the standard output.
+utility can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of
+.Xr grep 1 .
+Each input line that has at least one Semantic Version string is written to the standard output.
 .Pp
 A line containing a
 .Sq version
@@ -206,12 +210,14 @@ If
 is invalid.
 .El
 .Ss printf
+The
 .Nm
-can format and print a
+utility can format and print a
 .Ar version
 string under control of the
 .Ar format
-string, in the style of printf(1).
+string, in the style of
+.Xr printf 1 .
 .Pp
 The
 .Ar format
@@ -222,8 +228,7 @@ that was given.
 Character escape sequences are in backslash notation as defined in the
 .St -ansiC ,
 with extensions.
-The characters and their meanings
-are as follows:
+The supported characters and their meanings are:
 .Pp
 .Bl -tag -width Ds -offset indent -compact
 .It Cm \ea
@@ -240,20 +245,10 @@ Write a <new-line> character.
 Write a <carriage return> character.
 .It Cm \et
 Write a <tab> character.
-.It Cm \ev
-Write a <vertical tab> character.
 .It Cm \e\'
 Write a <single quote> character.
 .It Cm \e\e
 Write a backslash character.
-.It Cm \e Ns Ar num
-Write a byte whose
-value is the 1-, 2-, or 3-digit
-octal number
-.Ar num .
-Multibyte characters can be constructed using multiple
-.Cm \e Ns Ar num
-sequences.
 .El
 .Pp
 Each format specifier is introduced by the percent ('%') character. The format specifiers and their meanings are:
@@ -276,9 +271,9 @@ Print the build component of
 .El
 .Pp
 It is not an error to provide the format specifiers
-.Sq %prerelease
+.Cm %prerelease
 or
-.Sq %build
+.Cm %build
 in the
 .Ar format
 string when the
@@ -290,15 +285,17 @@ The operation will fail:
 .It
 If
 .Ar version
-is invalid (unclean data should therefore be piped through 'semver grep' before being piped into 'semver printf').
+is invalid.
 .It
 If invalid format specifiers are given in the
 .Ar format
 string.
 .El
 .Ss sort
+The
 .Nm
-can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of sort(1).
+utility can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of
+.Xr sort 1 .
 .Pp
 The sort subcommand understands the following options:
 .Bl -tag -width indent
@@ -411,6 +408,10 @@ The result will be:
 The Semantic Versioning standard does not define an ordering for two versions that are precedence-equal but stringwise-unequal (for example the BUILD is different). To guarantee predictable ordering between executions, the
 .Nm
 utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
+.Sh SEE ALSO
+.Xr grep 1 ,
+.Xr printf 1 ,
+.Xr sort 1
 .Sh STANDARDS
 The
 .Nm
