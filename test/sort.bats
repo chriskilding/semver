@@ -29,12 +29,22 @@ EOF
 @test "sort: should handle multiple versions" {
     input=$(cat <<EOF
 2.2.2
+1.0.2
 1.1.1
+1.0.0
+1.1.0
 3.3.3
+1.0.3
+1.0.1
 EOF
 )
 
     expected=$(cat <<EOF
+1.0.0
+1.0.1
+1.0.2
+1.0.3
+1.1.0
 1.1.1
 2.2.2
 3.3.3
