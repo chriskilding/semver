@@ -25,11 +25,10 @@ sub usage() {
     say STDERR "Usage:";
     say STDERR "  $program compare <version> <version>";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
-    say STDERR "  $program get [--major | --minor | --patch | --prerelease | --build] <version>";
-    say STDERR "  $program grep -";
+    say STDERR "  $program grep [-co] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
+    say STDERR "  $program printf <format> <version>";
     say STDERR "  $program sort [-r] -";
-    say STDERR "  $program validate <string>";
     say STDERR "  $program [-h]";
     say STDERR "";
     say STDERR "Options:";
@@ -198,79 +197,87 @@ sub semver::decrement_patch {
     }
 }
 
-sub semver::get {
-    my ($version) = @_;
+sub semver::printf {
+    my ($format, $version) = @_;
 
     my @matches = semver_get($version);
 
     my $major = $matches[0];
     my $minor = $matches[1];
     my $patch = $matches[2];
-    my $prerelease = $matches[3];
-    my $build = $matches[4];
+    my $prerelease = $matches[3] // '';
+    my $build = $matches[4] // '';
 
-    print $major . "\t" . $minor . "\t" . $patch;
+    # Version components
+    $format =~ s/%major/$major/g;
+    $format =~ s/%minor/$minor/g;
+    $format =~ s/%patch/$patch/g;
+    $format =~ s/%prerelease/$prerelease/g;
+    $format =~ s/%build/$build/g;
 
-    if ($build) {
-        print "\t" . ($prerelease // '') . "\t" . $build;
-    } elsif ($prerelease) {
-        print "\t" . $prerelease;
+    if ($format =~ m/%/) {
+        say STDERR "Invalid format specifier detected (valid specifiers: %major, %minor, %patch, %prerelease, %build)";
+        exit 1;
     }
 
-    print "\n";
+    # ASCII escape characters
+    $format =~ s/\\a/\a/g;
+    $format =~ s/\\b/\b/g;
+    $format =~ s/\\e/\e/g;
+    $format =~ s/\\f/\f/g;
+    $format =~ s/\\n/\n/g;
+    $format =~ s/\\r/\r/g;
+    $format =~ s/\\t/\t/g;
+    $format =~ s/\\'/\'/g;
+    $format =~ s/\\\\/\\/g;
+
+    printf $format;
 }
 
-sub semver::get_major {
-    my ($version) = @_;
+sub semver::grep_count {
+    my $num_matches = 0;
 
-    my @matches = semver_get($version);
+    while (my $line = <STDIN>) {
+        my @words = split(/\s+/, $line);
+        if (grep(/$semver_regex/, @words)) {
+            $num_matches++;
+        }
+    }
 
-    say $matches[0];
-}
+    if ($num_matches < 1) {
+        exit 1;
+    }
 
-sub semver::get_minor {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[1];
-}
-
-sub semver::get_patch {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[2];
-}
-
-sub semver::get_prerelease {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[3];
-}
-
-sub semver::get_build {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    say $matches[4];
+    say $num_matches;
 }
 
 sub semver::grep {
+    my ($only_matching) = @_;
+
+    my $num_matches = 0;
+
     while (my $line = <STDIN>) {
         my @words = split(/\s+/, $line);
-        foreach (@words) {
-            if (/$semver_regex/) {
-                print "$1.$2.$3";
-                print "-$4" if (length $4 // '');
-                print "+$5" if (length $5 // '');
-                print "\n";
+        if ($only_matching) {
+            foreach (@words) {
+                if (/$semver_regex/) {
+                    $num_matches++;
+                    print "$1.$2.$3";
+                    print "-$4" if (length $4 // '');
+                    print "+$5" if (length $5 // '');
+                    print "\n";
+                }
+            }
+        } else {
+            if (grep(/$semver_regex/, @words)) {
+                $num_matches++;
+                print $line;
             }
         }
+    }
+
+    if ($num_matches < 1) {
+        exit 1;
     }
 }
 
@@ -341,12 +348,6 @@ sub semver::sort_pair {
     }
 }
 
-sub semver::validate {
-    my ($str) = @_;
-
-    ($str =~ /$semver_regex/) ? exit 0 : exit 1;
-}
-
 sub num_trues(@) {
     my $trues = 0;
     foreach (@_) {
@@ -361,8 +362,8 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/grep/) {
-            semver::grep();
+        when (/compare/) {
+            say semver::compare($args[0], $args[1]);
         }
         when (/decrement/) {
             my $major, my $minor, my $patch, my $help;
@@ -387,32 +388,22 @@ sub main {
                 usage();
             }
         }
-        when (/get/) {
-            my $major, my $minor, my $patch, my $prerelease, my $build;
+        when (/grep/) {
+            my $count, my $only_matching, my $help;
 
             GetOptionsFromArray(
                 \@args,
-                "major" => \$major,
-                "minor" => \$minor,
-                "patch" => \$patch,
-                "prerelease" => \$prerelease,
-                "build" => \$build,
+                "count|c" => \$count,
+                "only-matching|o" => \$only_matching,
+                "help|h" => \$help,
             ) or exit 1;
 
-            usage() if (num_trues($major, $minor, $patch, $prerelease, $build) > 1);
+            usage() if $help;
 
-            if ($major) {
-                semver::get_major($args[0]);
-            } elsif ($minor) {
-                semver::get_minor($args[0]);
-            } elsif ($patch) {
-                semver::get_patch($args[0]);
-            } elsif ($prerelease) {
-                semver::get_prerelease($args[0]);
-            } elsif ($build) {
-                semver::get_build($args[0]);
+            if ($count) {
+                semver::grep_count();
             } else {
-                semver::get($args[0]);
+                semver::grep($only_matching);
             }
         }
         when (/increment/) {
@@ -438,6 +429,14 @@ sub main {
                 usage();
             }
         }
+        when (/printf/) {
+            usage() if (scalar(@args) < 2);
+
+            my $format = $args[0];
+            my $version = $args[1];
+
+            semver::printf($format, $version);
+        }
         when (/sort/) {
             my $reverse;
             GetOptionsFromArray(\@args, "reverse|r" => \$reverse) or exit 1;
@@ -447,12 +446,6 @@ sub main {
             } else {
                 semver::sort { semver::sort_pair($a, $b) };
             }
-        }
-        when (/validate/) {
-            semver::validate($args[0]);
-        }
-        when (/compare/) {
-            say semver::compare($args[0], $args[1]);
         }
         default {
             usage();

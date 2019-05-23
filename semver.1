@@ -14,23 +14,21 @@ decrement
 .Op Fl -major | Fl -minor | Fl -patch
 .Ar version
 .Nm
-get
-.Op Fl -major | Fl -minor | Fl -patch | Fl -prerelease | Fl -build
-.Ar version
-.Nm
 grep
+.Op Fl co
 .Fl
 .Nm
 increment
 .Op Fl -major | Fl -minor | Fl -patch
 .Ar version
 .Nm
+printf
+.Ar format
+.Ar version
+.Nm
 sort
 .Op Fl r
 .Fl
-.Nm
-validate
-.Ar string
 .Nm
 .Op Fl h
 .Sh DESCRIPTION
@@ -38,15 +36,18 @@ The
 .Nm
 utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
 .Ss compare
+The
 .Nm
-can compare two Semantic Versions
+utility can compare two Semantic Versions
 .Ar a
 and
 .Ar b
-for precedence.
+for precedence, and print the result to the standard output.
 .Pp
-The result of the comparison is a single number printed to STDOUT. The numbers are:
-.Bl -tag
+Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+.Pp
+Result:
+.Bl -tag -width Ds -offset indent -compact
 .It -1
 .Ar a
 <
@@ -61,13 +62,17 @@ The result of the comparison is a single number printed to STDOUT. The numbers a
 .Ar b
 .El
 .Pp
-If either
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+Either
 .Ar a
 or
 .Ar b
-are omitted, no result will be printed, and the utility will exit with an error code.
-.Pp
-Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
+were missing or invalid.
+.El
 .Ss decrement
 The
 .Nm
@@ -90,8 +95,8 @@ is:
 .Pp
 The PRERELEASE and BUILD components will be reset when a decrement occurs.
 .Pp
-The decrement subcommand understands the following mutually exclusive options:
-.Bl -tag -width indent
+Operators:
+.Bl -tag -width Fl -offset indent
 .It Fl -major
 Decrement the MAJOR component of
 .Ar version
@@ -103,99 +108,58 @@ Decrement the PATCH component of
 .Ar version
 .El
 .Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If the specified component of
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+The specified component of
 .Ar version
-is already 0.
-.It
-If more than one mutually exclusive option is given.
-.It
-If a required option is missing.
-.It
-If
+was already 0, or more than one operator was given, or
 .Ar version
-does not contain the specified component.
-.It
-If
+was invalid, or
 .Ar version
-is invalid.
-.El
-.Ss get
-.Nm
-can get the components of a
-.Ar version
-string, and print them in tab-separated format to STDOUT. The output is suitable for post-processing by standard *nix tools like 'cut'.
-.Pp
-The format looks like this:
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH
-.Dl MAJOR\tMINOR\tPATCH
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH+BUILD
-.Dl MAJOR\tMINOR\tPATCH\t\tBUILD
-.Pp
-.Dl $ semver get MAJOR.MINOR.PATCH-PRERELEASE+BUILD
-.Dl MAJOR\tMINOR\tPATCH\tPRERELEASE\tBUILD
-.Pp
-The get subcommand understands the following (mutually exclusive) options:
-.Bl -tag -width indent
-.It Fl -major
-Get only the MAJOR component of
-.Ar version
-.It Fl -minor
-Get only the MINOR component of
-.Ar version
-.It Fl -patch
-Get only the PATCH component of
-.Ar version
-.It Fl -prerelease
-Get only the PRERELEASE component of
-.Ar version
-.It Fl -build
-Get only the BUILD component of
-.Ar version
-.El
-.Pp
-The operation will fail:
-.Bl -bullet -compact
-.It
-If more than one mutually exclusive option is given.
-.It
-If a required option is missing.
-.It
-If
-.Ar version
-does not contain the specified component.
-.It
-If
-.Ar version
-is invalid.
+did not contain the specified component.
 .El
 .Ss grep
+The
 .Nm
-can parse text from STDIN to extract zero or more Semantic Version strings. It will tolerate quite noisy input.
+utility can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of
+.Xr grep 1 .
+Each input line that has at least one Semantic Version string is written to the standard output.
 .Pp
-A candidate version
-.Sq string
-will be matched within the text stream if it meets the following criteria:
+A line containing a
+.Sq version
+string will be matched within the text stream if the following criteria are met:
 .Bl -bullet -compact
 .It
-.Sq string
+.Sq version
 is a valid Semantic Version.
 .It
-.Sq string
+.Sq version
 is a whole word.
 .It
-.Sq string
+.Sq version
 has whitespace immediately before it, OR its first character is also the first character of the line.
 .It
-.Sq string
+.Sq version
 has whitespace immediately after it, OR its last character is also the last character of the line.
+.El
+.Pp
+Options:
+.Bl -tag -width Fl -offset indent
+.It Fl c, Fl -count
+Only a count of selected lines is written to standard output.
+.It Fl o, Fl -only-matching
+Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
+.El
+.Pp
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+One or more lines were selected (i.e. there was at least one valid Semantic Version).
+.It 1
+No lines were selected (i.e. there were no valid Semantic Versions), or an invalid option was specified.
 .El
 .Ss increment
 The
@@ -219,8 +183,8 @@ is:
 .Pp
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
-The increment subcommand understands the following mutually exclusive options:
-.Bl -tag -width indent
+Operators:
+.Bl -tag -width Fl -offset indent
 .It Fl -major
 Increment the MAJOR component of
 .Ar version
@@ -232,50 +196,127 @@ Increment the PATCH component of
 .Ar version
 .El
 .Pp
-The operation will fail:
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+More than one operator was given, or
+.Ar version
+was invalid, or
+.Ar version
+did not contain the specified component.
+.El
+.Ss printf
+The
+.Nm
+utility can format and print a
+.Ar version
+string under control of the
+.Ar format
+string, in the style of
+.Xr printf 1 .
+.Pp
+The
+.Ar format
+is a character string which contains three types of objects:
 .Bl -bullet -compact
 .It
-If more than one mutually exclusive option is given.
+Plain characters, which are simply copied to standard output.
 .It
-If a required option is missing.
+Character escape sequences (in
+.St -ansiC
+backslash notation), which are converted and copied to the standard output.
 .It
-If
+Format specifiers (prefixed by the '%' character), each of which causes printing of the relevant component of the
 .Ar version
-does not contain the specified component.
-.It
-If
+that was given.
+.El
+.Pp
+Note: It is not an error to provide the format specifiers
+.Cm %prerelease
+or
+.Cm %build
+in the
+.Ar format
+string when the
 .Ar version
-is invalid.
+does not contain a prerelease or build.
+.Pp
+Escape characters:
+.Bl -tag -width Ds -offset indent -compact
+.It Cm \ea
+Write a <bell> character.
+.It Cm \eb
+Write a <backspace> character.
+.It Cm \ec
+Ignore remaining characters in this string.
+.It Cm \ef
+Write a <form-feed> character.
+.It Cm \en
+Write a <new-line> character.
+.It Cm \er
+Write a <carriage return> character.
+.It Cm \et
+Write a <tab> character.
+.It Cm \e\'
+Write a <single quote> character.
+.It Cm \e\e
+Write a backslash character.
+.El
+.Pp
+Format specifiers:
+.Bl -tag -offset indent -compact
+.It Cm %major
+Print the major component of
+.Ar version
+.It Cm %minor
+Print the minor component of
+.Ar version
+.It Cm %patch
+Print the patch component of
+.Ar version
+.It Cm %prerelease
+Print the prerelease component of
+.Ar version
+.It Cm %build
+Print the build component of
+.Ar version
+.El
+.Pp
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+The
+.Ar format
+string contained invalid specifiers, or
+.Ar version
+was invalid.
 .El
 .Ss sort
+The
 .Nm
-can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high).
-.Pp
-The sort subcommand understands the following options:
-.Bl -tag -width indent
-.It Fl r, Fl -reverse
-Sort in reverse order (high-to-low).
-.El
-.Pp
-The operation will fail if the input is invalid (i.e. it contains anything besides Semantic Versions and line delimiter characters).
+utility can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of
+.Xr sort 1 .
 .Pp
 Note: Some aspects of Semantic Version ordering are undefined in the specification. The
 .Nm
 utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
-.Ss validate
-.Nm
-can check if an input
-.Ar string
-is a valid Semantic Version.
 .Pp
-It will return the result using an exit code. The exit codes are:
-.Bl -tag 
+Options:
+.Bl -tag -width Fl -offset indent
+.It Fl r, Fl -reverse
+Sort in reverse order (high-to-low).
+.El
+.Pp
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
 .It 0
-.Ar string
-is a valid Semantic Version.
+Success.
 .It 1
-.Ar string
-is not a valid Semantic Version.
+An invalid option was specified, or the input was invalid (i.e. it contained something besides Semantic Versions and line delimiter characters).
 .El
 .Sh OPTIONS
 .Pp
@@ -313,32 +354,29 @@ To decrement components of the version string
 .Pp
 .Dl $ semver decrement --patch '2.3.4'
 .Dl 2.3.3
-.Ss Get
+.Ss Grep
+Given a line-separated text stream:
 .Pp
-To get components of the version string
-.Sq 1.2.3-SNAPSHOT+2019
-:
+.Dl $ semver grep <<EOF
+.Dl foo 1.1.1
+.Dl bar
+.Dl baz 2.2.2 qux 3.3.3
+.Dl EOF
 .Pp
-.Dl $ semver get '1.2.3-SNAPSHOT+2019'
-.Dl 1\t2\t3\tSNAPSHOT\t2019
+The result will be:
 .Pp
-.Dl $ semver get '1.2.3-SNAPSHOT+2019' | cut -f 1-3
-.Dl 1\t2\t3
+.Dl foo 1.1.1
+.Dl baz 2.2.2 qux 3.3.3
 .Pp
-.Dl $ semver get --major '1.2.3-SNAPSHOT+2019'
-.Dl 1
+With the -o flag the result will be:
 .Pp
-.Dl $ semver get --minor '1.2.3-SNAPSHOT+2019'
-.Dl 2
+.Dl 1.1.1
+.Dl 2.2.2
+.Dl 3.3.3
 .Pp
-.Dl $ semver get --patch '1.2.3-SNAPSHOT+2019'
-.Dl 3
+To validate a candidate version string, use the command's exit status:
 .Pp
-.Dl $ semver get --prerelease '1.2.3-SNAPSHOT+2019'
-.Dl SNAPSHOT
-.Pp
-.Dl $ semver get --build '1.2.3-SNAPSHOT+2019'
-.Dl 2019
+.Dl [[ $(semver grep <<< '1.2.3-alpha+1') ]]
 .Ss Increment
 To increment components of the version string
 .Sq 1.2.3
@@ -352,6 +390,14 @@ To increment components of the version string
 .Pp
 .Dl $ semver increment --patch '1.2.3'
 .Dl 1.2.4
+.Ss Printf
+.Pp
+To format and print the version string
+.Sq 1.2.3-SNAPSHOT+2019
+as CSV:
+.Pp
+.Dl $ semver printf '%major,%minor,%patch,%prerelease,%build' '1.2.3-SNAPSHOT+2019'
+.Dl 1,2,3,SNAPSHOT,2019
 .Ss Sort
 Given a line-separated list of version strings:
 .Pp
@@ -366,29 +412,16 @@ The result will be:
 .Dl 1.1.1
 .Dl 2.2.2
 .Dl 4.4.4
-.Ss Validate
-.Pp
-To validate the (valid) version string
-.Sq 1.2.3
-:
-.Pp
-.Dl $ semver validate '1.2.3'
-.Dl $ echo $?
-.Dl 0
-.Pp
-To validate the (invalid) version string
-.Sq v1.0
-:
-.Pp
-.Dl $ semver validate 'v1.0'
-.Dl $ echo $?
-.Dl 1
 .Sh EXIT STATUS
 .Ex -std
 .Sh WARNINGS
 The Semantic Versioning standard does not define an ordering for two versions that are precedence-equal but stringwise-unequal (for example the BUILD is different). To guarantee predictable ordering between executions, the
 .Nm
 utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
+.Sh SEE ALSO
+.Xr grep 1 ,
+.Xr printf 1 ,
+.Xr sort 1
 .Sh STANDARDS
 The
 .Nm

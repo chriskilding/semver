@@ -38,15 +38,43 @@ Coming soon.
 
     semver compare <version> <version>
     semver decrement [--major | --minor | --patch] <version>
-    semver get [--major | --minor | --patch | --prerelease | --build] <version>
-    semver grep -
+    semver grep [-co] -
     semver increment [--major | --minor | --patch] <version>
+    semver printf <format> <version>
     semver sort [-r] -
-    semver validate <string>
     semver [-h]
 
 Man page:
 
 ```bash
 $ man semver
+```
+
+## Examples
+
+Find the latest Git tag:
+
+```bash
+git tag | semver grep -o | semver sort -r | head -n 1
+```    
+
+Validate a candidate version string:
+
+```bash
+[[ $(semver grep <<< "1.2.3-alpha+1") ]] && echo "Valid"
+```
+
+Download all artifacts in a version range:
+
+```bash
+version="0.0.1"
+while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
+    version=$(semver increment --patch ${version})
+done
+```
+
+Format a list of version strings as CSV:
+
+```bash
+git tag | semver grep -o | xargs semver printf "%major,%minor,%patch,%prerelease,%build" {}
 ```
