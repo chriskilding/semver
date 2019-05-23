@@ -16,28 +16,52 @@ should_gt() {
     [[ $(semver compare "$1" -gt "$2") -eq 0 ]] && [[ $(semver compare "$1" -lt "$2") -eq 1 ]]
 }
 
-@test 'compare: should support -eq operator' {
+@test 'compare: a -eq b should be true when a == b' {
     [[ $(semver compare '1.0.0' -eq '1.0.0') -eq 0 ]]
 }
 
-@test 'compare: should support -ne operator' {
+@test 'compare: a -eq b should be false when a != b' {
+    [[ $(semver compare '1.0.0' -eq '2.0.0') -eq 1 ]]
+}
+
+@test 'compare: a -ne b should be true when a != b' {
     [[ $(semver compare '1.0.0' -ne '2.0.0') -eq 0 ]]
 }
 
-@test 'compare: should support -ge operator' {
+@test 'compare: a -ne b should be false when a == b' {
+    [[ $(semver compare '1.0.0' -ne '1.0.0') -eq 1 ]]
+}
+
+@test 'compare: a -ge b should be true when a >= b' {
     [[ $(semver compare '2.0.0' -ge '1.0.0') -eq 0 ]]
 }
 
-@test 'compare: should support -gt operator' {
+@test 'compare: a -ge b should be false when a < b' {
+    [[ $(semver compare '1.0.0' -ge '2.0.0') -eq 1 ]]
+}
+
+@test 'compare: a -gt b should be true when a > b' {
     [[ $(semver compare '2.0.0' -gt '1.0.0') -eq 0 ]]
 }
 
-@test 'compare: should support -le operator' {
+@test 'compare: a -gt b should be false when a <= b' {
+    [[ $(semver compare '1.0.0' -gt '2.0.0') -eq 1 ]]
+}
+
+@test 'compare: a -le b should be true when a <= b' {
     [[ $(semver compare '1.0.0' -le '2.0.0') -eq 0 ]]
 }
 
-@test 'compare: should support -lt operator' {
+@test 'compare: a -le b should be false when a > b' {
+    [[ $(semver compare '2.0.0' -le '1.0.0') -eq 1 ]]
+}
+
+@test 'compare: a -lt b should be true when a < b' {
     [[ $(semver compare '1.0.0' -lt '2.0.0') -eq 0 ]]
+}
+
+@test 'compare: a -lt b should be false when a >= b' {
+    [[ $(semver compare '2.0.0' -lt '1.0.0') -eq 1 ]]
 }
 
 ##
@@ -131,5 +155,10 @@ should_gt() {
 
 @test "compare: invalid operator should fail" {
     run semver compare "1.0.0" -rubbish "1.0.0"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "compare: multiple operators should fail" {
+    run semver compare "1.0.0" "-eq -ne" "1.0.0"
     [[ "$status" -eq 1 ]]
 }
