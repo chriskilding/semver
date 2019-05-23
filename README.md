@@ -36,7 +36,7 @@ Coming soon.
 
 ## Usage
 
-    semver compare <version> <version>
+    semver compare <version> [-eq | -ge | -gt | -ne | -le | -lt] <version>
     semver decrement [--major | --minor | --patch] <version>
     semver grep [-co] -
     semver increment [--major | --minor | --patch] <version>

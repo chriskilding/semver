@@ -8,6 +8,7 @@
 .Nm
 compare
 .Ar version
+.Op Fl eq | Fl ge | Fl gt | Fl ne | Fl le | Fl lt
 .Ar version
 .Nm
 decrement
@@ -46,20 +47,46 @@ for precedence, and print the result to the standard output.
 .Pp
 Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
 .Pp
-Result:
-.Bl -tag -width Ds -offset indent -compact
-.It -1
-.Ar a
-<
-.Ar b
-.It 0
+Operators:
+.Bl -tag -width Fl -offset indent -compact
+.It Ar a Fl eq Ar b
+True if
 .Ar a
 ==
-.Ar b
-.It 1
+.Ar b .
+.It Ar a Fl ne Ar b
+True if
+.Ar a
+!=
+.Ar b .
+.It Ar a Fl gt Ar b
+True if
 .Ar a
 >
-.Ar b
+.Ar b .
+.It Ar a Fl ge Ar b
+True if
+.Ar a
+>=
+.Ar b .
+.It Ar a Fl lt Ar b
+True if
+.Ar a
+<
+.Ar b .
+.It Ar a Fl le Ar b
+True if
+.Ar a
+<=
+.Ar b .
+.El
+.Pp
+Result:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+The statement is true.
+.It 1
+The statement is false.
 .El
 .Pp
 Exit status:
@@ -67,11 +94,11 @@ Exit status:
 .It 0
 Success.
 .It 1
-Either
-.Ar a
+An error occurred, or an operand
+.Ar ( a
 or
-.Ar b
-were missing or invalid.
+.Ar b )
+was missing or invalid, or an operator was missing or invalid.
 .El
 .Ss decrement
 The
@@ -332,32 +359,29 @@ Display the usage screen.
 .Pp
 To compare version numbers for precedence:
 .Pp
-.Dl $ semver compare '1.0.0' '2.0.0'
-.Dl -1
+.Dl semver compare 1.0.0 -lt 2.0.0
+.Dl => 0
 .Pp
-.Dl $ semver compare '1.0.0' '1.0.0'
-.Dl 0
-.Pp
-.Dl $ semver compare '2.0.0' '1.0.0'
-.Dl 1
+.Dl semver compare 1.0.0 -gt 2.0.0
+.Dl => 1
 .Ss Decrement
 .Pp
 To decrement components of the version string
 .Sq 2.3.4
 :
 .Pp
-.Dl $ semver decrement --major '2.3.4'
-.Dl 1.0.0
+.Dl semver decrement --major 2.3.4
+.Dl => 1.0.0
 .Pp
-.Dl $ semver decrement --minor '2.3.4'
-.Dl 2.2.0
+.Dl semver decrement --minor 2.3.4
+.Dl => 2.2.0
 .Pp
-.Dl $ semver decrement --patch '2.3.4'
-.Dl 2.3.3
+.Dl semver decrement --patch 2.3.4
+.Dl => 2.3.3
 .Ss Grep
 Given a line-separated text stream:
 .Pp
-.Dl $ semver grep <<EOF
+.Dl semver grep <<EOF
 .Dl foo 1.1.1
 .Dl bar
 .Dl baz 2.2.2 qux 3.3.3
@@ -382,14 +406,14 @@ To increment components of the version string
 .Sq 1.2.3
 :
 .Pp
-.Dl $ semver increment --major '1.2.3'
-.Dl 2.0.0
+.Dl semver increment --major 1.2.3
+.Dl => 2.0.0
 .Pp
-.Dl $ semver increment --minor '1.2.3'
-.Dl 1.3.0
+.Dl semver increment --minor 1.2.3
+.Dl => 1.3.0
 .Pp
-.Dl $ semver increment --patch '1.2.3'
-.Dl 1.2.4
+.Dl semver increment --patch 1.2.3
+.Dl => 1.2.4
 .Ss Printf
 .Pp
 To format and print the version string
@@ -401,7 +425,7 @@ as CSV:
 .Ss Sort
 Given a line-separated list of version strings:
 .Pp
-.Dl $ semver sort <<EOF
+.Dl semver sort <<EOF
 .Dl 2.2.2
 .Dl 1.1.1
 .Dl 4.4.4

@@ -4,16 +4,16 @@ semver() {
     ./semver "$@"
 }
 
-should_le() {
-    [[ $(semver compare "$1" "$2") -eq -1 ]]
+should_lt() {
+    [[ $(semver compare "$1" -lt "$2") -eq 0 ]] && [[ $(semver compare "$1" -gt "$2") -eq 1 ]]
 }
 
 should_eq() {
-    [[ $(semver compare "$1" "$2") -eq 0 ]]
+    [[ $(semver compare "$1" -eq "$2") -eq 0 ]] && [[ $(semver compare "$1" -ne "$2") -eq 1 ]]
 }
 
 should_gt() {
-    [[ $(semver compare "$1" "$2") -eq 1 ]]
+    [[ $(semver compare "$1" -gt "$2") -eq 0 ]] && [[ $(semver compare "$1" -lt "$2") -eq 1 ]]
 }
 
 ##
@@ -48,7 +48,7 @@ should_gt() {
 }
 
 @test "compare: 0.0.1-alpha should < 0.0.1-beta" {
-    should_le "0.0.1-alpha" "0.0.1-beta"
+    should_lt "0.0.1-alpha" "0.0.1-beta"
 }
 
 @test 'compare: 1.0.0 should > 1.0.0-alpha' {
