@@ -7,7 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 decrement
-.Op Fl -major | Fl -minor | Fl -patch
+.Op Fl major | Fl minor | Fl patch
 .Ar version
 .Nm
 grep
@@ -15,7 +15,7 @@ grep
 .Fl
 .Nm
 increment
-.Op Fl -major | Fl -minor | Fl -patch
+.Op Fl major | Fl minor | Fl patch
 .Ar version
 .Nm
 printf
@@ -55,13 +55,13 @@ The PRERELEASE and BUILD components will be reset when a decrement occurs.
 .Pp
 Operators:
 .Bl -tag -width Fl -offset indent
-.It Fl -major
+.It Fl major
 Decrement the MAJOR component of
 .Ar version
-.It Fl -minor
+.It Fl minor
 Decrement the MINOR component of
 .Ar version
-.It Fl -patch
+.It Fl patch
 Decrement the PATCH component of
 .Ar version
 .El
@@ -143,13 +143,13 @@ The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
 Operators:
 .Bl -tag -width Fl -offset indent
-.It Fl -major
+.It Fl major
 Increment the MAJOR component of
 .Ar version
-.It Fl -minor
+.It Fl minor
 Increment the MINOR component of
 .Ar version
-.It Fl -patch
+.It Fl patch
 Increment the PATCH component of
 .Ar version
 .El
@@ -292,13 +292,13 @@ To decrement components of the version string
 .Sq 2.3.4
 :
 .Pp
-.Dl semver decrement --major 2.3.4
+.Dl semver decrement -major 2.3.4
 .Dl => 1.0.0
 .Pp
-.Dl semver decrement --minor 2.3.4
+.Dl semver decrement -minor 2.3.4
 .Dl => 2.2.0
 .Pp
-.Dl semver decrement --patch 2.3.4
+.Dl semver decrement -patch 2.3.4
 .Dl => 2.3.3
 .Ss Grep
 Given a line-separated text stream:
@@ -328,13 +328,13 @@ To increment components of the version string
 .Sq 1.2.3
 :
 .Pp
-.Dl semver increment --major 1.2.3
+.Dl semver increment -major 1.2.3
 .Dl => 2.0.0
 .Pp
-.Dl semver increment --minor 1.2.3
+.Dl semver increment -minor 1.2.3
 .Dl => 1.3.0
 .Pp
-.Dl semver increment --patch 1.2.3
+.Dl semver increment -patch 1.2.3
 .Dl => 1.2.4
 .Ss Printf
 .Pp

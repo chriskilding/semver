@@ -36,9 +36,9 @@ Coming soon.
 
 ## Usage
 
-    semver decrement [--major | --minor | --patch] <version>
+    semver decrement [-major | -minor | -patch] <version>
     semver grep [-co] -
-    semver increment [--major | --minor | --patch] <version>
+    semver increment [-major | -minor | -patch] <version>
     semver printf <format> <version>
     semver sort [-r] -
     semver [-h]
@@ -68,7 +68,7 @@ Download all artifacts in a version range:
 ```bash
 version="0.0.1"
 while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
-    version=$(semver increment --patch ${version})
+    version=$(semver increment -patch ${version})
 done
 ```
 

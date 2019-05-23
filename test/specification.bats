@@ -44,7 +44,7 @@ seq() {
 }
 
 @test "Each element MUST increase numerically. For instance: 1.9.0 -> 1.10.0 -> 1.11.0." {
-    [[ $(semver increment --minor "1.9.0") = "1.10.0" ]] && [[ $(semver increment --minor "1.10.0") = "1.11.0" ]]
+    [[ $(semver increment -minor "1.9.0") = "1.10.0" ]] && [[ $(semver increment -minor "1.10.0") = "1.11.0" ]]
 }
 
 ##
@@ -70,7 +70,7 @@ seq() {
 ##
 
 @test "Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced." {
-    [[ $(semver increment --patch "1.0.0") = "1.0.1" ]]
+    [[ $(semver increment -patch "1.0.0") = "1.0.1" ]]
 }
 
 ##
@@ -78,11 +78,11 @@ seq() {
 ##
 
 @test "Minor version Y (x.Y.z | x > 0) MUST be incremented if new, backwards compatible functionality is introduced to the public API." {
-    [[ $(semver increment --minor "1.0.0") = "1.1.0" ]]
+    [[ $(semver increment -minor "1.0.0") = "1.1.0" ]]
 }
 
 @test "Patch version MUST be reset to 0 when minor version is incremented." {
-    [[ $(semver increment --minor "0.0.1") = "0.1.0" ]]
+    [[ $(semver increment -minor "0.0.1") = "0.1.0" ]]
 }
 
 ##
@@ -90,11 +90,11 @@ seq() {
 ##
 
 @test "Major version X (X.y.z | X > 0) MUST be incremented if any backwards incompatible changes are introduced to the public API." {
-    [[ $(semver increment --major "1.0.0") = "2.0.0" ]]
+    [[ $(semver increment -major "1.0.0") = "2.0.0" ]]
 }
 
 @test "Patch and minor version MUST be reset to 0 when major version is incremented." {
-    [[ $(semver increment --major "0.1.2") = "1.0.0" ]]
+    [[ $(semver increment -major "0.1.2") = "1.0.0" ]]
 }
 
 ##
