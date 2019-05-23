@@ -6,11 +6,6 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
-compare
-.Ar version
-.Op Fl eq | Fl ge | Fl gt | Fl ne | Fl le | Fl lt
-.Ar version
-.Nm
 decrement
 .Op Fl -major | Fl -minor | Fl -patch
 .Ar version
@@ -35,71 +30,7 @@ sort
 .Sh DESCRIPTION
 The
 .Nm
-utility compares, generates, modifies, parses, sorts, and validates Semantic Version strings.
-.Ss compare
-The
-.Nm
-utility can compare two Semantic Versions
-.Ar a
-and
-.Ar b
-for precedence, and print the result to the standard output.
-.Pp
-Note: Precedence comparison is NOT a simple lexicographic or numerical comparison - for details please read the Semver.org specification linked at the end of this document.
-.Pp
-Operators:
-.Bl -tag -width Fl -offset indent -compact
-.It Ar a Fl eq Ar b
-True if
-.Ar a
-==
-.Ar b .
-.It Ar a Fl ne Ar b
-True if
-.Ar a
-!=
-.Ar b .
-.It Ar a Fl gt Ar b
-True if
-.Ar a
->
-.Ar b .
-.It Ar a Fl ge Ar b
-True if
-.Ar a
->=
-.Ar b .
-.It Ar a Fl lt Ar b
-True if
-.Ar a
-<
-.Ar b .
-.It Ar a Fl le Ar b
-True if
-.Ar a
-<=
-.Ar b .
-.El
-.Pp
-Result:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-The statement is true.
-.It 1
-The statement is false.
-.El
-.Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-Success.
-.It 1
-An error occurred, or an operand
-.Ar ( a
-or
-.Ar b )
-was missing or invalid, or an operator was missing or invalid.
-.El
+utility generates, modifies, parses, sorts, and validates Semantic Version strings.
 .Ss decrement
 The
 .Nm
@@ -355,15 +286,6 @@ utility understands the following command-line options:
 Display the usage screen.
 .El
 .Sh EXAMPLES
-.Ss Compare
-.Pp
-To compare version numbers for precedence:
-.Pp
-.Dl semver compare 1.0.0 -lt 2.0.0
-.Dl => 0
-.Pp
-.Dl semver compare 1.0.0 -gt 2.0.0
-.Dl => 1
 .Ss Decrement
 .Pp
 To decrement components of the version string

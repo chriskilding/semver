@@ -23,7 +23,6 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program compare <version> [-eq | -ge | -gt | -ne | -le | -lt] <version>";
     say STDERR "  $program decrement [--major | --minor | --patch] <version>";
     say STDERR "  $program grep [-co] -";
     say STDERR "  $program increment [--major | --minor | --patch] <version>";
@@ -362,44 +361,6 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/compare/) {
-            usage() if (scalar(@args) != 3);
-
-            my $a = $args[0];
-
-            my $eq, my $ge, my $gt, my $ne, my $le, my $lt;
-
-            GetOptionsFromString(
-                $args[1],
-                "eq" => \$eq,
-                "ge" => \$ge,
-                "gt" => \$gt,
-                "ne" => \$ne,
-                "le" => \$le,
-                "lt" => \$lt,
-            ) or exit 1;
-
-            usage() if (num_trues($eq, $ge, $gt, $ne, $le, $lt) > 1);
-
-            my $b = $args[2];
-
-            my $result = 1;
-            if ($eq) {
-                $result = 0 if (semver::compare($a, $b) == 0);
-            } elsif ($ne) {
-                $result = 0 if (semver::compare($a, $b) != 0);
-            } elsif ($ge) {
-                $result = 0 if (semver::compare($a, $b) >= 0);
-            } elsif ($gt) {
-                $result = 0 if (semver::compare($a, $b) > 0);
-            } elsif ($le) {
-                $result = 0 if (semver::compare($a, $b) <= 0);
-            } elsif ($lt) {
-                $result = 0 if (semver::compare($a, $b) < 0);
-            }
-
-            say $result;
-        }
         when (/decrement/) {
             my $major, my $minor, my $patch, my $help;
 
