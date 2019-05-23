@@ -169,8 +169,19 @@ EOF
 }
 
 @test "Build metadata SHOULD be ignored when determining version precedence. Thus two versions that differ only in the build metadata, have the same precedence." {
-    skip "We must find another way to test this."
-    # "0.0.1+2008" should have equal precedence to "0.0.1+2009"
+    expected=$(cat <<EOF
+0.0.1+2008
+0.0.1+2009
+EOF
+)
+
+    actual=$(semver sort <<EOF
+0.0.1+2009
+0.0.1+2008
+EOF
+)
+
+    [[ ${actual} = ${expected} ]]
 }
 
 @test "Example: 1.0.0-alpha+001" {
