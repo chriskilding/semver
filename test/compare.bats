@@ -16,6 +16,30 @@ should_gt() {
     [[ $(semver compare "$1" -gt "$2") -eq 0 ]] && [[ $(semver compare "$1" -lt "$2") -eq 1 ]]
 }
 
+@test 'compare: should support -eq operator' {
+    [[ $(semver compare '1.0.0' -eq '1.0.0') -eq 0 ]]
+}
+
+@test 'compare: should support -ne operator' {
+    [[ $(semver compare '1.0.0' -ne '2.0.0') -eq 0 ]]
+}
+
+@test 'compare: should support -ge operator' {
+    [[ $(semver compare '2.0.0' -ge '1.0.0') -eq 0 ]]
+}
+
+@test 'compare: should support -gt operator' {
+    [[ $(semver compare '2.0.0' -gt '1.0.0') -eq 0 ]]
+}
+
+@test 'compare: should support -le operator' {
+    [[ $(semver compare '1.0.0' -le '2.0.0') -eq 0 ]]
+}
+
+@test 'compare: should support -lt operator' {
+    [[ $(semver compare '1.0.0' -lt '2.0.0') -eq 0 ]]
+}
+
 ##
 ## MAJOR.MINOR.PATCH
 ##
@@ -96,11 +120,16 @@ should_gt() {
 ##
 
 @test "compare: missing operand should fail" {
-    run semver compare "1.0.0"
+    run semver compare "1.0.0" -eq
     [[ "$status" -eq 1 ]]
 }
 
 @test "compare: invalid operand should fail" {
-    run semver compare "1.0.0" "foo"
+    run semver compare "1.0.0" -eq "foo"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "compare: invalid operator should fail" {
+    run semver compare "1.0.0" -rubbish "1.0.0"
     [[ "$status" -eq 1 ]]
 }
