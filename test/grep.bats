@@ -36,8 +36,8 @@ semver() {
     [[ "$(semver grep -c <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" -eq 1 ]]
 }
 
-@test "grep -co: should print a count of selected lines (not a count of the semvers in those lines)" {
-    [[ "$(semver grep -co <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" -eq 1 ]]
+@test "grep -c -o: should print a count of selected lines (not a count of the semvers in those lines)" {
+    [[ "$(semver grep -c -o <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" -eq 1 ]]
 }
 
 @test "grep: should not match semver strings inside other words" {
@@ -51,6 +51,16 @@ semver() {
 
 @test "grep: should print nothing and exit 1 when no matches" {
     run semver grep <<< 'abc'
+    [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
+}
+
+@test "grep -q: should print nothing and exit 0 when there is a match" {
+    run semver grep -q <<< '1.0.0'
+    [[ -z "$output" ]] && [[ "$status" -eq 0 ]]
+}
+
+@test "grep -q: should print nothing and exit 1 when no matches" {
+    run semver grep -q <<< 'abc'
     [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
 }
 

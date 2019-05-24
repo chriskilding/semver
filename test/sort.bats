@@ -106,7 +106,7 @@ EOF
     [[ "$(semver sort <<< "$input")" = "$expected" ]]
 }
 
-@test "sort: should reverse ordering with the -r (--reverse) flag" {
+@test "sort -r: should reverse ordering" {
     input=$(cat <<EOF
 1.0.0
 2.0.0
@@ -123,10 +123,10 @@ EOF
 EOF
 )
 
-    [[ "$(semver sort -r <<< "$input")" = "$expected" ]] && [[ "$(semver sort --reverse <<< "$input")" = "$expected" ]]
+    [[ "$(semver sort -r <<< "$input")" = "$expected" ]]
 }
 
 @test "sort: should fail with invalid flags" {
-    run semver sort --foobar '1.0.0'
+    run semver sort -e '1.0.0'
     [[ "$status" -eq 1 ]]
 }

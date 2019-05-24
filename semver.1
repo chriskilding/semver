@@ -11,7 +11,7 @@ decrement
 .Ar version
 .Nm
 grep
-.Op Fl co
+.Op Fl coq
 .Fl
 .Nm
 increment
@@ -54,7 +54,7 @@ is:
 The PRERELEASE and BUILD components will be reset when a decrement occurs.
 .Pp
 Operators:
-.Bl -tag -width Fl -offset indent
+.Bl -tag -width Fl -offset indent -compact
 .It Fl major
 Decrement the MAJOR component of
 .Ar version
@@ -105,11 +105,13 @@ has whitespace immediately after it, OR its last character is also the last char
 .El
 .Pp
 Options:
-.Bl -tag -width Fl -offset indent
-.It Fl c, Fl -count
-Only a count of selected lines is written to standard output.
-.It Fl o, Fl -only-matching
-Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
+.Bl -tag -width Ds -offset indent -compact
+.It Fl c
+Write only a count of selected lines to standard output.
+.It Fl o
+Only-matching. Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
+.It Fl q
+Quiet. Nothing shall be written to the standard output, regardless of matching lines. Exit immediately with zero status if an input line is selected.
 .El
 .Pp
 Exit status:
@@ -142,7 +144,7 @@ is:
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Pp
 Operators:
-.Bl -tag -width Fl -offset indent
+.Bl -tag -width Fl -offset indent -compact
 .It Fl major
 Increment the MAJOR component of
 .Ar version
@@ -264,8 +266,8 @@ Note: Some aspects of Semantic Version ordering are undefined in the specificati
 utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
 .Pp
 Options:
-.Bl -tag -width Fl -offset indent
-.It Fl r, Fl -reverse
+.Bl -tag -width Ds -offset indent -compact
+.It Fl r
 Sort in reverse order (high-to-low).
 .El
 .Pp
@@ -281,8 +283,8 @@ An invalid option was specified, or the input was invalid (i.e. it contained som
 The
 .Nm
 utility understands the following command-line options:
-.Bl -tag -width indent
-.It Fl h, Fl -help
+.Bl -tag -width Ds indent
+.It Fl h
 Display the usage screen.
 .El
 .Sh EXAMPLES
@@ -322,7 +324,7 @@ With the -o flag the result will be:
 .Pp
 To validate a candidate version string, use the command's exit status:
 .Pp
-.Dl [[ $(semver grep <<< '1.2.3-alpha+1') ]]
+.Dl [[ $(semver grep -q <<< '1.2.3-alpha+1') ]]
 .Ss Increment
 To increment components of the version string
 .Sq 1.2.3

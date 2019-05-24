@@ -37,7 +37,7 @@ Coming soon.
 ## Usage
 
     semver decrement [-major | -minor | -patch] <version>
-    semver grep [-co] -
+    semver grep [-coq] -
     semver increment [-major | -minor | -patch] <version>
     semver printf <format> <version>
     semver sort [-r] -
@@ -60,7 +60,7 @@ git tag | semver grep -o | semver sort -r | head -n 1
 Validate a candidate version string:
 
 ```bash
-[[ $(semver grep <<< "1.2.3-alpha+1") ]] && echo "Valid"
+[[ $(semver grep -q <<< "1.2.3-alpha+1") ]] && echo "Valid"
 ```
 
 Download all artifacts in a version range:
