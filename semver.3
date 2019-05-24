@@ -1,0 +1,58 @@
+.Dd February 19, 2019
+.Dt SEMVER 3
+.Os
+.Sh NAME
+.Nm ++major
+.Nm ++minor
+.Nm ++patch
+.Nd Semantic Versioning shell functions
+.Sh LIBRARY
+Semver (semver.sh)
+.Sh SYNOPSIS
+.In semver.sh
+.Fn ++major "version"
+.Fn ++minor "version"
+.Fn ++patch "version"
+.Sh DESCRIPTION
+The
+.Fn semver
+family of shell functions can increment the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+.Pp
+The formula to increment the MAJOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
+.Pp
+The formula to increment the MINOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
+.Pp
+The formula to increment the PATCH component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
+.Pp
+The PRERELEASE and BUILD components will be reset when an increment occurs.
+.Sh EXAMPLES
+To increment the major version:
+.Dl $ ++major 1.2.3
+.Dl 2.0.0
+.Pp
+To increment the minor version:
+.Dl $ ++minor 1.2.3
+.Dl 1.3.0
+.Pp
+To increment the patch version:
+.Dl $ ++patch 1.2.3
+.Dl 1.2.4
+.Sh EXIT STATUS
+The
+.Fn semver
+shell functions exit 0 on success, and >0 if an error occurs.
+.Sh SEE ALSO
+.Xr semver 1
+.Sh STANDARDS
+The
+.Fn semver
+shell functions are expected to conform to the Semantic Versioning standard, defined at https://semver.org.

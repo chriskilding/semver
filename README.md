@@ -7,7 +7,7 @@ Semantic Versioning utility.
 
 ## Overview
 
-The `semver` command line utility generates, modifies, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
+The `semver` command line utility and functions generate, modify, parse, sort, and validate [Semantic Version](https://semver.org/) strings.
 
 The Semantic Versioning format is:
 
@@ -36,17 +36,33 @@ Coming soon.
 
 ## Usage
 
-    semver decrement [-major | -minor | -patch] <version>
+Semver:
+
     semver grep [-coq] -
-    semver increment [-major | -minor | -patch] <version>
     semver printf <format> <version>
     semver sort [-r] -
     semver [-h]
 
-Man page:
+semver.sh:
+
+    . semver.sh
+    
+    ++major <version>
+    ++minor <version>
+    ++patch <version>
+
+## Manual
+
+Semver:
 
 ```bash
 $ man semver
+```
+
+semver.sh:
+
+```bash
+$ man 3 semver
 ```
 
 ## Examples
@@ -76,4 +92,10 @@ Format a list of version strings as CSV:
 
 ```bash
 git tag | semver grep -o | xargs semver printf "%major,%minor,%patch,%prerelease,%build" {}
+```
+
+Increment the patch version of your library (requires `semver(3)` shell functions):
+
+```bash
+++patch $(git tag | semver grep -o | semver sort -r | head -n 1)
 ```
