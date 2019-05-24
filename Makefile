@@ -2,12 +2,15 @@
 
 prefix = /usr/local
 
-.PHONY: all test install uninstall
+.PHONY: all lint test install uninstall
 
 # Nothing to compile
 all:
 
-test:
+lint:
+	shellcheck semver.sh
+
+test: lint
 	bats test
 
 install:

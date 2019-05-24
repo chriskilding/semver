@@ -21,6 +21,7 @@ Dependencies:
 
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
 - [Bats](https://github.com/bats-core/bats-core) (test)
+- [ShellCheck](https://github.com/koalaman/shellcheck) (test)
 
 ### Source
 
