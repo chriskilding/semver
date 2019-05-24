@@ -36,33 +36,37 @@ Coming soon.
 
 ## Usage
 
-Semver:
-
-    semver grep [-coq] -
-    semver printf <format> <version>
-    semver sort [-r] -
-    semver [-h]
-
-semver.sh:
-
-    . semver.sh
-    
-    ++major <version>
-    ++minor <version>
-    ++patch <version>
-
-## Manual
-
-Semver:
+semver:
 
 ```bash
-$ man semver
+semver grep [-coq] -
+semver printf <format> <version>
+semver sort [-r] -
+semver [-h]
 ```
 
 semver.sh:
 
 ```bash
-$ man 3 semver
+. semver.sh
+
+++major <version>
+++minor <version>
+++patch <version>
+```
+
+## Manual
+
+semver:
+
+```bash
+man semver
+```
+
+semver.sh:
+
+```bash
+man 3 semver
 ```
 
 ## Examples
