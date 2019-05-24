@@ -324,7 +324,7 @@ With the -o flag the result will be:
 .Pp
 To validate a candidate version string, use the command's exit status:
 .Pp
-.Dl [[ $(semver grep <<< '1.2.3-alpha+1') ]]
+.Dl [[ $(semver grep -q <<< '1.2.3-alpha+1') ]]
 .Ss Increment
 To increment components of the version string
 .Sq 1.2.3

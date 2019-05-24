@@ -60,7 +60,7 @@ git tag | semver grep -o | semver sort -r | head -n 1
 Validate a candidate version string:
 
 ```bash
-[[ $(semver grep <<< "1.2.3-alpha+1") ]] && echo "Valid"
+[[ $(semver grep -q <<< "1.2.3-alpha+1") ]] && echo "Valid"
 ```
 
 Download all artifacts in a version range:
