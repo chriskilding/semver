@@ -24,14 +24,14 @@ sub usage() {
     say STDERR "";
     say STDERR "Usage:";
     say STDERR "  $program decrement [-major | -minor | -patch] <version>";
-    say STDERR "  $program grep [-co] -";
+    say STDERR "  $program grep [-coq] -";
     say STDERR "  $program increment [-major | -minor | -patch] <version>";
     say STDERR "  $program printf <format> <version>";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program [-h]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help  Show this help screen.";
+    say STDERR "  -h  Show this help screen.";
 
     exit 1;
 }
@@ -250,6 +250,17 @@ sub semver::grep_count {
     say $num_matches;
 }
 
+sub semver::grep_quiet {
+    while (my $line = <STDIN>) {
+        my @words = split(/\s+/, $line);
+        if (grep(/$semver_regex/, @words)) {
+            exit 0;
+        }
+    }
+
+    exit 1;
+}
+
 sub semver::grep {
     my ($only_matching) = @_;
 
@@ -375,19 +386,22 @@ sub main {
             }
         }
         when (/^grep$/) {
-            my $count, my $only_matching, my $help;
+            my $count, my $only_matching, my $quiet, my $help;
 
             GetOptionsFromArray(
                 \@args,
-                "count|c" => \$count,
-                "only-matching|o" => \$only_matching,
-                "help|h" => \$help,
+                "c" => \$count,
+                "o" => \$only_matching,
+                "q" => \$quiet,
+                "h" => \$help,
             ) or exit 1;
 
             usage() if $help;
 
             if ($count) {
                 semver::grep_count();
+            } elsif ($quiet) {
+                semver::grep_quiet();
             } else {
                 semver::grep($only_matching);
             }
@@ -423,7 +437,7 @@ sub main {
         }
         when (/^sort$/) {
             my $reverse;
-            GetOptionsFromArray(\@args, "reverse|r" => \$reverse) or exit 1;
+            GetOptionsFromArray(\@args, "r" => \$reverse) or exit 1;
 
             if ($reverse) {
                 semver::sort { semver::sort_pair($b, $a) };

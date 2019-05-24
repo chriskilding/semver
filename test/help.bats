@@ -9,11 +9,6 @@ semver() {
     [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]
 }
 
-@test "help: --help should print usage" {
-    run semver --help
-    [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]
-}
-
 @test "help: invoking semver without arguments should print usage" {
     run semver
     [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]

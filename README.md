@@ -37,7 +37,7 @@ Coming soon.
 ## Usage
 
     semver decrement [-major | -minor | -patch] <version>
-    semver grep [-co] -
+    semver grep [-coq] -
     semver increment [-major | -minor | -patch] <version>
     semver printf <format> <version>
     semver sort [-r] -
