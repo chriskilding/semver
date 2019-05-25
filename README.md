@@ -72,7 +72,7 @@ man 3 semver
 
 ## Examples
 
-Find the latest Git tag:
+Find the current Git tag:
 
 ```bash
 git tag | semver grep -o | semver sort -r | head -n 1
@@ -84,22 +84,22 @@ Validate a candidate version string:
 [[ $(semver grep -q <<< "1.2.3-alpha+1") ]] && echo "Valid"
 ```
 
-Download all artifacts in a version range:
-
-```bash
-version="0.0.1"
-while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
-    version=$(semver increment -patch ${version})
-done
-```
-
 Format a list of version strings as CSV:
 
 ```bash
 git tag | semver grep -o | xargs semver printf "%major,%minor,%patch,%prerelease,%build" {}
 ```
 
-Increment the patch version of your library (requires `semver(3)` shell functions):
+Download all artifacts in a version range (requires `semver(3)` shell functions):
+
+```bash
+version="0.0.1"
+while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
+    version=$(++patch "$version")
+done
+```
+
+Increment the current Git tag (requires `semver(3)` shell functions):
 
 ```bash
 ++patch $(git tag | semver grep -o | semver sort -r | head -n 1)
