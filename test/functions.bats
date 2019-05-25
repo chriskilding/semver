@@ -78,7 +78,3 @@ semver() {
     run ++major ''
     [[ "$status" -eq 1 ]]
 }
-
-@test "functions: should tolerate whitespace" {
-    [[ $(++major " 0.0.0 ") = "1.0.0" ]]
-}
