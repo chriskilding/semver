@@ -2,6 +2,9 @@
 .Dt SEMVER 3
 .Os
 .Sh NAME
+.Nm dmajor
+.Nm dminor
+.Nm dpatch
 .Nm imajor
 .Nm iminor
 .Nm ipatch
@@ -12,15 +15,45 @@ Semver (semver.awk)
 \fB@include "semver.awk"\fP
 \n
 .Ft version
+.Fn dmajor "version"
+.Ft version
+.Fn dminor "version"
+.Ft version
+.Fn dpatch "version"
+.Ft version
 .Fn imajor "version"
 .Ft version
 .Fn iminor "version"
 .Ft version
 .Fn ipatch "version"
 .Sh DESCRIPTION
+.Ss Decrement
 The
 .Fn semver
-family of awk functions can parse and increment components of a Semantic Version string.
+awk functions can decrement the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+.Pp
+The formula to decrement the MAJOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR - 1).0.0
+.Pp
+The formula to decrement the MINOR component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR - 1).0
+.Pp
+The formula to decrement the PATCH component of
+.Ar version
+is:
+.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
+.Pp
+The PRERELEASE and BUILD components will be reset when a decrement occurs.
+.Pp
+A decrement operation will fail if the decremented component is already zero.
+.Ss Increment
+The
+.Fn semver
+awk functions can increment the MAJOR, MINOR, or PATCH component of a Semantic Version string.
 .Pp
 The formula to increment the MAJOR component of
 .Ar version
@@ -39,6 +72,32 @@ is:
 .Pp
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Sh EXAMPLES
+.Ss Decrement
+To decrement the major version:
+.Bd -literal -offset indent
+@include "semver.awk"
+{
+    print dmajor("1.2.3"); # => "0.0.0"
+}
+.Ed
+.Dl
+.Pp
+To decrement the minor version:
+.Bd -literal -offset indent
+@include "semver.awk"
+{
+    print dminor("1.2.3"); # => "1.1.0"
+}
+.Ed
+.Pp
+To decrement the patch version:
+.Bd -literal -offset indent
+@include "semver.awk"
+{
+    print dpatch("1.2.3"); # => "1.2.2"
+}
+.Ed
+.Ss Increment
 To increment the major version:
 .Bd -literal -offset indent
 @include "semver.awk"

@@ -1,5 +1,17 @@
 #!/usr/bin/env bats
 
+dmajor() {
+    awk -f semver.awk -e '{ print dmajor($0) }' <<< "$@"
+}
+
+dminor() {
+    awk -f semver.awk -e '{ print dminor($0) }' <<< "$@"
+}
+
+dpatch() {
+    awk -f semver.awk -e '{ print dpatch($0) }' <<< "$@"
+}
+
 imajor() {
     awk -f semver.awk -e '{ print imajor($0) }' <<< "$@"
 }
@@ -11,6 +23,8 @@ iminor() {
 ipatch() {
     awk -f semver.awk -e '{ print ipatch($0) }' <<< "$@"
 }
+
+# Increment
 
 @test "awk: imajor 0.0.0 should be 1.0.0" {
     [[ $(imajor "0.0.0") = "1.0.0" ]]
@@ -84,6 +98,94 @@ ipatch() {
 
 @test "awk: ipatch 0.0.-1 should fail" {
     run ipatch "0.0.-1"
+    [[ "$status" -eq 1 ]]
+}
+
+# Decrement
+
+@test "awk: dmajor 1.0.0 should be 0.0.0" {
+    [[ $(dmajor "1.0.0") = "0.0.0" ]]
+}
+
+@test "awk: dminor 0.1.0 should be 0.0.0" {
+    [[ $(dminor "0.1.0") = "0.0.0" ]]
+}
+
+@test "awk: dpatch 0.0.1 should be 0.0.0" {
+    [[ $(dpatch "0.0.1") = "0.0.0" ]]
+}
+
+@test "awk: dmajor 2.0.0 should be 1.0.0" {
+    [[ $(dmajor "2.0.0") = "1.0.0" ]]
+}
+
+@test "awk: dminor 0.2.0 should be 0.1.0" {
+    [[ $(dminor "0.2.0") = "0.1.0" ]]
+}
+
+@test "awk: dpatch 0.0.2 should be 0.0.1" {
+    [[ $(dpatch "0.0.2") = "0.0.1" ]]
+}
+
+@test "awk: dmajor 11.0.0 should be 10.0.0" {
+    [[ $(dmajor "11.0.0") = "10.0.0" ]]
+}
+
+@test "awk: dminor 0.11.0 should be 0.10.0" {
+    [[ $(dminor "0.11.0") = "0.10.0" ]]
+}
+
+@test "awk: dpatch 0.0.11 should be 0.0.10" {
+    [[ $(dpatch "0.0.11") = "0.0.10" ]]
+}
+
+@test "awk: dmajor 2.0.0-alpha should be 1.0.0" {
+    [[ $(dmajor "2.0.0-alpha") = "1.0.0" ]]
+}
+
+@test "awk: dminor 0.2.0-alpha should be 0.1.0" {
+    [[ $(dminor "0.2.0-alpha") = "0.1.0" ]]
+}
+
+@test "awk: dpatch 0.0.2-alpha should be 0.0.1" {
+    [[ $(dpatch "0.0.2-alpha") = "0.0.1" ]]
+}
+
+@test "awk: dmajor 1.1.1 should be 0.0.0" {
+    [[ $(dmajor "1.1.1") = "0.0.0" ]]
+}
+
+@test "awk: dminor 0.1.1 should be 0.0.0" {
+    [[ $(dminor "0.1.1") = "0.0.0" ]]
+}
+
+@test "awk: dmajor 0.0.0 should fail" {
+    run dmajor "0.0.0"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "awk: dminor 0.0.0 should fail" {
+    run dminor "0.0.0"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "awk: dpatch 0.0.0 should fail" {
+    run dpatch "0.0.0"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "awk: dmajor -1.0.0 should fail" {
+    run dmajor "-1.0.0"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "awk: dminor 0.-1.0 should fail" {
+    run dminor "0.-1.0"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "awk: dpatch 0.0.-1 should fail" {
+    run dpatch "0.0.-1"
     [[ "$status" -eq 1 ]]
 }
 

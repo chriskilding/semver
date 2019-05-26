@@ -50,6 +50,9 @@ semver.awk:
 ```awk
 @include "semver.awk"
 {
+    print dmajor(<version>);
+    print dminor(<version>);
+    print dpatch(<version>);
     print imajor(<version>);
     print iminor(<version>);
     print ipatch(<version>);
