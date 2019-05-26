@@ -2,21 +2,25 @@
 .Dt SEMVER 3
 .Os
 .Sh NAME
-.Nm ++major
-.Nm ++minor
-.Nm ++patch
-.Nd Semantic Versioning shell functions
+.Nm imajor
+.Nm iminor
+.Nm ipatch
+.Nd Semantic Versioning awk functions
 .Sh LIBRARY
-Semver (semver.sh)
+Semver (semver.awk)
 .Sh SYNOPSIS
-.In semver.sh
-.Fn ++major "version"
-.Fn ++minor "version"
-.Fn ++patch "version"
+\fB@include "semver.awk"\fP
+\n
+.Ft version
+.Fn imajor "version"
+.Ft version
+.Fn iminor "version"
+.Ft version
+.Fn ipatch "version"
 .Sh DESCRIPTION
 The
 .Fn semver
-family of shell functions can increment the MAJOR, MINOR, or PATCH component of a Semantic Version string.
+family of awk functions can parse and increment components of a Semantic Version string.
 .Pp
 The formula to increment the MAJOR component of
 .Ar version
@@ -36,23 +40,36 @@ is:
 The PRERELEASE and BUILD components will be reset when an increment occurs.
 .Sh EXAMPLES
 To increment the major version:
-.Dl $ ++major 1.2.3
-.Dl 2.0.0
+.Bd -literal -offset indent
+@include "semver.awk"
+{
+    print imajor("1.2.3"); # => "2.0.0"
+}
+.Ed
+.Dl
 .Pp
 To increment the minor version:
-.Dl $ ++minor 1.2.3
-.Dl 1.3.0
+.Bd -literal -offset indent
+@include "semver.awk"
+{
+    print iminor("1.2.3"); # => "1.3.0"
+}
+.Ed
 .Pp
 To increment the patch version:
-.Dl $ ++patch 1.2.3
-.Dl 1.2.4
+.Bd -literal -offset indent
+@include "semver.awk"
+{
+    print ipatch("1.2.3"); # => "1.2.4"
+}
+.Ed
 .Sh EXIT STATUS
 The
 .Fn semver
-shell functions exit 0 on success, and >0 if an error occurs.
+awk functions exit 0 on success, and >0 if an error occurs.
 .Sh SEE ALSO
 .Xr semver 1
 .Sh STANDARDS
 The
 .Fn semver
-shell functions are expected to conform to the Semantic Versioning standard, defined at https://semver.org.
+awk functions are expected to conform to the Semantic Versioning standard, defined at https://semver.org.

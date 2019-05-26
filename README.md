@@ -7,7 +7,7 @@ Semantic Versioning utility.
 
 ## Overview
 
-The `semver` command line utility and functions generate, modify, parse, sort, and validate [Semantic Version](https://semver.org/) strings.
+The `semver` command line utility and Awk functions generate, modify, parse, sort, and validate [Semantic Version](https://semver.org/) strings.
 
 The Semantic Versioning format is:
 
@@ -21,7 +21,6 @@ Dependencies:
 
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
 - [Bats](https://github.com/bats-core/bats-core) (test)
-- [ShellCheck](https://github.com/koalaman/shellcheck) (test)
 
 ### Source
 
@@ -46,29 +45,20 @@ semver sort [-r] -
 semver [-h]
 ```
 
-semver.sh:
+semver.awk:
 
-```bash
-. semver.sh
-
-++major <version>
-++minor <version>
-++patch <version>
+```awk
+@include "semver.awk"
+{
+    print imajor(<version>);
+    print iminor(<version>);
+    print ipatch(<version>);
+}
 ```
 
 ## Manual
 
-semver:
-
-```bash
-man semver
-```
-
-semver.sh:
-
-```bash
-man 3 semver
-```
+See `semver(1)` and `semver(3)`.
 
 ## Examples
 
@@ -90,17 +80,18 @@ Format a list of version strings as CSV:
 git tag | semver grep -o | xargs semver printf "%major,%minor,%patch,%prerelease,%build" {}
 ```
 
-Download all artifacts in a version range (requires `semver(3)` shell functions):
+Download all artifacts in a version range (requires `semver(3)` awk functions):
 
 ```bash
 version="0.0.1"
 while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
-    version=$(++patch "$version")
+    version=$(awk -f semver.awk -e '{ print ipatch($0) }' <<< "$version")
 done
 ```
 
-Increment the current Git tag (requires `semver(3)` shell functions):
+Increment a Git tag (requires `semver(3)` awk functions):
 
 ```bash
-++patch $(git tag | semver grep -o | semver sort -r | head -n 1)
+current=$(git tag | semver grep -o | semver sort -r | head -n 1)
+next=$(awk -f semver.awk -e '{ print imajor($0) }' <<< "$current")
 ```
