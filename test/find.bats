@@ -30,6 +30,7 @@ EOF
 
     expected=$(cat <<EOF
 ${dir}/1.0.0
+${dir}/foo-1.0.0
 EOF
 )
 
@@ -54,7 +55,7 @@ EOF
 
 @test "find: -links should match all files with semvers in their names which have n links" {
     dir="$(mktemp -d)"
-    touch "$dir/1.0.0" touch "$dir/2.0.0"
+    touch "$dir/1.0.0" "$dir/2.0.0"
     ln "$dir/1.0.0" "$dir/link"
 
     [[ $(semver find "$dir" -links 2) = "$dir/1.0.0" ]]
