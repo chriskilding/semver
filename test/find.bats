@@ -30,7 +30,6 @@ EOF
 
     expected=$(cat <<EOF
 ${dir}/1.0.0
-${dir}/foo-1.0.0
 EOF
 )
 
