@@ -81,7 +81,7 @@ done
 Increment a version:
 
 ```bash
-semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print ++$1 "." 0 "." 0 }'     # => 2.0.0
-semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." ++$2 "." 0 }'    # => 1.3.0
-semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." $2 "." ++$3 }'   # => 1.2.4
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print ++$1 "." 0 "." 0 }'   # => 2.0.0
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." ++$2 "." 0 }'  # => 1.3.0
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." $2 "." ++$3 }' # => 1.2.4
 ```
