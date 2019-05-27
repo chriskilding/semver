@@ -6,17 +6,9 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
-decrement
-.Op Fl major | Fl minor | Fl patch
-.Ar version
-.Nm
 grep
 .Op Fl coq
 .Fl
-.Nm
-increment
-.Op Fl major | Fl minor | Fl patch
-.Ar version
 .Nm
 printf
 .Ar format
@@ -31,54 +23,6 @@ sort
 The
 .Nm
 utility generates, modifies, parses, sorts, and validates Semantic Version strings.
-.Ss decrement
-The
-.Nm
-utility can decrement the MAJOR, MINOR, or PATCH component of a Semantic Version string.
-.Pp
-The formula to decrement the MAJOR component of
-.Ar version
-is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR - 1).0.0
-.Pp
-The formula to decrement the MINOR component of
-.Ar version
-is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR - 1).0
-.Pp
-The formula to decrement the PATCH component of
-.Ar version
-is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH - 1)
-.Pp
-The PRERELEASE and BUILD components will be reset when a decrement occurs.
-.Pp
-Operators:
-.Bl -tag -width Fl -offset indent -compact
-.It Fl major
-Decrement the MAJOR component of
-.Ar version
-.It Fl minor
-Decrement the MINOR component of
-.Ar version
-.It Fl patch
-Decrement the PATCH component of
-.Ar version
-.El
-.Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-Success.
-.It 1
-The specified component of
-.Ar version
-was already 0, or more than one operator was given, or
-.Ar version
-was invalid, or
-.Ar version
-did not contain the specified component.
-.El
 .Ss grep
 The
 .Nm
@@ -120,52 +64,6 @@ Exit status:
 One or more lines were selected (i.e. there was at least one valid Semantic Version).
 .It 1
 No lines were selected (i.e. there were no valid Semantic Versions), or an invalid option was specified.
-.El
-.Ss increment
-The
-.Nm
-utility can increment the MAJOR, MINOR, or PATCH component of a Semantic Version string.
-.Pp
-The formula to increment the MAJOR component of
-.Ar version
-is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> (MAJOR + 1).0.0
-.Pp
-The formula to increment the MINOR component of
-.Ar version
-is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.(MINOR + 1).0
-.Pp
-The formula to increment the PATCH component of
-.Ar version
-is:
-.Dl MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD] -> MAJOR.MINOR.(PATCH + 1)
-.Pp
-The PRERELEASE and BUILD components will be reset when an increment occurs.
-.Pp
-Operators:
-.Bl -tag -width Fl -offset indent -compact
-.It Fl major
-Increment the MAJOR component of
-.Ar version
-.It Fl minor
-Increment the MINOR component of
-.Ar version
-.It Fl patch
-Increment the PATCH component of
-.Ar version
-.El
-.Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-Success.
-.It 1
-More than one operator was given, or
-.Ar version
-was invalid, or
-.Ar version
-did not contain the specified component.
 .El
 .Ss printf
 The
@@ -288,78 +186,75 @@ utility understands the following command-line options:
 Display the usage screen.
 .El
 .Sh EXAMPLES
-.Ss Decrement
-.Pp
-To decrement components of the version string
-.Sq 2.3.4
-:
-.Pp
-.Dl semver decrement -major 2.3.4
-.Dl => 1.0.0
-.Pp
-.Dl semver decrement -minor 2.3.4
-.Dl => 2.2.0
-.Pp
-.Dl semver decrement -patch 2.3.4
-.Dl => 2.3.3
 .Ss Grep
 Given a line-separated text stream:
-.Pp
-.Dl semver grep <<EOF
-.Dl foo 1.1.1
-.Dl bar
-.Dl baz 2.2.2 qux 3.3.3
-.Dl EOF
+.Bd -literal -offset indent
+semver grep <<EOF
+foo 1.1.1
+bar
+baz 2.2.2 qux 3.3.3
+EOF
+.Ed
 .Pp
 The result will be:
 .Pp
-.Dl foo 1.1.1
-.Dl baz 2.2.2 qux 3.3.3
+.Bd -literal -offset indent
+foo 1.1.1
+baz 2.2.2 qux 3.3.3
+.Ed
 .Pp
 With the -o flag the result will be:
 .Pp
-.Dl 1.1.1
-.Dl 2.2.2
-.Dl 3.3.3
+.Bd -literal -offset indent
+1.1.1
+2.2.2
+3.3.3
+.Ed
 .Pp
 To validate a candidate version string, use the command's exit status:
-.Pp
-.Dl [[ $(semver grep -q <<< '1.2.3-alpha+1') ]]
-.Ss Increment
-To increment components of the version string
-.Sq 1.2.3
-:
-.Pp
-.Dl semver increment -major 1.2.3
-.Dl => 2.0.0
-.Pp
-.Dl semver increment -minor 1.2.3
-.Dl => 1.3.0
-.Pp
-.Dl semver increment -patch 1.2.3
-.Dl => 1.2.4
+.Bd -literal -offset indent
+[[ $(semver grep -q <<< '1.2.3-alpha+1') ]]
+.Ed
 .Ss Printf
 .Pp
-To format and print the version string
-.Sq 1.2.3-SNAPSHOT+2019
-as CSV:
+Format a version string:
+.Bd -literal -offset indent -compact
+semver printf '%major,%minor,%patch,%prerelease,%build' '1.2.3-alpha+1'
+# => 1,2,3,alpha,1
+
+semver printf '{"major": "%major", "minor": "%minor", "patch": "%patch", "prerelease": "%prerelease", "build": "%build"}' '1.2.3-alpha+1'
+# => {"major": "1", "minor": "2", "patch": "3", "prerelease": "alpha", "build": "1"}
+.Ed
 .Pp
-.Dl $ semver printf '%major,%minor,%patch,%prerelease,%build' '1.2.3-SNAPSHOT+2019'
-.Dl 1,2,3,SNAPSHOT,2019
+Increment a version string:
+.Bd -literal -offset indent -compact
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print ++$1 "." 0 "." 0 }'
+# => 2.0.0
+
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." ++$2 "." 0 }'
+# => 1.3.0
+
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." $2 "." ++$3 }'
+# => 1.2.4
+.Ed
 .Ss Sort
 Given a line-separated list of version strings:
 .Pp
-.Dl semver sort <<EOF
-.Dl 2.2.2
-.Dl 1.1.1
-.Dl 4.4.4
-.Dl EOF
+.Bd -literal -offset indent
+semver sort <<EOF
+2.2.2
+1.1.1
+4.4.4
+EOF
+.Ed
 .Pp
 The result will be:
 .Pp
-.Dl 1.1.1
-.Dl 2.2.2
-.Dl 4.4.4
+.Bd -literal -offset indent
+1.1.1
+2.2.2
+4.4.4
+.Ed
 .Sh EXIT STATUS
 .Ex -std
 .Sh WARNINGS
@@ -373,5 +268,4 @@ utility applies an additional natural sort on top of the Semantic Version preced
 .Sh STANDARDS
 The
 .Nm
-utility is expected to conform to the Semantic Versioning standard,
-defined at https://semver.org.
+utility is expected to conform to the Semantic Versioning standard, defined at https://semver.org.

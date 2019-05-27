@@ -36,17 +36,17 @@ Coming soon.
 
 ## Usage
 
-    semver decrement [-major | -minor | -patch] <version>
-    semver grep [-coq] -
-    semver increment [-major | -minor | -patch] <version>
-    semver printf <format> <version>
-    semver sort [-r] -
-    semver [-h]
+```bash
+semver grep [-coq] -
+semver printf <format> <version>
+semver sort [-r] -
+semver [-h]
+```
 
-Man page:
+Manual:
 
 ```bash
-$ man semver
+man semver
 ```
 
 ## Examples
@@ -63,17 +63,25 @@ Validate a candidate version string:
 [[ $(semver grep -q <<< "1.2.3-alpha+1") ]] && echo "Valid"
 ```
 
-Download all artifacts in a version range:
-
-```bash
-version="0.0.1"
-while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
-    version=$(semver increment -patch ${version})
-done
-```
-
 Format a list of version strings as CSV:
 
 ```bash
-git tag | semver grep -o | xargs semver printf "%major,%minor,%patch,%prerelease,%build" {}
+git tag | semver grep -o | xargs semver printf '%major,%minor,%patch,%prerelease,%build' {}
+```
+
+Download all artifacts in a version range:
+
+```bash
+version='0.0.1'
+while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
+    version=$(semver printf '%major %minor %patch' "$version" | awk '{ print $1 "." $2 "." ++$3 }')
+done
+```
+
+Increment a version:
+
+```bash
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print ++$1 "." 0 "." 0 }'   # => 2.0.0
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." ++$2 "." 0 }'  # => 1.3.0
+semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." $2 "." ++$3 }' # => 1.2.4
 ```

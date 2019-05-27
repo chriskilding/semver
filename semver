@@ -23,9 +23,7 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program decrement [-major | -minor | -patch] <version>";
     say STDERR "  $program grep [-coq] -";
-    say STDERR "  $program increment [-major | -minor | -patch] <version>";
     say STDERR "  $program printf <format> <version>";
     say STDERR "  $program sort [-r] -";
     say STDERR "  $program [-h]";
@@ -148,54 +146,6 @@ sub semver::compare {
     }
 }
 
-sub semver::decrement_major {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-
-    if ($major > 0) {
-        my $new_major = $major - 1;
-        say "$new_major.0.0";
-    } else {
-        exit 1;
-    }
-}
-
-sub semver::decrement_minor {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-    my $minor = $matches[1];
-
-    if ($minor > 0) {
-        my $new_minor = $minor - 1;
-        say "$major.$new_minor.0";
-    } else {
-        exit 1;
-    }
-}
-
-sub semver::decrement_patch {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-    my $minor = $matches[1];
-    my $patch = $matches[2];
-
-    if ($patch > 0) {
-        my $new_patch = $patch - 1;
-        say "$major.$minor.$new_patch";
-    } else {
-        exit 1;
-    }
-}
-
 sub semver::printf {
     my ($format, $version) = @_;
 
@@ -291,42 +241,6 @@ sub semver::grep {
     }
 }
 
-sub semver::increment_major {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-    my $new_major = $major + 1;
-
-    say "$new_major.0.0";
-}
-
-sub semver::increment_minor {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-    my $minor = $matches[1];
-    my $new_minor = $minor + 1;
-
-    say "$major.$new_minor.0";
-}
-
-sub semver::increment_patch {
-    my ($version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-    my $minor = $matches[1];
-    my $patch = $matches[2];
-    my $new_patch = $patch + 1;
-
-    say "$major.$minor.$new_patch";
-}
-
 sub semver::sort(&@) {
     my ($sort_fn) = @_;
 
@@ -364,27 +278,6 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
-        when (/^decrement$/) {
-            my $operator = $args[0];
-            my $version = $args[1];
-
-            usage() if (scalar(@args) != 2);
-
-            for ($operator) {
-                when (/^-major$/) {
-                    semver::decrement_major($version);
-                }
-                when (/^-minor$/) {
-                    semver::decrement_minor($version);
-                }
-                when (/^-patch$/) {
-                    semver::decrement_patch($version);
-                }
-                default {
-                    usage();
-                }
-            }
-        }
         when (/^grep$/) {
             my $count, my $only_matching, my $quiet, my $help;
 
@@ -404,27 +297,6 @@ sub main {
                 semver::grep_quiet();
             } else {
                 semver::grep($only_matching);
-            }
-        }
-        when (/^increment$/) {
-            my $operator = $args[0];
-            my $version = $args[1];
-
-            usage() if (scalar(@args) != 2);
-
-            for ($operator) {
-                when (/^-major$/) {
-                    semver::increment_major($version);
-                }
-                when (/^-minor$/) {
-                    semver::increment_minor($version);
-                }
-                when (/^-patch$/) {
-                    semver::increment_patch($version);
-                }
-                default {
-                    usage();
-                }
             }
         }
         when (/^printf$/) {
