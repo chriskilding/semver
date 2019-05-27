@@ -8,16 +8,16 @@ semver() {
     ./semver "$@"
 }
 
-imajor() {
-    awk -f semver.awk -e '{ print imajor($0) }' <<< "$@"
+++major() {
+    semver printf '%major %minor %patch' "$@" | awk '{ print ++$1 "." 0 "." 0 }'
 }
 
-iminor() {
-    awk -f semver.awk -e '{ print iminor($0) }' <<< "$@"
+++minor() {
+    semver printf '%major %minor %patch' "$@" | awk '{ print $1 "." ++$2 "." 0 }'
 }
 
-ipatch() {
-    awk -f semver.awk -e '{ print ipatch($0) }' <<< "$@"
+++patch() {
+    semver printf '%major %minor %patch' "$@" | awk '{ print $1 "." $2 "." ++$3 }'
 }
 
 seq() {
@@ -56,7 +56,7 @@ seq() {
 }
 
 @test "Each element MUST increase numerically. For instance: 1.9.0 -> 1.10.0 -> 1.11.0." {
-    [[ $(iminor "1.9.0") = "1.10.0" ]] && [[ $(iminor "1.10.0") = "1.11.0" ]]
+    [[ $(++minor "1.9.0") = "1.10.0" ]] && [[ $(++minor "1.10.0") = "1.11.0" ]]
 }
 
 ##
@@ -82,7 +82,7 @@ seq() {
 ##
 
 @test "Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced." {
-    [[ $(ipatch "1.0.0") = "1.0.1" ]]
+    [[ $(++patch "1.0.0") = "1.0.1" ]]
 }
 
 ##
@@ -90,11 +90,11 @@ seq() {
 ##
 
 @test "Minor version Y (x.Y.z | x > 0) MUST be incremented if new, backwards compatible functionality is introduced to the public API." {
-    [[ $(iminor "1.0.0") = "1.1.0" ]]
+    [[ $(++minor "1.0.0") = "1.1.0" ]]
 }
 
 @test "Patch version MUST be reset to 0 when minor version is incremented." {
-    [[ $(iminor "0.0.1") = "0.1.0" ]]
+    [[ $(++minor "0.0.1") = "0.1.0" ]]
 }
 
 ##
@@ -102,11 +102,11 @@ seq() {
 ##
 
 @test "Major version X (X.y.z | X > 0) MUST be incremented if any backwards incompatible changes are introduced to the public API." {
-    [[ $(imajor "1.0.0") = "2.0.0" ]]
+    [[ $(++major "1.0.0") = "2.0.0" ]]
 }
 
 @test "Patch and minor version MUST be reset to 0 when major version is incremented." {
-    [[ $(imajor "0.1.2") = "1.0.0" ]]
+    [[ $(++major "0.1.2") = "1.0.0" ]]
 }
 
 ##
