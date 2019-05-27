@@ -37,6 +37,7 @@ Coming soon.
 ## Usage
 
 ```bash
+semver find <path> [expression]
 semver grep [-coq] -
 semver printf <format> <version>
 semver sort [-r] -
