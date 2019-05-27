@@ -68,6 +68,11 @@ EOF
     [[ "$status" -eq 1 ]]
 }
 
+@test "find: should fail on invalid option" {
+    run semver find -rubbish
+    [[ "$status" -eq 1 ]]
+}
+
 @test "find: -h should print usage" {
     run semver find -h
     [[ "$status" -eq 1 ]] && [[ "${lines[0]}" = "Semantic Versioning utility." ]]
