@@ -192,23 +192,23 @@ sub semver::printf {
 }
 
 sub semver::find {
-    my ($path, $links, $type) = @_;
+    my ($path, $type) = @_;
 
     *wanted = sub {
-        my ($dev, $ino, $mode, $nlink, $uid, $gid);
+        my ($dev, $ino, $mode);
 
-        my $is_match = /$semver_regex/s && (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_));
+        my $is_match = /$semver_regex/s && (($dev, $ino, $mode) = lstat($_));
 
         if ($type) {
             if ($type eq "d") {
                 $is_match = $is_match && -d _;
             } elsif ($type eq "f") {
                 $is_match = $is_match && -f _;
+            } elsif ($type eq "l") {
+                $is_match = $is_match && -l _;
+            } elsif ($type eq "p") {
+                $is_match = $is_match && -p _;
             }
-        }
-
-        if ($links) {
-            $is_match = $is_match && ($nlink == $links);
         }
 
         if ($is_match) {
@@ -315,20 +315,19 @@ sub main {
 
     for ($subcommand) {
         when (/^find$/) {
-            my $links, my $type, my $help;
+            my $type, my $help;
 
             GetOptionsFromArray(
                 \@args,
-                "links=i" => \$links,
                 "type=s" => \$type,
                 "h" => \$help,
             ) or exit 1;
 
-            usage() if $help or (scalar(@args) < 1);;
+            usage() if $help or (scalar(@args) < 1);
 
             my $path = $args[0];
 
-            semver::find($path, $links, $type);
+            semver::find($path, $type);
         }
         when (/^grep$/) {
             my $count, my $only_matching, my $quiet, my $help;

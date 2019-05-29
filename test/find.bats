@@ -55,25 +55,20 @@ EOF
     [[ $(semver find "$dir" -type f) = "$dir/1.0.0" ]]
 }
 
-@test "find: -links should match all files with semvers in their names which have n links" {
+@test "find: -type l should match all symlinks with semvers in their names" {
     dir="$(mktemp -d)"
-    touch "$dir/1.0.0" "$dir/2.0.0"
-    ln "$dir/1.0.0" "$dir/link"
+    touch "$dir/1.0.0"
+    ln -s "$dir/1.0.0" "$dir/1.0.0-link"
 
-    [[ $(semver find "$dir" -links 2) = "$dir/1.0.0" ]]
+    [[ $(semver find "$dir" -type l) = "$dir/1.0.0-link" ]]
 }
 
-@test "find: should combine primaries with an implicit AND operator" {
+@test "find: -type p should match all FIFO pipes with semvers in their names" {
     dir="$(mktemp -d)"
-    # file, 2 links
-    touch "$dir/1.0.0"
-    ln "$dir/1.0.0" "$dir/link"
-    # file, 1 link
+    mkfifo "$dir/1.0.0"
     touch "$dir/2.0.0"
-    # directory
-    mkdir "$dir/3.0.0"
 
-    [[ $(semver find "$dir" -type f -links 2) = "$dir/1.0.0" ]]
+    [[ $(semver find "$dir" -type p) = "$dir/1.0.0" ]]
 }
 
 @test "find: should fail if path missing" {
