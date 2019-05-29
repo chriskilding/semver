@@ -6,6 +6,10 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
+find
+.Ar path
+.Op Ar expression
+.Nm
 grep
 .Op Fl coq
 .Fl
@@ -22,7 +26,45 @@ sort
 .Sh DESCRIPTION
 The
 .Nm
-utility generates, modifies, parses, sorts, and validates Semantic Version strings.
+utility finds, generates, modifies, parses, sorts, and validates Semantic Version strings.
+.Ss find
+The
+.Nm
+utility can recursively descend the directory hierarchy specified by
+.Ar path ,
+select any paths that (a) contain one or more Semantic Version strings and (b) match the optional Boolean
+.Op Ar expression ,
+and print them to the standard output, in the style of
+.Xr find 1 .
+.Pp
+The
+.Op Ar expression
+is made of one or more operands as described below. Each operand will be evaluated only once. Negations are not supported.
+.Pp
+Operands:
+.Bl -tag -width indent -offset indent
+.It Ic -type Ar t
+True if the file is of the specified type. Possible file types are as follows:
+.Pp
+.Bl -tag -width indent -compact
+.It Cm d
+directory
+.It Cm f
+regular file
+.It Cm l
+symbolic link
+.It Cm p
+FIFO pipe
+.El
+.El
+.Pp
+Exit status:
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+Success.
+.It 1
+An error occurred, or an invalid option or operand was specified.
+.El
 .Ss grep
 The
 .Nm
@@ -186,6 +228,16 @@ utility understands the following command-line options:
 Display the usage screen.
 .El
 .Sh EXAMPLES
+.Ss Find
+.Pp
+Find only regular files containing Semantic Version strings in their filenames:
+.Pp
+.Bd -literal -offset indent -compact
+$ semver find . -type f
+foo-1.2.3
+bar-4.5.6
+7.8.9
+.Ed
 .Ss Grep
 Given a line-separated text stream:
 .Bd -literal -offset indent
