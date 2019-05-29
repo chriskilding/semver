@@ -39,7 +39,7 @@ and print them to the standard output, in the style of
 .Pp
 The
 .Op Ar expression
-is made of one or more operands as described below. Each operand will be evaluated only once. Negations are not supported.
+is made of one or more operands as described below.
 .Pp
 Operands:
 .Bl -tag -width indent -offset indent
@@ -58,11 +58,17 @@ FIFO pipe
 .El
 .El
 .Pp
+The primaries are combined with an implicit conjunction; the AND operator is implied by the juxtaposition of two primaries. Other operators from
+.Xr find 1
+including negations are not supported.
+.Pp
+The primaries shall evaluate their respective arguments only once.
+.Pp
 Exit status:
 .Bl -tag -width Ds -offset indent -compact
 .It 0
 Success.
-.It 1
+.It >0
 An error occurred, or an invalid option or operand was specified.
 .El
 .Ss grep
@@ -104,8 +110,8 @@ Exit status:
 .Bl -tag -width Ds -offset indent -compact
 .It 0
 One or more lines were selected (i.e. there was at least one valid Semantic Version).
-.It 1
-No lines were selected (i.e. there were no valid Semantic Versions), or an invalid option was specified.
+.It >0
+No lines were selected (i.e. there were no valid Semantic Versions), or an invalid option was specified, or an error occurred.
 .El
 .Ss printf
 The
@@ -188,12 +194,12 @@ Exit status:
 .Bl -tag -width Ds -offset indent -compact
 .It 0
 Success.
-.It 1
+.It >0
 The
 .Ar format
 string contained invalid specifiers, or
 .Ar version
-was invalid.
+was invalid, or an error occurred.
 .El
 .Ss sort
 The
@@ -215,8 +221,8 @@ Exit status:
 .Bl -tag -width Ds -offset indent -compact
 .It 0
 Success.
-.It 1
-An invalid option was specified, or the input was invalid (i.e. it contained something besides Semantic Versions and line delimiter characters).
+.It >0
+An invalid option was specified, or the input was invalid (i.e. it contained something besides Semantic Versions and line delimiter characters), or an error occurred.
 .El
 .Sh OPTIONS
 .Pp
@@ -314,6 +320,7 @@ The Semantic Versioning standard does not define an ordering for two versions th
 .Nm
 utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
 .Sh SEE ALSO
+.Xr find 1 ,
 .Xr grep 1 ,
 .Xr printf 1 ,
 .Xr sort 1
