@@ -63,6 +63,19 @@ EOF
     [[ $(semver find "$dir" -links 2) = "$dir/1.0.0" ]]
 }
 
+@test "find: should combine primaries with an implicit AND operator" {
+    dir="$(mktemp -d)"
+    # file, 2 links
+    touch "$dir/1.0.0"
+    ln "$dir/1.0.0" "$dir/link"
+    # file, 1 link
+    touch "$dir/2.0.0"
+    # directory
+    mkdir "$dir/3.0.0"
+
+    [[ $(semver find "$dir" -type f -links 2) = "$dir/1.0.0" ]]
+}
+
 @test "find: should fail if path missing" {
     run semver find -type d
     [[ "$status" -eq 1 ]]
