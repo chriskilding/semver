@@ -32,10 +32,12 @@ The
 .Nm
 utility can recursively descend the directory hierarchy specified by
 .Ar path ,
-select any paths that (a) contain one or more Semantic Version strings and (b) match the optional Boolean
+select any paths where (a) the file name contains one or more Semantic Version strings and (b) the file matches the optional boolean
 .Op Ar expression ,
 and print them to the standard output, in the style of
-.Xr find 1 .
+.Xr find 1
+with
+.Ic -name .
 .Pp
 The
 .Op Ar expression
@@ -43,6 +45,10 @@ is made of one or more operands as described below.
 .Pp
 Operands:
 .Bl -tag -width indent -offset indent
+.It Ic -depth
+Causes descent of the directory hierarchy to be done so that all entries in a directory are acted on BEFORE the directory itself. (If a
+.Ic -depth
+primary is not specified, all entries in a directory shall be acted on AFTER the directory itself.)
 .It Ic -type Ar t
 True if the file is of the specified type. Possible file types are as follows:
 .Pp

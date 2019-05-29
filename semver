@@ -192,7 +192,7 @@ sub semver::printf {
 }
 
 sub semver::find {
-    my ($path, $type) = @_;
+    my ($path, $depth, $type) = @_;
 
     *wanted = sub {
         my ($dev, $ino, $mode);
@@ -216,7 +216,11 @@ sub semver::find {
         }
     };
 
-    find({ wanted => \&wanted }, $path);
+    if ($depth) {
+        finddepth({ wanted => \&wanted }, $path);
+    } else {
+        find({ wanted => \&wanted }, $path);
+    }
 }
 
 sub semver::grep_count {
@@ -315,10 +319,11 @@ sub main {
 
     for ($subcommand) {
         when (/^find$/) {
-            my $type, my $help;
+            my $depth, my $type, my $help;
 
             GetOptionsFromArray(
                 \@args,
+                "depth" => \$depth,
                 "type=s" => \$type,
                 "h" => \$help,
             ) or exit 1;
@@ -327,7 +332,7 @@ sub main {
 
             my $path = $args[0];
 
-            semver::find($path, $type);
+            semver::find($path, $depth, $type);
         }
         when (/^grep$/) {
             my $count, my $only_matching, my $quiet, my $help;

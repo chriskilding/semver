@@ -10,14 +10,18 @@ semver() {
     [[ $(semver find "$dir") = "" ]]
 }
 
-@test "find: should match all pathnames containing semvers" {
+@test "find: should match all files with semvers in their names, like find(1) -name" {
     dir="$(mktemp -d)"
     touch "$dir/1.0.0"
+    touch "$dir/foo"
     mkdir "$dir/2.0.0"
+    touch "$dir/2.0.0/3.0.0"
+    touch "$dir/2.0.0/bar"
 
     expected=$(cat <<EOF
 ${dir}/1.0.0
 ${dir}/2.0.0
+${dir}/2.0.0/3.0.0
 EOF
 )
 
@@ -69,6 +73,39 @@ EOF
     touch "$dir/2.0.0"
 
     [[ $(semver find "$dir" -type p) = "$dir/1.0.0" ]]
+}
+
+@test "find: -depth should process directory entries before the directory itself" {
+    dir="$(mktemp -d)"
+    touch "$dir/1.0.0"
+    mkdir "$dir/2.0.0"
+    touch "$dir/2.0.0/3.0.0"
+    touch "$dir/2.0.0/bar"
+
+    expected=$(cat <<EOF
+${dir}/1.0.0
+${dir}/2.0.0/3.0.0
+${dir}/2.0.0
+EOF
+)
+
+    [[ $(semver find "$dir" -depth) = "$expected" ]]
+}
+
+@test "find: should combine primaries with an implicit AND operator" {
+    dir="$(mktemp -d)"
+    touch "$dir/1.0.0"
+    mkdir "$dir/2.0.0"
+    touch "$dir/2.0.0/3.0.0"
+    mkdir "$dir/2.0.0/4.0.0"
+
+    expected=$(cat <<EOF
+${dir}/2.0.0/4.0.0
+${dir}/2.0.0
+EOF
+)
+
+    [[ $(semver find "$dir" -type d -depth) = "$expected" ]]
 }
 
 @test "find: should fail if path missing" {
