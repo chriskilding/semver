@@ -32,12 +32,10 @@ The
 .Nm
 utility can recursively descend the directory hierarchy specified by
 .Ar path ,
-select any paths where (a) the file name contains one or more Semantic Version strings and (b) the file matches the optional boolean
+select any paths where (a) the file name contains one or more Semantic Versions and (b) the file matches the optional boolean
 .Op Ar expression ,
 and print them to the standard output, in the style of
-.Xr find 1
-with
-.Ic -name .
+.Xr find 1 .
 .Pp
 The
 .Op Ar expression
@@ -45,6 +43,14 @@ is made of one or more operands as described below.
 .Pp
 Operands:
 .Bl -tag -width indent -offset indent
+.It Ic -name
+True if the basename of the current pathname (i.e. the file name) contains one or more Semantic Versions. NOTE: unlike
+.Xr find 1
+this operand does not take a pattern argument: it is preloaded with the Semantic Version pattern.
+.It Ic -path
+True if the current pathname contains one or more Semantic Versions (i.e. a Semantic Version appears at any level of the pathname). NOTE: unlike
+.Xr find 1
+this operand does not take a pattern argument: it is preloaded with the Semantic Version pattern.
 .It Ic -depth
 Causes descent of the directory hierarchy to be done so that all entries in a directory are acted on BEFORE the directory itself. (If a
 .Ic -depth
@@ -66,9 +72,7 @@ FIFO pipe
 .Pp
 The primaries are combined with an implicit conjunction; the AND operator is implied by the juxtaposition of two primaries. Other operators from
 .Xr find 1
-including negations are not supported.
-.Pp
-The primaries shall evaluate their respective arguments only once.
+including negations are not supported. The primaries shall evaluate their respective arguments only once.
 .Pp
 Exit status:
 .Bl -tag -width Ds -offset indent -compact
@@ -242,10 +246,10 @@ Display the usage screen.
 .Sh EXAMPLES
 .Ss Find
 .Pp
-Find only regular files containing Semantic Version strings in their filenames:
+Find only regular file names containing Semantic Version strings:
 .Pp
 .Bd -literal -offset indent -compact
-$ semver find . -type f
+$ semver find . -name -type f
 foo-1.2.3
 bar-4.5.6
 7.8.9

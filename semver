@@ -192,12 +192,18 @@ sub semver::printf {
 }
 
 sub semver::find {
-    my ($path, $depth, $type) = @_;
+    my ($dir, $depth, $nom, $path, $type) = @_;
 
     *wanted = sub {
         my ($dev, $ino, $mode);
 
-        my $is_match = /$semver_regex/s && (($dev, $ino, $mode) = lstat($_));
+        my $is_match = (($dev, $ino, $mode) = lstat($_));
+
+        if ($nom) {
+            $is_match = $is_match && /$semver_regex/s;
+        } elsif ($path) {
+            $is_match = $is_match && $File::Find::name =~ /$semver_regex/s;
+        }
 
         if ($type) {
             if ($type eq "d") {
@@ -217,9 +223,9 @@ sub semver::find {
     };
 
     if ($depth) {
-        finddepth({ wanted => \&wanted }, $path);
+        finddepth({ wanted => \&wanted }, $dir);
     } else {
-        find({ wanted => \&wanted }, $path);
+        find({ wanted => \&wanted }, $dir);
     }
 }
 
@@ -319,20 +325,22 @@ sub main {
 
     for ($subcommand) {
         when (/^find$/) {
-            my $depth, my $type, my $help;
+            my $depth, my $name, my $path, my $type, my $help;
 
             GetOptionsFromArray(
                 \@args,
                 "depth" => \$depth,
+                "name" => \$name,
+                "path" => \$path,
                 "type=s" => \$type,
                 "h" => \$help,
             ) or exit 1;
 
             usage() if $help or (scalar(@args) < 1);
 
-            my $path = $args[0];
+            my $dir = $args[0];
 
-            semver::find($path, $depth, $type);
+            semver::find($dir, $depth, $name, $path, $type);
         }
         when (/^grep$/) {
             my $count, my $only_matching, my $quiet, my $help;
