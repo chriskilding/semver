@@ -5,11 +5,18 @@ use warnings;
 use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
+use File::Find;
 use Getopt::Long qw(GetOptionsFromArray);
 no if $] >= 5.018, warnings => qw(experimental::smartmatch);
 
+# for the convenience of &wanted calls, including -eval statements:
+use vars qw/*name *dir *prune/;
+*name   = *File::Find::name;
+*dir    = *File::Find::dir;
+*prune  = *File::Find::prune;
+
 # Regex from semver.org: https://github.com/semver/semver/pull/460
-my $semver_regex = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$';
+my $semver_regex = '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?';
 my $semver_precedence_regex_head = '^([0-9a-zA-Z-]*)';
 my $semver_precedence_regex_tail = '\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*)';
 
@@ -23,6 +30,7 @@ sub usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
+    say STDERR "  $program find <path> [expression]";
     say STDERR "  $program grep [-coq] -";
     say STDERR "  $program printf <format> <version>";
     say STDERR "  $program sort [-r] -";
@@ -37,7 +45,7 @@ sub usage() {
 sub semver_get {
     my ($str) = @_;
 
-    my @matches = $str =~ $semver_regex;
+    my @matches = $str =~ /^$semver_regex$/;
 
     if ((defined $matches[0]) && (defined $matches[1]) && (defined $matches[2])) {
         return @matches;
@@ -183,12 +191,44 @@ sub semver::printf {
     printf $format;
 }
 
+sub semver::find {
+    my ($dir, $depth, $type) = @_;
+
+    *wanted = sub {
+        my ($dev, $ino, $mode);
+
+        my $is_match = /$semver_regex/s && (($dev, $ino, $mode) = lstat($_));
+
+        if ($type) {
+            if ($type eq "d") {
+                $is_match = $is_match && -d _;
+            } elsif ($type eq "f") {
+                $is_match = $is_match && -f _;
+            } elsif ($type eq "l") {
+                $is_match = $is_match && -l _;
+            } elsif ($type eq "p") {
+                $is_match = $is_match && -p _;
+            }
+        }
+
+        if ($is_match) {
+            say "$name";
+        }
+    };
+
+    if ($depth) {
+        finddepth({ wanted => \&wanted }, $dir);
+    } else {
+        find({ wanted => \&wanted }, $dir);
+    }
+}
+
 sub semver::grep_count {
     my $num_matches = 0;
 
     while (my $line = <STDIN>) {
         my @words = split(/\s+/, $line);
-        if (grep(/$semver_regex/, @words)) {
+        if (grep(/^$semver_regex$/, @words)) {
             $num_matches++;
         }
     }
@@ -203,7 +243,7 @@ sub semver::grep_count {
 sub semver::grep_quiet {
     while (my $line = <STDIN>) {
         my @words = split(/\s+/, $line);
-        if (grep(/$semver_regex/, @words)) {
+        if (grep(/^$semver_regex$/, @words)) {
             exit 0;
         }
     }
@@ -220,7 +260,7 @@ sub semver::grep {
         my @words = split(/\s+/, $line);
         if ($only_matching) {
             foreach (@words) {
-                if (/$semver_regex/) {
+                if (/^$semver_regex$/) {
                     $num_matches++;
                     print "$1.$2.$3";
                     print "-$4" if (length $4 // '');
@@ -229,7 +269,7 @@ sub semver::grep {
                 }
             }
         } else {
-            if (grep(/$semver_regex/, @words)) {
+            if (grep(/^$semver_regex$/, @words)) {
                 $num_matches++;
                 print $line;
             }
@@ -249,7 +289,7 @@ sub semver::sort(&@) {
     chomp(@lines);
 
     # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
-    if ((scalar(@lines) eq 1) && ($lines[0] !~ /$semver_regex/)) {
+    if ((scalar(@lines) eq 1) && ($lines[0] !~ /^$semver_regex$/)) {
         exit 1;
     }
 
@@ -278,6 +318,22 @@ sub main {
     my $subcommand = shift @args // '';
 
     for ($subcommand) {
+        when (/^find$/) {
+            my $depth, my $type, my $help;
+
+            GetOptionsFromArray(
+                \@args,
+                "depth" => \$depth,
+                "type=s" => \$type,
+                "h" => \$help,
+            ) or exit 1;
+
+            usage() if $help or (scalar(@args) < 1);
+
+            my $dir = $args[0];
+
+            semver::find($dir, $depth, $type);
+        }
         when (/^grep$/) {
             my $count, my $only_matching, my $quiet, my $help;
 
