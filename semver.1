@@ -32,7 +32,7 @@ The
 .Nm
 utility can recursively descend the directory hierarchy specified by
 .Ar path ,
-select any paths where (a) the file name contains one or more Semantic Versions and (b) the file matches the optional boolean
+select any paths where the file matches the optional boolean
 .Op Ar expression ,
 and print them to the standard output, in the style of
 .Xr find 1 .
@@ -46,11 +46,11 @@ Operands:
 .It Ic -name
 True if the basename of the current pathname (i.e. the file name) contains one or more Semantic Versions. NOTE: unlike
 .Xr find 1
-this operand does not take a pattern argument: it is preloaded with the Semantic Version pattern.
+this operand is preloaded with the Semantic Version pattern.
 .It Ic -path
-True if the current pathname contains one or more Semantic Versions (i.e. a Semantic Version appears at any level of the pathname). NOTE: unlike
+True if the current pathname contains one or more Semantic Versions. NOTE: unlike
 .Xr find 1
-this operand does not take a pattern argument: it is preloaded with the Semantic Version pattern.
+this operand is preloaded with the Semantic Version pattern.
 .It Ic -depth
 Causes descent of the directory hierarchy to be done so that all entries in a directory are acted on BEFORE the directory itself. (If a
 .Ic -depth

@@ -63,6 +63,24 @@ EOF
     [[ $(semver find "$dir" -path) = "$expected" ]]
 }
 
+@test "find: -name and -path together should combine with an implicit AND" {
+    dir="$(mktemp -d)"
+    touch "$dir/1.0.0"
+    touch "$dir/foo"
+    mkdir "$dir/2.0.0"
+    touch "$dir/2.0.0/3.0.0"
+    touch "$dir/2.0.0/bar"
+
+    expected=$(cat <<EOF
+${dir}/1.0.0
+${dir}/2.0.0
+${dir}/2.0.0/3.0.0
+EOF
+)
+
+    [[ $(semver find "$dir" -name -path) = "$expected" ]]
+}
+
 @test "find: -name and -path should loosely match semvers" {
     skip "Unreliable in the CI environment"
 

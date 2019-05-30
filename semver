@@ -201,7 +201,9 @@ sub semver::find {
 
         if ($nom) {
             $is_match = $is_match && /$semver_regex/s;
-        } elsif ($path) {
+        }
+
+        if ($path) {
             $is_match = $is_match && $File::Find::name =~ /$semver_regex/s;
         }
 
