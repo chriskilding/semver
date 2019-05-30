@@ -32,10 +32,12 @@ The
 .Nm
 utility can recursively descend the directory hierarchy specified by
 .Ar path ,
-select any paths where the file matches the optional boolean
+select any paths where (a) the basename (file name) contains one or more Semantic Version strings and (b) the file matches the optional boolean
 .Op Ar expression ,
 and print them to the standard output, in the style of
-.Xr find 1 .
+.Xr find 1
+with
+.Ic -name .
 .Pp
 The
 .Op Ar expression
@@ -43,14 +45,6 @@ is made of one or more operands as described below.
 .Pp
 Operands:
 .Bl -tag -width indent -offset indent
-.It Ic -name
-True if the basename of the current pathname (i.e. the file name) contains one or more Semantic Versions. NOTE: unlike
-.Xr find 1
-this operand is preloaded with the Semantic Version pattern.
-.It Ic -path
-True if the current pathname contains one or more Semantic Versions. NOTE: unlike
-.Xr find 1
-this operand is preloaded with the Semantic Version pattern.
 .It Ic -depth
 Causes descent of the directory hierarchy to be done so that all entries in a directory are acted on BEFORE the directory itself. (If a
 .Ic -depth
@@ -249,7 +243,7 @@ Display the usage screen.
 Find only regular file names containing Semantic Version strings:
 .Pp
 .Bd -literal -offset indent -compact
-$ semver find . -name -type f
+$ semver find . -type f
 foo-1.2.3
 bar-4.5.6
 7.8.9

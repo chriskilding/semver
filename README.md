@@ -90,5 +90,5 @@ semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." $2 ".
 Find filenames containing Semantic Versions inside a directory:
 
 ```bash
-semver find . -name -type f
+semver find . -type f
 ```
