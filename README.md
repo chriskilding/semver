@@ -99,15 +99,15 @@ The following wrapper functions can make common versioning operations easier.
 ```bash
 #!/bin/sh
 
-major++() {
+++major() {
     semver printf '%major %minor %patch' "$1" | awk '{ print ++$1 "." 0 "." 0 }'
 }
 
-minor++() {
+++minor() {
     semver printf '%major %minor %patch' "$1" | awk '{ print $1 "." ++$2 "." 0 }'
 }
 
-patch++() {
+++patch() {
     semver printf '%major %minor %patch' "$1" | awk '{ print $1 "." $2 "." ++$3 }'
 }
 ```
@@ -115,5 +115,5 @@ patch++() {
 The above example of incrementing a Git tag then becomes:
 
 ```bash
-major++ $(git tag | semver grep -o | semver sort -r | head -n 1)
+++major $(git tag | semver grep -o | semver sort -r | head -n 1)
 ```
