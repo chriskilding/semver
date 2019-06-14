@@ -107,7 +107,7 @@ The following wrapper functions can make complex versioning operations easier:
 }
 
 ++patch() {
-    semver -t <<< "$1" | awk -F '\t'  '{ print $1 "." $2 "." ++$3 }'
+    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 }
 ```
 

@@ -240,8 +240,7 @@ sub main {
         "tabulate|t" => \$tabulate,
     ) or exit 1;
 
-    usage() if $help;
-
+    usage() if ($help || (scalar(@args) > 0));
 
     semver::grep($quiet, $sort, $tabulate);
 }
