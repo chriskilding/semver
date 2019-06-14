@@ -58,21 +58,19 @@ EOF
     [[ "$(semver <<< "$input")" = "$expected" ]]
 }
 
-@test "semver: should handle slashes between versions (to read from find(1))" {
+@test "semver: should handle file-like spacers between versions (to read from find(1))" {
     expected=$(cat <<EOF
 1.0.0
-2.0.0
 2.0.0
 3.0.0
 EOF
 )
 
     actual=$(semver <<EOF
-/dir/1.0.0
-/dir/foo
-/dir/2.0.0
-/dir/2.0.0/3.0.0
-/dir/2.0.0/bar
+1.0.0
+foo
+2.0.0-bar
+baz_3.0.0
 EOF
 )
 
@@ -92,11 +90,6 @@ EOF
 }
 
 # Sort [-s]
-
-@test "semver -s: should handle empty input" {
-    run printf '' | semver -s
-    [[ "$status" -eq 0 ]] && [[ "$output" = "" ]]
-}
 
 @test "semver -s: should handle a single version" {
     [[ "$(semver -s <<< "1.0.0")" = "1.0.0" ]]
@@ -212,15 +205,17 @@ EOF
 # Bundling
 
 @test "semver: should support option bundling (-s, -t)" {
-    expected=$(cat <<EOF
+    expected=$(printf "$(cat <<EOF
 1\t0\t0
 2\t0\t0
+3\t0\t0
 EOF
-)
+)")
 
     actual=$(semver -st <<EOF
-1.0.0
 2.0.0
+3.0.0
+1.0.0
 EOF
 )
 

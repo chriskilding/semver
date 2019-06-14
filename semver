@@ -148,7 +148,7 @@ sub semver::compare {
     }
 }
 
-sub semver::grep {
+sub semver::match {
     my ($quiet, $sort, $tabulate) = @_;
 
     if ($quiet) {
@@ -161,12 +161,33 @@ sub semver::grep {
         exit 1;
     }
 
+    my $num_matches = 0;
+
+    my @lines = qw();
+
+    while (my $line = <STDIN>) {
+        my @words = split(/\s+/, $line);
+        foreach (@words) {
+            if (/^$semver_regex$/) {
+                $num_matches++;
+
+                if ($sort) {
+                    push(@lines, plain($1, $2, $3, $4, $5));
+                } elsif ($tabulate) {
+                    say tabulate($1, $2, $3, $4, $5);
+                } else {
+                    say plain($1, $2, $3, $4, $5);
+                }
+            }
+        }
+    }
+
+    if ($num_matches < 1) {
+        exit 1;
+    }
+
     if ($sort) {
         my $sort_fn = sub ($$) { sort_pair($_[0], $_[1]) };
-
-        my @lines = <STDIN>;
-
-        chomp(@lines);
 
         # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
         if ((scalar(@lines) eq 1) && ($lines[0] !~ /^$semver_regex$/)) {
@@ -176,43 +197,41 @@ sub semver::grep {
         @lines = sort $sort_fn @lines;
 
         foreach my $line (@lines) {
-            say $line;
-        }
-
-        exit 0;
-    } else {
-        my $num_matches = 0;
-
-        while (my $line = <STDIN>) {
-            my @words = split(/\s+/, $line);
-            foreach (@words) {
-                if (/^$semver_regex$/) {
-                    $num_matches++;
-
-                    if ($tabulate) {
-                        my $delim = "\t";
-                        print $1 . $delim . $2 . $delim . $3;
-                        if ((!defined $4) && (defined $5)) {
-                            print $delim . $delim . $5;
-                        } else {
-                            print $delim . $4 if (length $4 // '');
-                            print $delim . $5 if (length $5 // '');
-                        }
-                        print "\n";
-                    } else {
-                        print "$1.$2.$3";
-                        print "-$4" if (length $4 // '');
-                        print "+$5" if (length $5 // '');
-                        print "\n";
-                    }
-                }
+            if ($tabulate && $line =~ /^$semver_regex$/) {
+                say tabulate($1, $2, $3, $4, $5);
+            } else {
+                say $line;
             }
         }
-
-        if ($num_matches < 1) {
-            exit 1;
-        }
     }
+}
+
+sub semver::tabulate {
+    my ($major, $minor, $patch, $pre, $build) = @_;
+
+    my $delim = "\t";
+
+    my $str = $major . $delim . $minor . $delim . $patch;
+
+    if ((!defined $pre) && (defined $build)) {
+        $str =  $str . $delim . $delim . $build;
+    } else {
+        $str = $str . $delim . $pre if (length $pre // '');
+        $str = $str . $delim . $5 if (length $5 // '');
+    }
+
+    return $str;
+}
+
+sub semver::plain {
+    my ($major, $minor, $patch, $pre, $build) = @_;
+
+    my $str = "$major.$minor.$patch";
+
+    $str = $str . "-" . $pre if (length $pre // '');
+    $str = $str . "+" . $build if (length $build // '');
+
+    return $str;
 }
 
 sub semver::sort_pair {
@@ -242,7 +261,7 @@ sub main {
 
     usage() if ($help || (scalar(@args) > 0));
 
-    semver::grep($quiet, $sort, $tabulate);
+    match($quiet, $sort, $tabulate);
 }
 
 main(@ARGV);

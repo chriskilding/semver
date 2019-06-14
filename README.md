@@ -49,9 +49,9 @@ Options:
 - `-q --quiet`  
   Quiet mode (suppress normal output).
 - `-s --sort`  
-  Sort the versions.
+  Sort the matched versions in precedence order (low-to-high).
 - `-t --tabulate`  
-  Tabulate the versions (separator: '\t').
+  Tabulate the matched versions (separator: '\t').
 
 Manual:
 
@@ -70,7 +70,7 @@ semver -t <<< '1.2.3-alpha+1' | cut -f 1-3
 Find Semantic Versions in filenames in a directory:
 
 ```bash
-find . -type f | semver
+find . -type f -execdir echo '{}' ';' | semver
 ```
 
 Format versions as CSV:
@@ -83,7 +83,7 @@ Get the latest Git tag:
 
 ```bash
 git tag | semver -s | tail -n 1
-```    
+```
 
 Validate a candidate version string:
 
