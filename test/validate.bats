@@ -5,12 +5,12 @@ semver() {
 }
 
 should_allow() {
-    run semver grep <<< "$1"
+    run semver <<< "$1"
     [[ "$status" -eq 0 ]]
 }
 
 should_reject() {
-    run semver grep <<< "$1"
+    run semver <<< "$1"
     [[ "$status" -eq 1 ]]
 }
 

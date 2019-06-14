@@ -6,83 +6,15 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
-find
-.Ar path
-.Op Ar expression
-.Nm
-grep
-.Op Fl coq
-.Fl
-.Nm
-printf
-.Ar format
-.Ar version
-.Nm
-sort
-.Op Fl r
-.Fl
-.Nm
-.Op Fl h
+.Op Fl hqst
 .Sh DESCRIPTION
 The
 .Nm
-utility finds, generates, modifies, parses, sorts, and validates Semantic Version strings.
-.Ss find
-The
-.Nm
-utility can recursively descend the directory hierarchy specified by
-.Ar path ,
-select any paths where (a) the basename (file name) contains one or more Semantic Version strings and (b) the file matches the optional boolean
-.Op Ar expression ,
-and print them to the standard output, in the style of
-.Xr find 1
-with
-.Ic -name .
+utility can search text from the standard input, select any Semantic Version strings that are
+present, and write them to the standard output. It can optionally sort or tabulate the selected
+versions.
 .Pp
-The
-.Op Ar expression
-is made of one or more operands as described below.
-.Pp
-Operands:
-.Bl -tag -width indent -offset indent
-.It Ic -depth
-Causes descent of the directory hierarchy to be done so that all entries in a directory are acted on BEFORE the directory itself. (If a
-.Ic -depth
-primary is not specified, all entries in a directory shall be acted on AFTER the directory itself.)
-.It Ic -type Ar t
-True if the file is of the specified type. Possible file types are as follows:
-.Pp
-.Bl -tag -width indent -compact
-.It Cm d
-directory
-.It Cm f
-regular file
-.It Cm l
-symbolic link
-.It Cm p
-FIFO pipe
-.El
-.El
-.Pp
-The primaries are combined with an implicit conjunction; the AND operator is implied by the juxtaposition of two primaries. Other operators from
-.Xr find 1
-including negations are not supported. The primaries shall evaluate their respective arguments only once.
-.Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-Success.
-.It >0
-An error occurred, or an invalid option or operand was specified.
-.El
-.Ss grep
-The
-.Nm
-utility can search text from STDIN, and select any lines that contain one or more Semantic Version strings, in the style of
-.Xr grep 1 .
-Each input line that has at least one Semantic Version string is written to the standard output.
-.Pp
-A line containing a
+A
 .Sq version
 string will be matched within the text stream if the following criteria are met:
 .Bl -bullet -compact
@@ -100,234 +32,127 @@ has whitespace immediately before it, OR its first character is also the first c
 has whitespace immediately after it, OR its last character is also the last character of the line.
 .El
 .Pp
-Options:
-.Bl -tag -width Ds -offset indent -compact
-.It Fl c
-Write only a count of selected lines to standard output.
-.It Fl o
-Only-matching. Print only the matched Semantic Version strings found on a line, with each such version on a separate output line.
-.It Fl q
-Quiet. Nothing shall be written to the standard output, regardless of matching lines. Exit immediately with zero status if an input line is selected.
-.El
+Example:
 .Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-One or more lines were selected (i.e. there was at least one valid Semantic Version).
-.It >0
-No lines were selected (i.e. there were no valid Semantic Versions), or an invalid option was specified, or an error occurred.
-.El
-.Ss printf
-The
-.Nm
-utility can format and print a
-.Ar version
-string under control of the
-.Ar format
-string, in the style of
-.Xr printf 1 .
-.Pp
-The
-.Ar format
-is a character string which contains three types of objects:
-.Bl -bullet -compact
-.It
-Plain characters, which are simply copied to standard output.
-.It
-Character escape sequences (in
-.St -ansiC
-backslash notation), which are converted and copied to the standard output.
-.It
-Format specifiers (prefixed by the '%' character), each of which causes printing of the relevant component of the
-.Ar version
-that was given.
-.El
-.Pp
-Note: It is not an error to provide the format specifiers
-.Cm %prerelease
-or
-.Cm %build
-in the
-.Ar format
-string when the
-.Ar version
-does not contain a prerelease or build.
-.Pp
-Escape characters:
-.Bl -tag -width Ds -offset indent -compact
-.It Cm \ea
-Write a <bell> character.
-.It Cm \eb
-Write a <backspace> character.
-.It Cm \ec
-Ignore remaining characters in this string.
-.It Cm \ef
-Write a <form-feed> character.
-.It Cm \en
-Write a <new-line> character.
-.It Cm \er
-Write a <carriage return> character.
-.It Cm \et
-Write a <tab> character.
-.It Cm \e\'
-Write a <single quote> character.
-.It Cm \e\e
-Write a backslash character.
-.El
-.Pp
-Format specifiers:
-.Bl -tag -offset indent -compact
-.It Cm %major
-Print the major component of
-.Ar version
-.It Cm %minor
-Print the minor component of
-.Ar version
-.It Cm %patch
-Print the patch component of
-.Ar version
-.It Cm %prerelease
-Print the prerelease component of
-.Ar version
-.It Cm %build
-Print the build component of
-.Ar version
-.El
-.Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-Success.
-.It >0
-The
-.Ar format
-string contained invalid specifiers, or
-.Ar version
-was invalid, or an error occurred.
-.El
-.Ss sort
-The
-.Nm
-utility can sort a list of line-delimited Semantic Version strings from STDIN in precedence order (low-to-high), in the style of
-.Xr sort 1 .
-.Pp
-Note: Some aspects of Semantic Version ordering are undefined in the specification. The
-.Nm
-utility makes implementation-specific choices to stabilise ordering across executions. Please see the WARNINGS section for details.
-.Pp
-Options:
-.Bl -tag -width Ds -offset indent -compact
-.It Fl r
-Sort in reverse order (high-to-low).
-.El
-.Pp
-Exit status:
-.Bl -tag -width Ds -offset indent -compact
-.It 0
-Success.
-.It >0
-An invalid option was specified, or the input was invalid (i.e. it contained something besides Semantic Versions and line delimiter characters), or an error occurred.
-.El
+.Bd -literal -offset indent
+$ semver <<EOF
+foo 1.1.1
+bar
+baz 1.0.0-alpha+1 qux 2.2.2
+EOF
+
+1.1.1
+1.0.0-alpha+1
+2.2.2
+.Ed
 .Sh OPTIONS
 .Pp
 The
 .Nm
 utility understands the following command-line options:
 .Bl -tag -width Ds indent
-.It Fl h
+.It Fl h, -help
 Display the usage screen.
+.It Fl q, -quiet
+Quiet mode. Nothing shall be written to the standard output, regardless of matching Semantic Versions. The utility will exit immediately with zero status if a Semantic Version string is selected.
+.Pp
+Example:
+.Pp
+.Bd -literal -offset indent
+semver -q <<< '1.2.3'    # => 0
+semver -q <<< 'invalid'  # => 1
+.Ed
+.It Fl s, -sort
+Sort the matched versions in precedence order (low-to-high).
+.Pp
+Example:
+.Pp
+.Bd -literal -offset indent
+$ semver -s <<EOF
+2.2.2
+1.1.1
+4.4.4
+EOF
+
+1.1.1
+2.2.2
+4.4.4
+.Ed
+.It Fl t, -tabulate
+Tabulate the matched versions (separator: '\\t').
+.Pp
+Example:
+.Pp
+.Bd -literal -offset indent
+$ semver -t <<EOF
+1.0.0
+1.0.0-alpha
+1.0.0+1
+1.0.0-alpha+1
+EOF
+
+1   0   0
+1   0   0   alpha
+1   0   0           1
+1   0   0   alpha   1
+.Ed
 .El
 .Sh EXAMPLES
-.Ss Find
 .Pp
-Find only regular file names containing Semantic Version strings:
+\fBCut\fR out the major, minor, and patch components of a version:
 .Pp
 .Bd -literal -offset indent -compact
-$ semver find . -type f
-foo-1.2.3
-bar-4.5.6
-7.8.9
-.Ed
-.Ss Grep
-Given a line-separated text stream:
-.Bd -literal -offset indent
-semver grep <<EOF
-foo 1.1.1
-bar
-baz 2.2.2 qux 3.3.3
-EOF
+semver -t <<< $version | cut -f 1-3
 .Ed
 .Pp
-The result will be:
+\fBFind\fR Semantic Versions in filenames inside a directory:
 .Pp
-.Bd -literal -offset indent
-foo 1.1.1
-baz 2.2.2 qux 3.3.3
-.Ed
-.Pp
-With the -o flag the result will be:
-.Pp
-.Bd -literal -offset indent
-1.1.1
-2.2.2
-3.3.3
-.Ed
-.Pp
-To validate a candidate version string, use the command's exit status:
-.Bd -literal -offset indent
-[[ $(semver grep -q <<< '1.2.3-alpha+1') ]]
-.Ed
-.Ss Printf
-.Pp
-Format a version string:
 .Bd -literal -offset indent -compact
-semver printf '%major,%minor,%patch,%prerelease,%build' '1.2.3-alpha+1'
-# => 1,2,3,alpha,1
-
-semver printf '{"major": "%major", "minor": "%minor", "patch": "%patch", "prerelease": "%prerelease", "build": "%build"}' '1.2.3-alpha+1'
-# => {"major": "1", "minor": "2", "patch": "3", "prerelease": "alpha", "build": "1"}
+find . -type f | semver
 .Ed
 .Pp
-Increment a version string:
+\fBFormat\fR a version string as CSV:
+.Pp
 .Bd -literal -offset indent -compact
-semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print ++$1 "." 0 "." 0 }'
-# => 2.0.0
-
-semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." ++$2 "." 0 }'
-# => 1.3.0
-
-semver printf '%major %minor %patch' '1.2.3-alpha+1' | awk '{ print $1 "." $2 "." ++$3 }'
-# => 1.2.4
-.Ed
-.Ss Sort
-Given a line-separated list of version strings:
-.Pp
-.Bd -literal -offset indent
-semver sort <<EOF
-2.2.2
-1.1.1
-4.4.4
-EOF
+semver -t <<< $version | tr '\\t' ','
 .Ed
 .Pp
-The result will be:
+\fBGet\fR the current Git tag:
+.Pp
+.Bd -literal -offset indent -compact
+git tag | semver -s | tail -n 1
+.Ed
+.Pp
+\fBIncrement\fR the Git tag:
+.Pp
+.Bd -literal -offset indent -compact
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." 0 "." 0 }'      # major++
+
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." 0 }'     # minor++
+
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'  # patch++
+.Ed
+.Pp
+\fBValidate\fR a candidate version string:
 .Pp
 .Bd -literal -offset indent
-1.1.1
-2.2.2
-4.4.4
+semver -q <<< $version && echo 'ok'
 .Ed
 .Sh EXIT STATUS
-.Ex -std
+The
+.Nm
+utility exits with one of the following values:
+.Pp
+.Bl -tag -width flag -compact
+.It Li 0
+One or more Semantic Versions were matched.
+.It Li >0
+No Semantic Versions were matched, or an error occurred.
+.El
 .Sh WARNINGS
 The Semantic Versioning standard does not define an ordering for two versions that are precedence-equal but stringwise-unequal (for example the BUILD is different). To guarantee predictable ordering between executions, the
 .Nm
 utility applies an additional natural sort on top of the Semantic Version precedence sort. This additional sort is IMPLEMENTATION-SPECIFIC and SUBJECT TO CHANGE between releases, so its algorithm is deliberately left undocumented. You should not rely on it.
-.Sh SEE ALSO
-.Xr find 1 ,
-.Xr grep 1 ,
-.Xr printf 1 ,
-.Xr sort 1
 .Sh STANDARDS
 The
 .Nm

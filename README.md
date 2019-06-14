@@ -7,7 +7,7 @@ Semantic Versioning utility.
 
 ## Overview
 
-The `semver` command line utility finds, generates, modifies, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
+The `semver` command line utility extracts, increments, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
 
 The Semantic Versioning format is:
 
@@ -34,15 +34,24 @@ $ make install
 
 Coming soon.
 
-## Usage
+## Help
+
+Usage:
 
 ```bash
-semver find <path> [expression]
-semver grep [-coq] -
-semver printf <format> <version>
-semver sort [-r] -
-semver [-h]
+semver [-hqst]
 ```
+
+Options:
+
+- `-h --help`  
+  Show the help screen.
+- `-q --quiet`  
+  Quiet mode (suppress normal output).
+- `-s --sort`  
+  Sort the versions.
+- `-t --tabulate`  
+  Tabulate the versions (separator: '\t').
 
 Manual:
 
@@ -52,68 +61,67 @@ man semver
 
 ## Examples
 
-See the latest Git tag:
+Cut out the major, minor, and patch components of a version:
 
 ```bash
-git tag | semver grep -o | semver sort -r | head -n 1
+semver -t <<< '1.2.3-alpha+1' | cut -f 1-3
+```
+
+Find Semantic Versions in filenames in a directory:
+
+```bash
+find . -type f | semver
+```
+
+Format versions as CSV:
+
+```bash
+git tag | semver -t | tr '\t' ','
+```
+
+Get the latest Git tag:
+
+```bash
+git tag | semver -s | tail -n 1
 ```    
 
 Validate a candidate version string:
 
 ```bash
-[[ $(semver grep -q <<< '1.2.3-alpha+1') ]] && echo 'Valid'
+semver -q <<< '1.2.3' && echo 'Valid'
 ```
 
-Format a list of version tags as CSV:
+## Extras
+
+The following wrapper functions can make complex versioning operations easier:
 
 ```bash
-git tag | semver grep -o | xargs semver printf '%major,%minor,%patch,%prerelease,%build' {}
+#!/bin/sh
+
+++major() {
+    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+}
+
+++minor() {
+    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+}
+
+++patch() {
+    semver -t <<< "$1" | awk -F '\t'  '{ print $1 "." $2 "." ++$3 }'
+}
 ```
 
 Download all artifacts in a version range:
 
 ```bash
-version='0.0.1'
-while curl -fs "https://example.com/artifact/$version.tar.gz" > "$version.tar.gz"; do
-    version=$(semver printf '%major %minor %patch' "$version" | awk '{ print $1 "." $2 "." ++$3 }')
+v='0.0.1'
+while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
+    v=$(++patch "$v")
 done
 ```
 
 Increment the current Git tag:
 
 ```bash
-current=$(git tag | semver grep -o | semver sort -r | head -n 1)
-next=$(semver printf '%major %minor %patch' "$current" | awk '{ print ++$1 "." 0 "." 0 }')
-```
-
-Find filenames containing Semantic Versions inside a directory:
-
-```bash
-semver find . -type f
-```
-
-## Extras
-
-The following wrapper functions can make common versioning operations easier.
-
-```bash
-#!/bin/sh
-
-++major() {
-    semver printf '%major %minor %patch' "$1" | awk '{ print ++$1 "." 0 "." 0 }'
-}
-
-++minor() {
-    semver printf '%major %minor %patch' "$1" | awk '{ print $1 "." ++$2 "." 0 }'
-}
-
-++patch() {
-    semver printf '%major %minor %patch' "$1" | awk '{ print $1 "." $2 "." ++$3 }'
-}
-```
-
-The above example of incrementing a Git tag then becomes:
-
-```bash
-++major $(git tag | semver grep -o | semver sort -r | head -n 1)
+++patch $(git tag | semver -s | tail -n 1)
 ```
