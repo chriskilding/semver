@@ -186,6 +186,14 @@ EOF
 
 # Tabulate [-t]
 
+@test 'semver -t: should have a default field delimiter of \\t' {
+    [[ $(semver -t <<< '1.2.3-alpha+1') = $(printf "1\t2\t3\talpha\t1") ]]
+}
+
+@test 'semver -t: should allow custom field delimiters' {
+    [[ $(semver -t ',' <<< '1.2.3-alpha+1') = "1,2,3,alpha,1" ]]
+}
+
 @test 'semver -t: 1.2.3 should be [1,2,3]' {
     [[ $(semver -t <<< '1.2.3') = $(printf "1\t2\t3") ]]
 }

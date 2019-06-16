@@ -25,13 +25,13 @@ sub semver::usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program [-hqst]";
+    say STDERR "  $program [options]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help      Show the help screen.";
-    say STDERR "  -q --quiet     Quiet mode (suppress normal output).";
-    say STDERR "  -s --sort      Sort the versions.";
-    say STDERR "  -t --tabulate  Tabulate the versions (separator: '\\t').";
+    say STDERR "  -h --help              Show the help screen.";
+    say STDERR "  -q --quiet             Quiet mode (suppress normal output).";
+    say STDERR "  -s --sort              Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate=[delim]  Tabulate the matched versions with '\\t', or [delim] if it is provided.";
 
     exit 1;
 }
@@ -163,6 +163,15 @@ sub semver::match {
 
     my $num_matches = 0;
 
+    my $delim;
+    if (defined $tabulate) {
+        if ($tabulate eq "") {
+            $delim = "\t";
+        } else {
+            $delim = $tabulate;
+        }
+    }
+
     my @lines = qw();
 
     while (my $line = <STDIN>) {
@@ -173,8 +182,8 @@ sub semver::match {
 
                 if ($sort) {
                     push(@lines, plain($1, $2, $3, $4, $5));
-                } elsif ($tabulate) {
-                    say tabulate($1, $2, $3, $4, $5);
+                } elsif ($delim) {
+                    say tabulate($1, $2, $3, $4, $5, $delim);
                 } else {
                     say plain($1, $2, $3, $4, $5);
                 }
@@ -197,8 +206,8 @@ sub semver::match {
         @lines = sort $sort_fn @lines;
 
         foreach my $line (@lines) {
-            if ($tabulate && $line =~ /^$semver_regex$/) {
-                say tabulate($1, $2, $3, $4, $5);
+            if ($delim && $line =~ /^$semver_regex$/) {
+                say tabulate($1, $2, $3, $4, $5, $delim);
             } else {
                 say $line;
             }
@@ -207,9 +216,7 @@ sub semver::match {
 }
 
 sub semver::tabulate {
-    my ($major, $minor, $patch, $pre, $build) = @_;
-
-    my $delim = "\t";
+    my ($major, $minor, $patch, $pre, $build, $delim) = @_;
 
     my $str = $major . $delim . $minor . $delim . $patch;
 
@@ -256,7 +263,7 @@ sub main {
         "help|h"       => \$help,
         "quiet|q"      => \$quiet,
         "sort|s"       => \$sort,
-        "tabulate|t" => \$tabulate,
+        "tabulate|t:s" => \$tabulate,
     ) or exit 1;
 
     usage() if ($help || (scalar(@args) > 0));

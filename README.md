@@ -39,7 +39,7 @@ Coming soon.
 Usage:
 
 ```bash
-semver [-hqst]
+semver [options]
 ```
 
 Options:
@@ -50,8 +50,8 @@ Options:
   Quiet mode (suppress normal output).
 - `-s --sort`  
   Sort the matched versions in precedence order (low-to-high).
-- `-t --tabulate`  
-  Tabulate the matched versions (separator: '\t').
+- `-t --tabulate=[delim]`  
+  Tabulate the matched versions with '\\t', or `delim` if it is provided.
 
 Manual:
 
@@ -76,7 +76,7 @@ find . -type f -execdir echo '{}' ';' | semver
 Format versions as CSV:
 
 ```bash
-git tag | semver -t | tr '\t' ','
+git tag | semver -t ','
 ```
 
 Get the latest Git tag:
@@ -99,15 +99,15 @@ The following wrapper functions can make complex versioning operations easier:
 #!/bin/sh
 
 ++major() {
-    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+    semver -t ' ' <<< "$1" | awk '{ print ++$1 "." 0 "." 0 }'
 }
 
 ++minor() {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+    semver -t ' ' <<< "$1" | awk '{ print $1 "." ++$2 "." 0 }'
 }
 
 ++patch() {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+    semver -t ' ' <<< "$1" | awk '{ print $1 "." $2 "." ++$3 }'
 }
 ```
 

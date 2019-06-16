@@ -6,7 +6,10 @@
 .Nd Semantic Versioning utility
 .Sh SYNOPSIS
 .Nm
-.Op Fl hqst
+.Op Fl h
+.Op Fl q
+.Op Fl s
+.Op Fl t Ar delim
 .Sh DESCRIPTION
 The
 .Nm
@@ -78,8 +81,10 @@ EOF
 2.2.2
 4.4.4
 .Ed
-.It Fl t, -tabulate
-Tabulate the matched versions (separator: '\\t').
+.It Fl t Ar delim , Fl Fl tabulate Ns = Ns Ar delim
+Tabulate the matched versions with '\\t', or
+.Ar delim
+if it is provided.
 .Pp
 Example:
 .Pp
@@ -111,10 +116,10 @@ semver -t <<< $version | cut -f 1-3
 find . -type f -execdir echo '{}' ';' | semver
 .Ed
 .Pp
-\fBFormat\fR a version string as CSV:
+\fBFormat\fR version strings as CSV:
 .Pp
 .Bd -literal -offset indent -compact
-semver -t <<< $version | tr '\\t' ','
+git tag | semver -t ','
 .Ed
 .Pp
 \fBGet\fR the current Git tag:
@@ -126,11 +131,11 @@ git tag | semver -s | tail -n 1
 \fBIncrement\fR the Git tag:
 .Pp
 .Bd -literal -offset indent -compact
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." 0 "." 0 }'      # major++
+git tag | semver -s -t ' ' | tail -n 1 | awk '{ print $1 "." 0 "." 0 }'      # major++
 
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." 0 }'     # minor++
+git tag | semver -s -t ' ' | tail -n 1 | awk '{ print $1 "." $2 "." 0 }'     # minor++
 
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'  # patch++
+git tag | semver -s -t ' ' | tail -n 1 | awk '{ print $1 "." $2 "." ++$3 }'  # patch++
 .Ed
 .Pp
 \fBValidate\fR a candidate version string:
