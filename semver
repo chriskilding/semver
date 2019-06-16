@@ -25,13 +25,14 @@ sub semver::usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program [-hqst]";
+    say STDERR "  $program [options]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help      Show the help screen.";
-    say STDERR "  -q --quiet     Quiet mode (suppress normal output).";
-    say STDERR "  -s --sort      Sort the versions.";
-    say STDERR "  -t --tabulate  Tabulate the versions (separator: '\\t').";
+    say STDERR "  -h --help          Show the help screen.";
+    say STDERR "  -m --match=<mode>  Match mode (modes: exact, loose [default], line).";
+    say STDERR "  -q --quiet         Quiet - suppress normal output.";
+    say STDERR "  -s --sort          Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate      Tabulate the matched versions (separator: '\\t').";
 
     exit 1;
 }
@@ -251,12 +252,15 @@ sub main {
 
     my ($help, $quiet, $sort, $tabulate);
 
+    my $match = 'loose';
+
     main::GetOptionsFromArray(
         \@args,
         "help|h"       => \$help,
+        "match|m:s"    => \$match,
         "quiet|q"      => \$quiet,
         "sort|s"       => \$sort,
-        "tabulate|t" => \$tabulate,
+        "tabulate|t"   => \$tabulate,
     ) or exit 1;
 
     usage() if ($help || (scalar(@args) > 0));

@@ -39,18 +39,20 @@ Coming soon.
 Usage:
 
 ```bash
-semver [-hqst]
+semver [options]
 ```
 
 Options:
 
-- `-h --help`  
+- `-h --help`
   Show the help screen.
-- `-q --quiet`  
-  Quiet mode (suppress normal output).
-- `-s --sort`  
+- `-m --match=<mode>`
+  Match mode (modes: exact, loose [default], line).
+- `-q --quiet`
+  Quiet - suppress normal output.
+- `-s --sort`
   Sort the matched versions in precedence order (low-to-high).
-- `-t --tabulate`  
+- `-t --tabulate`
   Tabulate the matched versions (separator: '\t').
 
 Manual:
@@ -70,7 +72,7 @@ semver -t <<< '1.2.3-alpha+1' | cut -f 1-3
 Find Semantic Versions in filenames in a directory:
 
 ```bash
-find . -type f -execdir echo '{}' ';' | semver
+find . -type f | semver
 ```
 
 Format versions as CSV:

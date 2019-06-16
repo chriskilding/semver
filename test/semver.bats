@@ -16,14 +16,6 @@ semver() {
     [[ "$(semver <<< "1 1.23 1.2.3.4.5.6.7")" = "" ]]
 }
 
-@test "semver: should match a semver between other words and print the whole line" {
-    [[ "$(semver <<< "the cow jumped 1.0.0 over the 2.0.0 moon")" = "$(printf "1.0.0\n2.0.0")" ]]
-}
-
-@test "semver: should not match semver strings inside other words" {
-    [[ "$(semver <<< "v1.2.3 foo1.2.3bar 1.2.3bar")" = "" ]]
-}
-
 @test "semver: should print nothing and exit 1 on empty input" {
     run semver <<< ''
     [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
@@ -34,15 +26,7 @@ semver() {
     [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
 }
 
-@test "semver: should handle spaces between versions" {
-    [[ "$(semver <<< "1.0.0 2.0.0")" = "$(printf "1.0.0\n2.0.0")" ]]
-}
-
-@test "semver: should handle tabs between versions" {
-    [[ "$(printf "1.0.44\t1.0.68" | semver)" = "$(printf "1.0.44\n1.0.68")" ]]
-}
-
-@test "semver: should handle newlines between versions" {
+@test "semver: should read multiple lines" {
     input=$(cat <<EOF
 1.0.0
 2.0.0
@@ -58,19 +42,65 @@ EOF
     [[ "$(semver <<< "$input")" = "$expected" ]]
 }
 
-@test "semver: should handle file-like spacers between versions (to read from find(1))" {
+# Match mode [-m]
+
+@test "semver [-m loose]: should match 1+ semvers in a line" {
     expected=$(cat <<EOF
 1.0.0
 2.0.0
 3.0.0
+4.0.0
+5.0.0
 EOF
 )
 
     actual=$(semver <<EOF
 1.0.0
-foo
-2.0.0-bar
-baz_3.0.0
+the 2.0.0 jumped over the 3.0.0
+foo-4.0.0.zip
+ 5.0.0
+bar
+EOF
+)
+
+    # TODO roll the \t assertion into the main test data
+    [[ "$actual" = "$expected" ]] && [[ "$(printf "1.0.44\t1.0.68" | semver)" = "$(printf "1.0.44\n1.0.68")" ]]
+}
+
+
+@test "semver -m line: should match a line containing semvers" {
+    expected=$(cat <<EOF
+1.0.0
+the 2.0.0 jumped over the 3.0.0
+foo-4.0.0.zip
+ 5.0.0
+EOF
+)
+
+    actual=$(semver -m line <<EOF
+1.0.0
+the 2.0.0 jumped over the 3.0.0
+foo-4.0.0.zip
+ 5.0.0
+bar
+EOF
+)
+
+    [[ "$actual" = "$expected" ]]
+}
+
+@test "semver -m exact: should match a line which is exactly a semver" {
+    expected=$(cat <<EOF
+1.0.0
+EOF
+)
+
+    actual=$(semver -m exact <<EOF
+1.0.0
+the 2.0.0 jumped over the 3.0.0
+foo-4.0.0.zip
+ 5.0.0
+bar
 EOF
 )
 
@@ -202,6 +232,10 @@ EOF
     [[ $(semver -t <<< '1.2.3-alpha+1') = $(printf "1\t2\t3\talpha\t1") ]]
 }
 
+@test 'semver -t: should work with cut(1)' {
+    [[ $(semver -t <<< '1.2.3-alpha+4' | cut -f 1) = '1' ]]
+}
+
 # Bundling
 
 @test "semver: should support option bundling (-s, -t)" {
@@ -220,10 +254,4 @@ EOF
 )
 
     [[ "$actual" = "$expected" ]]
-}
-
-# Integrations
-
-@test 'semver -t: should work with cut(1)' {
-    [[ $(semver -t <<< '1.2.3-alpha+4' | cut -f 1) = '1' ]]
 }
