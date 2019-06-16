@@ -9,15 +9,19 @@ semver() {
 }
 
 ++major() {
-    semver -t ' ' <<< "$@" | awk '{ print ++$1 "." 0 "." 0 }'
+    semver -t <<< "$@" | awk -F '\\t' '{ print ++$1 "." 0 "." 0 }'
 }
 
 ++minor() {
-    semver -t ' ' <<< "$@" | awk '{ print $1 "." ++$2 "." 0 }'
+    semver -t <<< "$@" | awk -F '\\t' '{ print $1 "." ++$2 "." 0 }'
 }
 
 ++patch() {
-    semver -t ' ' <<< "$@" | awk '{ print $1 "." $2 "." ++$3 }'
+    semver -t <<< "$@" | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'
+}
+
+seq() {
+    printf "$1\n$2\n"
 }
 
 ##
@@ -40,7 +44,7 @@ semver() {
 }
 
 @test "X is the major version, Y is the minor version, and Z is the patch version." {
-    [[ $(semver -t ' ' <<< "1.9.0") = '1 9 0' ]]
+    [[ $(semver -t <<< "1.9.0") = $(printf '1\t9\t0') ]]
 }
 
 @test "Each element MUST increase numerically. For instance: 1.9.0 -> 1.10.0 -> 1.11.0." {
