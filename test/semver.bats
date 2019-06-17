@@ -42,9 +42,9 @@ EOF
     [[ "$(semver <<< "$input")" = "$expected" ]]
 }
 
-# Match mode [-m]
+# Match modes [-l, -w]
 
-@test "semver [-m loose]: should match 1+ semvers in a line" {
+@test "semver: should match strings that are semvers" {
     expected=$(cat <<EOF
 1.0.0
 2.0.0
@@ -63,48 +63,53 @@ bar
 EOF
 )
 
+    [[ "$actual" = "$expected" ]]
+}
+
+@test "semver -l: should match whole lines that are semvers" {
+    expected=$(cat <<EOF
+1.0.0
+EOF
+)
+
+    actual=$(semver -l <<EOF
+1.0.0
+the 2.0.0 jumped over the 3.0.0
+foo-4.0.0.zip
+ 5.0.0
+bar
+EOF
+)
+
+    [[ "$actual" = "$expected" ]]
+}
+
+@test "semver -w: should match whole words that are semvers" {
+    expected=$(cat <<EOF
+1.0.0
+2.0.0
+3.0.0
+5.0.0
+EOF
+)
+
+    actual=$(semver -w <<EOF
+1.0.0
+the 2.0.0 jumped over the 3.0.0
+foo-4.0.0.zip
+ 5.0.0
+bar
+EOF
+)
+
     # TODO roll the \t assertion into the main test data
-    [[ "$actual" = "$expected" ]] && [[ "$(printf "1.0.44\t1.0.68" | semver)" = "$(printf "1.0.44\n1.0.68")" ]]
-}
-
-
-@test "semver -m line: should match a line containing semvers" {
-    expected=$(cat <<EOF
-1.0.0
-the 2.0.0 jumped over the 3.0.0
-foo-4.0.0.zip
- 5.0.0
-EOF
-)
-
-    actual=$(semver -m line <<EOF
-1.0.0
-the 2.0.0 jumped over the 3.0.0
-foo-4.0.0.zip
- 5.0.0
-bar
-EOF
-)
-
+    # [[ "$(printf "1.0.44\t1.0.68" | semver)" = "$(printf "1.0.44\n1.0.68")" ]]
     [[ "$actual" = "$expected" ]]
 }
 
-@test "semver -m exact: should match a line which is exactly a semver" {
-    expected=$(cat <<EOF
-1.0.0
-EOF
-)
-
-    actual=$(semver -m exact <<EOF
-1.0.0
-the 2.0.0 jumped over the 3.0.0
-foo-4.0.0.zip
- 5.0.0
-bar
-EOF
-)
-
-    [[ "$actual" = "$expected" ]]
+@test "semver: match modes should be mutually exclusive" {
+    run semver -lw <<< 'abc'
+    [[ "$status" -eq 1 ]]
 }
 
 # Quiet [-q]

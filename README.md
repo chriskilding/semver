@@ -36,26 +36,32 @@ Coming soon.
 
 ## Help
 
-Usage:
+### Usage
 
 ```bash
 semver [options]
 ```
 
-Options:
+### Options
 
 - `-h --help`
   Show the help screen.
-- `-m --match=<mode>`
-  Match mode (modes: exact, loose [default], line).
+- `-l --line`
+  Match whole lines that are semvers.
 - `-q --quiet`
   Quiet - suppress normal output.
 - `-s --sort`
   Sort the matched versions in precedence order (low-to-high).
 - `-t --tabulate`
   Tabulate the matched versions (separator: '\t').
+- `-w --word`
+  Match whole words that are semvers.
 
-Manual:
+Some options can be combined. For example, `semver -stw` will match whole-word occurrences of semvers, sort them, and print them in tabulated form. 
+
+Some options cannot be combined. For example, `-w` and `-l` are mutually exclusive.
+
+### Manual
 
 ```bash
 man semver
@@ -78,19 +84,25 @@ find . -type f | semver
 Format versions as CSV:
 
 ```bash
-git tag | semver -t | tr '\t' ','
+git tag | semver -lt | tr '\t' ','
 ```
 
 Get the latest Git tag:
 
 ```bash
-git tag | semver -s | tail -n 1
+git tag | semver -ls | tail -n 1
+```
+
+Increment the current Git tag:
+
+```bash
+git tag | semver -lst | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 ```
 
 Validate a candidate version string:
 
 ```bash
-semver -q <<< '1.2.3' && echo 'Valid'
+semver -lq <<< '1.2.3' && echo 'Valid'
 ```
 
 ## Extras
@@ -101,15 +113,15 @@ The following wrapper functions can make complex versioning operations easier:
 #!/bin/sh
 
 ++major() {
-    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+    semver -lt <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
 }
 
 ++minor() {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+    semver -lt <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
 }
 
 ++patch() {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+    semver -lt <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 }
 ```
 
@@ -120,10 +132,4 @@ v='0.0.1'
 while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
     v=$(++patch "$v")
 done
-```
-
-Increment the current Git tag:
-
-```bash
-++patch $(git tag | semver -s | tail -n 1)
 ```

@@ -28,11 +28,12 @@ sub semver::usage() {
     say STDERR "  $program [options]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help          Show the help screen.";
-    say STDERR "  -m --match=<mode>  Match mode (modes: exact, loose [default], line).";
-    say STDERR "  -q --quiet         Quiet - suppress normal output.";
-    say STDERR "  -s --sort          Sort the matched versions in precedence order (low-to-high).";
-    say STDERR "  -t --tabulate      Tabulate the matched versions (separator: '\\t').";
+    say STDERR "  -h --help      Show the help screen.";
+    say STDERR "  -l --line      Match whole lines that are semvers.";
+    say STDERR "  -q --quiet     Quiet - suppress normal output.";
+    say STDERR "  -s --sort      Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate  Tabulate the matched versions (separator: '\\t').";
+    say STDERR "  -w --word      Match whole words that are semvers.";
 
     exit 1;
 }
@@ -152,16 +153,6 @@ sub semver::compare {
 sub semver::match {
     my ($quiet, $sort, $tabulate) = @_;
 
-    if ($quiet) {
-        while (my $line = <STDIN>) {
-            my @words = split(/\s+/, $line);
-            if (grep(/^$semver_regex$/, @words)) {
-                exit 0;
-            }
-        }
-        exit 1;
-    }
-
     my $num_matches = 0;
 
     my @lines = qw();
@@ -171,6 +162,10 @@ sub semver::match {
         foreach (@words) {
             if (/^$semver_regex$/) {
                 $num_matches++;
+
+                if ($quiet) {
+                    exit 0;
+                }
 
                 if ($sort) {
                     push(@lines, plain($1, $2, $3, $4, $5));
@@ -188,12 +183,12 @@ sub semver::match {
     }
 
     if ($sort) {
-        my $sort_fn = sub ($$) { sort_pair($_[0], $_[1]) };
-
         # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
         if ((scalar(@lines) eq 1) && ($lines[0] !~ /^$semver_regex$/)) {
             exit 1;
         }
+
+        my $sort_fn = sub ($$) { sort_pair($_[0], $_[1]) };
 
         @lines = sort $sort_fn @lines;
 
@@ -250,20 +245,27 @@ sub semver::sort_pair {
 sub main {
     my @args = @_;
 
-    my ($help, $quiet, $sort, $tabulate);
-
-    my $match = 'loose';
+    my ($help, $line, $quiet, $sort, $tabulate, $word);
 
     main::GetOptionsFromArray(
         \@args,
-        "help|h"       => \$help,
-        "match|m:s"    => \$match,
-        "quiet|q"      => \$quiet,
-        "sort|s"       => \$sort,
-        "tabulate|t"   => \$tabulate,
+        "help|h"     => \$help,
+        "line|l"     => \$line,
+        "quiet|q"    => \$quiet,
+        "sort|s"     => \$sort,
+        "tabulate|t" => \$tabulate,
+        "word|w"     => \$word
     ) or exit 1;
 
-    usage() if ($help || (scalar(@args) > 0));
+    if ($help || (scalar(@args) > 0)) {
+        usage();
+    }
+
+    if ($line && $word) {
+        say STDERR "Invalid option: -l and -w are mutually exclusive.";
+        say STDERR "";
+        usage();
+    }
 
     match($quiet, $sort, $tabulate);
 }
