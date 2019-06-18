@@ -98,6 +98,11 @@ EOF
 
 # Sort [-s]
 
+@test "semver -s: should print nothing and exit 1 when no matches" {
+    run semver -s <<< 'abc'
+    [[ -z "$output" ]] && [[ "$status" -eq 1 ]]
+}
+
 @test "semver -s: should handle a single version" {
     [[ "$(semver -s <<< "1.0.0")" = "1.0.0" ]]
 }

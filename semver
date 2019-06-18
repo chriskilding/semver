@@ -6,7 +6,6 @@ use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
-no if $] >= 5.018, warnings => qw(experimental::smartmatch);
 
 package semver;
 
@@ -40,14 +39,7 @@ sub semver::usage() {
 
 sub semver::get {
     my ($str) = @_;
-
-    my @matches = $str =~ /^$semver_regex$/;
-
-    if ((defined $matches[0]) && (defined $matches[1]) && (defined $matches[2])) {
-        return @matches;
-    } else {
-        exit 1;
-    }
+    return $str =~ /^$semver_regex$/;
 }
 
 sub semver::get_prerelease_identifiers {
