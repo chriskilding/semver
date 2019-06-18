@@ -5,18 +5,13 @@ use warnings;
 use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
-use File::Find;
-use Getopt::Long qw(GetOptionsFromArray);
-no if $] >= 5.018, warnings => qw(experimental::smartmatch);
+use Getopt::Long qw(GetOptionsFromArray :config bundling);
 
-# for the convenience of &wanted calls, including -eval statements:
-use vars qw/*name *dir *prune/;
-*name   = *File::Find::name;
-*dir    = *File::Find::dir;
-*prune  = *File::Find::prune;
+package semver;
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?';
+
 my $semver_precedence_regex_head = '^([0-9a-zA-Z-]*)';
 my $semver_precedence_regex_tail = '\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*)';
 
@@ -24,37 +19,30 @@ my $greater_than = 1;
 my $equal_to = 0;
 my $less_than = -1;
 
-sub usage() {
+sub semver::usage() {
     my $program = "semver";
 
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program find <path> [expression]";
-    say STDERR "  $program grep [-coq] -";
-    say STDERR "  $program printf <format> <version>";
-    say STDERR "  $program sort [-r] -";
-    say STDERR "  $program [-h]";
+    say STDERR "  $program [-hqstw]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h  Show this help screen.";
+    say STDERR "  -h --help        Show the help screen.";
+    say STDERR "  -q --quiet       Quiet - suppress normal output.";
+    say STDERR "  -s --sort        Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate    Tabulate the matched versions (separator: '\\t').";
+    say STDERR "  -w --word-match  Select words that match the semver pattern.";
 
     exit 1;
 }
 
-sub semver_get {
+sub semver::get {
     my ($str) = @_;
-
-    my @matches = $str =~ /^$semver_regex$/;
-
-    if ((defined $matches[0]) && (defined $matches[1]) && (defined $matches[2])) {
-        return @matches;
-    } else {
-        exit 1
-    }
+    return $str =~ /^$semver_regex$/;
 }
 
-sub semver_get_prerelease_identifiers {
+sub semver::get_prerelease_identifiers {
     my ($prerelease) = @_;
 
     my @prerelease_identifiers_first = $prerelease =~ /$semver_precedence_regex_head/;
@@ -65,20 +53,20 @@ sub semver_get_prerelease_identifiers {
     return @prerelease_identifiers_first;
 }
 
-sub semver_compare_prerelease_identifier {
-    my ($a, $b) = @_;
+sub semver::compare_prerelease_identifier {
+    my ($v1, $v2) = @_;
 
-    if ((defined $a) && (defined $b)) {
-        if (looks_like_number($a) && looks_like_number($b)) {
-            if ($a > $b) {
+    if ((defined $v1) && (defined $v2)) {
+        if (main::looks_like_number($v1) && main::looks_like_number($v2)) {
+            if ($v1 > $v2) {
                 return $greater_than;
-            } elsif ($a < $b) {
+            } elsif ($v1 < $v2) {
                 return $less_than;
             }
-        } elsif (!looks_like_number($a) && looks_like_number($b)) {
+        } elsif (!main::looks_like_number($v1) && main::looks_like_number($v2)) {
             return $greater_than;
         } else {
-            my $a_cmp_b = $a cmp $b;
+            my $a_cmp_b = $v1 cmp $v2;
 
             if ($a_cmp_b eq 1) {
                 return $greater_than;
@@ -87,29 +75,29 @@ sub semver_compare_prerelease_identifier {
             }
         }
         return $equal_to;
-    } elsif ((defined $a) && (!defined $b)) {
+    } elsif ((defined $v1) && (!defined $v2)) {
         return $greater_than;
-    } elsif ((!defined $a) && (defined $b)) {
+    } elsif ((!defined $v1) && (defined $v2)) {
         return $less_than;
     }
 }
 
-sub semver_compare_prerelease {
-    my ($a, $b) = @_;
+sub semver::compare_prerelease {
+    my ($v1, $v2) = @_;
 
-    if ((!defined $a) && (defined $b)) {
+    if ((!defined $v1) && (defined $v2)) {
         return $greater_than;
-    } elsif ((defined $a) && (!defined $b)) {
+    } elsif ((defined $v1) && (!defined $v2)) {
         return $less_than;
-    } elsif ((defined $a) && (defined $b)) {
-        my @a_identifiers = semver_get_prerelease_identifiers($a);
-        my @b_identifiers = semver_get_prerelease_identifiers($b);
+    } elsif ((defined $v1) && (defined $v2)) {
+        my @a_identifiers = get_prerelease_identifiers($v1);
+        my @b_identifiers = get_prerelease_identifiers($v2);
 
-        for (my $i = 0; $i < max(scalar(@a_identifiers), scalar(@b_identifiers)); $i++) {
+        for (my $i = 0; $i < main::max(scalar(@a_identifiers), scalar(@b_identifiers)); $i++) {
             my $a_identifier = $a_identifiers[$i];
             my $b_identifier = $b_identifiers[$i];
 
-            my $a_cmp_b = semver_compare_prerelease_identifier($a_identifier, $b_identifier);
+            my $a_cmp_b = compare_prerelease_identifier($a_identifier, $b_identifier);
 
             if ($a_cmp_b eq 1) {
                 return $greater_than;
@@ -125,16 +113,16 @@ sub semver_compare_prerelease {
 }
 
 sub semver::compare {
-    my ($a, $b) = @_;
+    my ($v1, $v2) = @_;
 
-    my @a_matches = semver_get($a);
+    my @a_matches = get($v1);
 
     my $a_major = $a_matches[0];
     my $a_minor = $a_matches[1];
     my $a_patch = $a_matches[2];
     my $a_prerelease = $a_matches[3];
 
-    my @b_matches = semver_get($b);
+    my @b_matches = get($v2);
 
     my $b_major = $b_matches[0];
     my $b_minor = $b_matches[1];
@@ -148,165 +136,101 @@ sub semver::compare {
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch > $b_patch)) {
         return $greater_than;
     } elsif (($a_major eq $b_major) && ($a_minor eq $b_minor) && ($a_patch eq $b_patch)) {
-        return semver_compare_prerelease($a_prerelease, $b_prerelease);
+        return compare_prerelease($a_prerelease, $b_prerelease);
     } else {
         return $less_than;
     }
 }
 
-sub semver::printf {
-    my ($format, $version) = @_;
-
-    my @matches = semver_get($version);
-
-    my $major = $matches[0];
-    my $minor = $matches[1];
-    my $patch = $matches[2];
-    my $prerelease = $matches[3] // '';
-    my $build = $matches[4] // '';
-
-    # Version components
-    $format =~ s/%major/$major/g;
-    $format =~ s/%minor/$minor/g;
-    $format =~ s/%patch/$patch/g;
-    $format =~ s/%prerelease/$prerelease/g;
-    $format =~ s/%build/$build/g;
-
-    if ($format =~ m/%/) {
-        say STDERR "Invalid format specifier detected (valid specifiers: %major, %minor, %patch, %prerelease, %build)";
-        exit 1;
-    }
-
-    # ASCII escape characters
-    $format =~ s/\\a/\a/g;
-    $format =~ s/\\b/\b/g;
-    $format =~ s/\\e/\e/g;
-    $format =~ s/\\f/\f/g;
-    $format =~ s/\\n/\n/g;
-    $format =~ s/\\r/\r/g;
-    $format =~ s/\\t/\t/g;
-    $format =~ s/\\'/\'/g;
-    $format =~ s/\\\\/\\/g;
-
-    printf $format;
-}
-
-sub semver::find {
-    my ($dir, $depth, $type) = @_;
-
-    *wanted = sub {
-        my ($dev, $ino, $mode);
-
-        my $is_match = /$semver_regex/s && (($dev, $ino, $mode) = lstat($_));
-
-        if ($type) {
-            if ($type eq "d") {
-                $is_match = $is_match && -d _;
-            } elsif ($type eq "f") {
-                $is_match = $is_match && -f _;
-            } elsif ($type eq "l") {
-                $is_match = $is_match && -l _;
-            } elsif ($type eq "p") {
-                $is_match = $is_match && -p _;
-            }
-        }
-
-        if ($is_match) {
-            say "$name";
-        }
-    };
-
-    if ($depth) {
-        finddepth({ wanted => \&wanted }, $dir);
-    } else {
-        find({ wanted => \&wanted }, $dir);
-    }
-}
-
-sub semver::grep_count {
-    my $num_matches = 0;
-
-    while (my $line = <STDIN>) {
-        my @words = split(/\s+/, $line);
-        if (grep(/^$semver_regex$/, @words)) {
-            $num_matches++;
-        }
-    }
-
-    if ($num_matches < 1) {
-        exit 1;
-    }
-
-    say $num_matches;
-}
-
-sub semver::grep_quiet {
-    while (my $line = <STDIN>) {
-        my @words = split(/\s+/, $line);
-        if (grep(/^$semver_regex$/, @words)) {
-            exit 0;
-        }
-    }
-
-    exit 1;
-}
-
-sub semver::grep {
-    my ($only_matching) = @_;
+sub semver::match {
+    my ($quiet, $sort, $tabulate, $word_match) = @_;
 
     my $num_matches = 0;
 
+    my @lines = qw();
+
     while (my $line = <STDIN>) {
-        my @words = split(/\s+/, $line);
-        if ($only_matching) {
-            foreach (@words) {
-                if (/^$semver_regex$/) {
-                    $num_matches++;
-                    print "$1.$2.$3";
-                    print "-$4" if (length $4 // '');
-                    print "+$5" if (length $5 // '');
-                    print "\n";
+        my @words = qw();
+
+        if ($word_match) {
+            @words = split(/\s+/, $line);
+        } else {
+            @words = $line;
+        }
+
+        foreach (@words) {
+            if (/^$semver_regex$/) {
+                $num_matches++;
+
+                if ($quiet) {
+                    exit 0;
+                }
+
+                if ($sort) {
+                    push(@lines, plain($1, $2, $3, $4, $5));
+                } elsif ($tabulate) {
+                    say tabulate($1, $2, $3, $4, $5);
+                } else {
+                    say plain($1, $2, $3, $4, $5);
                 }
             }
-        } else {
-            if (grep(/^$semver_regex$/, @words)) {
-                $num_matches++;
-                print $line;
-            }
         }
     }
 
     if ($num_matches < 1) {
         exit 1;
     }
+
+    if ($sort) {
+        my $sort_fn = sub ($$) { sort_pair($_[0], $_[1]) };
+
+        @lines = sort $sort_fn @lines;
+
+        foreach my $line (@lines) {
+            if ($tabulate && $line =~ /^$semver_regex$/) {
+                say tabulate($1, $2, $3, $4, $5);
+            } else {
+                say $line;
+            }
+        }
+    }
 }
 
-sub semver::sort(&@) {
-    my ($sort_fn) = @_;
+sub semver::tabulate {
+    my ($major, $minor, $patch, $pre, $build) = @_;
 
-    my @lines = <STDIN>;
+    my $delim = "\t";
 
-    chomp(@lines);
+    my $str = $major . $delim . $minor . $delim . $patch;
 
-    # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
-    if ((scalar(@lines) eq 1) && ($lines[0] !~ /^$semver_regex$/)) {
-        exit 1;
+    if ((!defined $pre) && (defined $build)) {
+        $str =  $str . $delim . $delim . $build;
+    } else {
+        $str = $str . $delim . $pre if (length $pre // '');
+        $str = $str . $delim . $5 if (length $5 // '');
     }
 
-    @lines = sort $sort_fn @lines;
+    return $str;
+}
 
-    foreach my $line (@lines) {
-        say $line;
-    }
+sub semver::plain {
+    my ($major, $minor, $patch, $pre, $build) = @_;
+
+    my $str = "$major.$minor.$patch";
+
+    $str = $str . "-" . $pre if (length $pre // '');
+    $str = $str . "+" . $build if (length $build // '');
+
+    return $str;
 }
 
 sub semver::sort_pair {
-    my ($a, $b) = @_;
+    my ($v1, $v2) = @_;
 
-    my $result = semver::compare($a, $b);
+    my $result = compare($v1, $v2);
 
     if ($result eq $equal_to) {
-        return $a cmp $b;
+        return $v1 cmp $v2;
     } else {
         return $result;
     }
@@ -315,68 +239,22 @@ sub semver::sort_pair {
 sub main {
     my @args = @_;
 
-    my $subcommand = shift @args // '';
+    my ($help, $quiet, $sort, $tabulate, $word_match);
 
-    for ($subcommand) {
-        when (/^find$/) {
-            my $depth, my $type, my $help;
+    main::GetOptionsFromArray(
+        \@args,
+        "help|h"       => \$help,
+        "quiet|q"      => \$quiet,
+        "sort|s"       => \$sort,
+        "tabulate|t"   => \$tabulate,
+        "word-match|w" => \$word_match
+    ) or exit 1;
 
-            GetOptionsFromArray(
-                \@args,
-                "depth" => \$depth,
-                "type=s" => \$type,
-                "h" => \$help,
-            ) or exit 1;
-
-            usage() if $help or (scalar(@args) < 1);
-
-            my $dir = $args[0];
-
-            semver::find($dir, $depth, $type);
-        }
-        when (/^grep$/) {
-            my $count, my $only_matching, my $quiet, my $help;
-
-            GetOptionsFromArray(
-                \@args,
-                "c" => \$count,
-                "o" => \$only_matching,
-                "q" => \$quiet,
-                "h" => \$help,
-            ) or exit 1;
-
-            usage() if $help;
-
-            if ($count) {
-                semver::grep_count();
-            } elsif ($quiet) {
-                semver::grep_quiet();
-            } else {
-                semver::grep($only_matching);
-            }
-        }
-        when (/^printf$/) {
-            usage() if (scalar(@args) < 2);
-
-            my $format = $args[0];
-            my $version = $args[1];
-
-            semver::printf($format, $version);
-        }
-        when (/^sort$/) {
-            my $reverse;
-            GetOptionsFromArray(\@args, "r" => \$reverse) or exit 1;
-
-            if ($reverse) {
-                semver::sort { semver::sort_pair($b, $a) };
-            } else {
-                semver::sort { semver::sort_pair($a, $b) };
-            }
-        }
-        default {
-            usage();
-        }
+    if ($help || (scalar(@args) > 0)) {
+        usage();
     }
+
+    match($quiet, $sort, $tabulate, $word_match);
 }
 
 main(@ARGV);

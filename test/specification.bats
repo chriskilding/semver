@@ -9,15 +9,15 @@ semver() {
 }
 
 ++major() {
-    semver printf '%major %minor %patch' "$@" | awk '{ print ++$1 "." 0 "." 0 }'
+    semver -t <<< "$@" | awk -F '\\t' '{ print ++$1 "." 0 "." 0 }'
 }
 
 ++minor() {
-    semver printf '%major %minor %patch' "$@" | awk '{ print $1 "." ++$2 "." 0 }'
+    semver -t <<< "$@" | awk -F '\\t' '{ print $1 "." ++$2 "." 0 }'
 }
 
 ++patch() {
-    semver printf '%major %minor %patch' "$@" | awk '{ print $1 "." $2 "." ++$3 }'
+    semver -t <<< "$@" | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'
 }
 
 seq() {
@@ -29,30 +29,22 @@ seq() {
 ##
 
 @test "A normal version number MUST take the form X.Y.Z..." {
-    run semver grep <<< "1.0.0"
+    run semver -q <<< "1.0.0"
     [[ "$status" -eq 0 ]]
 }
 
 @test "...where X, Y, and Z are non-negative integers..." {
-    run semver grep <<< "-1.-1.-1"
+    run semver -q <<< "-1.-1.-1"
     [[ "$status" -eq 1 ]]
 }
 
 @test "...and MUST NOT contain leading zeroes." {
-    run semver grep <<< "01.01.01"
+    run semver -q <<< "01.01.01"
     [[ "$status" -eq 1 ]]
 }
 
-@test "X is the major version..." {
-    [[ $(semver printf "%major" "1.9.0") = "1" ]]
-}
-
-@test "...Y is the minor version..." {
-    [[ $(semver printf "%minor" "1.9.0") = "9" ]]
-}
-
-@test "...and Z is the patch version." {
-    [[ $(semver printf "%patch" "1.9.0") = "0" ]]
+@test "X is the major version, Y is the minor version, and Z is the patch version." {
+    [[ $(semver -t <<< "1.9.0") = $(printf '1\t9\t0') ]]
 }
 
 @test "Each element MUST increase numerically. For instance: 1.9.0 -> 1.10.0 -> 1.11.0." {
@@ -64,7 +56,7 @@ seq() {
 ##
 
 @test "Major version zero (0.y.z) is for initial development." {
-    run semver grep <<< "0.0.0"
+    run semver -q <<< "0.0.0"
     [[ "$status" -eq 0 ]]
 }
 
@@ -73,7 +65,7 @@ seq() {
 ##
 
 @test "Version 1.0.0 defines the public API." {
-    run semver grep <<< "1.0.0"
+    run semver -q <<< "1.0.0"
     [[ "$status" -eq 0 ]]
 }
 
@@ -114,20 +106,20 @@ seq() {
 ##
 
 @test "A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version." {
-    [[ $(semver printf "%prerelease" "0.0.0-a.b.c") = "a.b.c" ]]
+    [[ $(semver -t <<< "0.0.0-a.b.c" | cut -f 4) = "a.b.c" ]]
 }
 
 @test "Pre-release identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-]." {
-    [[ $(semver printf "%prerelease" "0.0.0-09AZaz-") = "09AZaz-" ]]
+    [[ $(semver -t <<< "0.0.0-09AZaz-" | cut -f 4) = "09AZaz-" ]]
 }
 
 @test "Pre-release identifiers MUST NOT be empty." {
-    run semver grep <<< "0.0.0-a..c"
+    run semver -q <<< "0.0.0-a..c"
     [[ "$status" -eq 1 ]]
 }
 
 @test "Pre-release numeric identifiers MUST NOT include leading zeroes." {
-    run semver grep <<< "0.0.0-1.02.3"
+    run semver -q <<< "0.0.0-1.02.3"
     [[ "$status" -eq 1 ]]
 }
 
@@ -138,7 +130,7 @@ seq() {
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 0.0.1
 0.0.1-alpha
 EOF
@@ -148,19 +140,19 @@ EOF
 }
 
 @test "Example: 1.0.0-alpha" {
-    [[ $(semver printf "%prerelease" "1.0.0-alpha") = "alpha" ]]
+    [[ $(semver -t <<< '1.0.0-alpha' | cut -f 4) = 'alpha' ]]
 }
 
 @test "Example: 1.0.0-alpha.1" {
-    [[ $(semver printf "%prerelease" "1.0.0-alpha.1") = "alpha.1" ]]
+    [[ $(semver -t <<< '1.0.0-alpha.1' | cut -f 4) = 'alpha.1' ]]
 }
 
 @test "Example: 1.0.0-0.3.7" {
-    [[ $(semver printf "%prerelease" "1.0.0-0.3.7") = "0.3.7" ]]
+    [[ $(semver -t <<< '1.0.0-0.3.7' | cut -f 4) = '0.3.7' ]]
 }
 
 @test "Example: 1.0.0-x.7.z.92" {
-    [[ $(semver printf "%prerelease" "1.0.0-x.7.z.92") = "x.7.z.92" ]]
+    [[ $(semver -t <<< '1.0.0-x.7.z.92' | cut -f 4) = 'x.7.z.92' ]]
 }
 
 ##
@@ -168,15 +160,15 @@ EOF
 ##
 
 @test "Build metadata MAY be denoted by appending a plus sign and a series of dot separated identifiers immediately following the patch or pre-release version." {
-    [[ $(semver printf "%build" "0.0.0+a.b.c") = "a.b.c" ]]
+    [[ $(semver -t <<< "0.0.0+a.b.c" | cut -f 5) = "a.b.c" ]]
 }
 
 @test "Build identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-]." {
-    [[ $(semver printf "%build" "0.0.0+09AZaz-") = "09AZaz-" ]]
+    [[ $(semver -t <<< "0.0.0+09AZaz-" | cut -f 5) = "09AZaz-" ]]
 }
 
 @test "Build identifiers MUST NOT be empty." {
-    run semver grep <<< "0.0.0+a..c"
+    run semver -q <<< "0.0.0+a..c"
     [[ "$status" -eq 1 ]]
 }
 
@@ -187,7 +179,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 0.0.1+2009
 0.0.1+2008
 EOF
@@ -197,15 +189,15 @@ EOF
 }
 
 @test "Example: 1.0.0-alpha+001" {
-    [[ $(semver printf "%build" "1.0.0-alpha+001") = "001" ]]
+    [[ $(semver -t <<< '1.0.0-alpha+001' | cut -f 5) = "001" ]]
 }
 
 @test "Example: 1.0.0+20130313144700" {
-    [[ $(semver printf "%build" "1.0.0+20130313144700") = "20130313144700" ]]
+    [[ $(semver -t <<< "1.0.0+20130313144700" | cut -f 5) = "20130313144700" ]]
 }
 
 @test "Example: 1.0.0-beta+exp.sha.5114f85" {
-    [[ $(semver printf "%build" "1.0.0-beta+exp.sha.5114f85") = "exp.sha.5114f85" ]]
+    [[ $(semver -t <<< "1.0.0-beta+exp.sha.5114f85" | cut -f 5) = "exp.sha.5114f85" ]]
 }
 
 ##
@@ -219,7 +211,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 19999.0.0
 200.0.0
 EOF
@@ -237,7 +229,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 2.1.0
 1.0.0
 2.1.1
@@ -260,7 +252,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 1.0.0-2
 1.0.0-1
 EOF
@@ -269,14 +261,14 @@ EOF
     [[ ${actual} = ${expected} ]]
 }
 
-@test 'Identifiers with letters or hyphens are compared lexically in ASCII sort order.' {
+@test 'Identifiers with letters or hyphens are compared lexically in ASCII -s order.' {
     expected=$(cat <<EOF
 1.0.0-a-a
 1.0.0-a-b
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 1.0.0-a-b
 1.0.0-a-a
 EOF
@@ -292,7 +284,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 1.0.0-a
 1.0.0-1
 EOF
@@ -308,7 +300,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 1.0.0-1.1.1
 1.0.0-1.1
 EOF
@@ -330,7 +322,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 1.0.0-beta.11
 1.0.0-alpha.1
 1.0.0-beta.2
@@ -352,7 +344,7 @@ EOF
 EOF
 )
 
-    actual=$(semver sort <<EOF
+    actual=$(semver -s <<EOF
 1.0.0
 1.0.0-alpha
 EOF
