@@ -13,7 +13,7 @@ semver() {
 }
 
 @test "semver: should not match non-semver version strings" {
-    [[ "$(semver <<< "1 1.23 1.2.3.4.5.6.7")" = "" ]]
+    [[ "$(semver <<< "1 1.23 1.2-alpha 1.2.a.4.5.b.7")" = "" ]]
 }
 
 @test "semver: should print nothing and exit 1 on empty input" {
@@ -42,15 +42,11 @@ EOF
     [[ "$(semver <<< "$input")" = "$expected" ]]
 }
 
-# Match modes [-l, -w]
+# Match modes [-w]
 
-@test "semver: should match strings that are semvers" {
+@test "semver: should line-match semvers" {
     expected=$(cat <<EOF
 1.0.0
-2.0.0
-3.0.0
-4.0.0
-5.0.0
 EOF
 )
 
@@ -66,25 +62,7 @@ EOF
     [[ "$actual" = "$expected" ]]
 }
 
-@test "semver -l: should match whole lines that are semvers" {
-    expected=$(cat <<EOF
-1.0.0
-EOF
-)
-
-    actual=$(semver -l <<EOF
-1.0.0
-the 2.0.0 jumped over the 3.0.0
-foo-4.0.0.zip
- 5.0.0
-bar
-EOF
-)
-
-    [[ "$actual" = "$expected" ]]
-}
-
-@test "semver -w: should match whole words that are semvers" {
+@test "semver -w: should word-match semvers" {
     expected=$(cat <<EOF
 1.0.0
 2.0.0
@@ -103,13 +81,7 @@ EOF
 )
 
     # TODO roll the \t assertion into the main test data
-    # [[ "$(printf "1.0.44\t1.0.68" | semver)" = "$(printf "1.0.44\n1.0.68")" ]]
-    [[ "$actual" = "$expected" ]]
-}
-
-@test "semver: match modes should be mutually exclusive" {
-    run semver -lw <<< 'abc'
-    [[ "$status" -eq 1 ]]
+    [[ "$actual" = "$expected" ]] && [[ "$(printf "1.0.44\t1.0.68" | semver -w)" = "$(printf "1.0.44\n1.0.68")" ]]
 }
 
 # Quiet [-q]

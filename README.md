@@ -39,27 +39,23 @@ Coming soon.
 ### Usage
 
 ```bash
-semver [options]
+semver [-hqstw]
 ```
 
 ### Options
 
 - `-h --help`
   Show the help screen.
-- `-l --line`
-  Match whole lines that are semvers.
 - `-q --quiet`
   Quiet - suppress normal output.
 - `-s --sort`
   Sort the matched versions in precedence order (low-to-high).
 - `-t --tabulate`
   Tabulate the matched versions (separator: '\t').
-- `-w --word`
-  Match whole words that are semvers.
+- `-w --word-match`
+  Select words that match the semver pattern.
 
-Some options can be combined. For example, `semver -stw` will match whole-word occurrences of semvers, sort them, and print them in tabulated form. 
-
-Some options cannot be combined. For example, `-w` and `-l` are mutually exclusive.
+Most options can be combined. For example, `semver -stw` will word-match occurrences of semvers, sort them, and print them in tabulated form. 
 
 ### Manual
 
@@ -69,40 +65,43 @@ man semver
 
 ## Examples
 
-Cut out the major, minor, and patch components of a version:
+**Cut** out the major, minor, and patch components of a version:
 
 ```bash
 semver -t <<< '1.2.3-alpha+1' | cut -f 1-3
 ```
 
-Find Semantic Versions in filenames in a directory:
+**Download** all artifacts in a version range:
 
 ```bash
-find . -type f | semver
+v='0.0.1'
+while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
+    v=$(semver -t <<< "$v" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }')
+done
 ```
 
-Format versions as CSV:
+**Format** versions as CSV:
 
 ```bash
-git tag | semver -lt | tr '\t' ','
+semver -tw < versions.txt | tr '\t' ','
 ```
 
-Get the latest Git tag:
+**Get** the latest Git tag:
 
 ```bash
-git tag | semver -ls | tail -n 1
+git tag | semver -s | tail -n 1
 ```
 
-Increment the current Git tag:
+**Increment** the current Git tag:
 
 ```bash
-git tag | semver -lst | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 ```
 
-Validate a candidate version string:
+**Validate** a candidate version string:
 
 ```bash
-semver -lq <<< '1.2.3' && echo 'Valid'
+semver -q <<< '1.2.3' && echo 'Valid'
 ```
 
 ## Extras
@@ -113,23 +112,14 @@ The following wrapper functions can make complex versioning operations easier:
 #!/bin/sh
 
 ++major() {
-    semver -lt <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
 }
 
 ++minor() {
-    semver -lt <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
 }
 
 ++patch() {
-    semver -lt <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 }
-```
-
-Download all artifacts in a version range:
-
-```bash
-v='0.0.1'
-while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
-    v=$(++patch "$v")
-done
 ```

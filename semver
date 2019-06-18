@@ -12,6 +12,7 @@ package semver;
 
 # Regex from semver.org: https://github.com/semver/semver/pull/460
 my $semver_regex = '(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?';
+
 my $semver_precedence_regex_head = '^([0-9a-zA-Z-]*)';
 my $semver_precedence_regex_tail = '\.(0|[1-9a-zA-Z-][0-9a-zA-Z-]*)';
 
@@ -25,15 +26,14 @@ sub semver::usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program [options]";
+    say STDERR "  $program [-hqstw]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help      Show the help screen.";
-    say STDERR "  -l --line      Match whole lines that are semvers.";
-    say STDERR "  -q --quiet     Quiet - suppress normal output.";
-    say STDERR "  -s --sort      Sort the matched versions in precedence order (low-to-high).";
-    say STDERR "  -t --tabulate  Tabulate the matched versions (separator: '\\t').";
-    say STDERR "  -w --word      Match whole words that are semvers.";
+    say STDERR "  -h --help        Show the help screen.";
+    say STDERR "  -q --quiet       Quiet - suppress normal output.";
+    say STDERR "  -s --sort        Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate    Tabulate the matched versions (separator: '\\t').";
+    say STDERR "  -w --word-match  Select words that match the semver pattern.";
 
     exit 1;
 }
@@ -151,14 +151,21 @@ sub semver::compare {
 }
 
 sub semver::match {
-    my ($quiet, $sort, $tabulate) = @_;
+    my ($quiet, $sort, $tabulate, $word_match) = @_;
 
     my $num_matches = 0;
 
     my @lines = qw();
 
     while (my $line = <STDIN>) {
-        my @words = split(/\s+/, $line);
+        my @words = qw();
+
+        if ($word_match) {
+            @words = split(/\s+/, $line);
+        } else {
+            @words = $line;
+        }
+
         foreach (@words) {
             if (/^$semver_regex$/) {
                 $num_matches++;
@@ -245,29 +252,22 @@ sub semver::sort_pair {
 sub main {
     my @args = @_;
 
-    my ($help, $line, $quiet, $sort, $tabulate, $word);
+    my ($help, $quiet, $sort, $tabulate, $word_match);
 
     main::GetOptionsFromArray(
         \@args,
-        "help|h"     => \$help,
-        "line|l"     => \$line,
-        "quiet|q"    => \$quiet,
-        "sort|s"     => \$sort,
-        "tabulate|t" => \$tabulate,
-        "word|w"     => \$word
+        "help|h"       => \$help,
+        "quiet|q"      => \$quiet,
+        "sort|s"       => \$sort,
+        "tabulate|t"   => \$tabulate,
+        "word-match|w" => \$word_match
     ) or exit 1;
 
     if ($help || (scalar(@args) > 0)) {
         usage();
     }
 
-    if ($line && $word) {
-        say STDERR "Invalid option: -l and -w are mutually exclusive.";
-        say STDERR "";
-        usage();
-    }
-
-    match($quiet, $sort, $tabulate);
+    match($quiet, $sort, $tabulate, $word_match);
 }
 
 main(@ARGV);
