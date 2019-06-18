@@ -182,11 +182,6 @@ sub semver::match {
     }
 
     if ($sort) {
-        # Extra validation if just 1 element, because Perl does not sort unless there are at least 2 elements.
-        if ((scalar(@lines) eq 1) && ($lines[0] !~ /^$semver_regex$/)) {
-            exit 1;
-        }
-
         my $sort_fn = sub ($$) { sort_pair($_[0], $_[1]) };
 
         @lines = sort $sort_fn @lines;
