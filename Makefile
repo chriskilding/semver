@@ -8,7 +8,7 @@ prefix = /usr/local
 all:
 
 test:
-	bats test
+	bats -r test
 
 install:
 	mkdir -p $(DESTDIR)$(prefix)/bin $(DESTDIR)$(prefix)/share/man/man1
