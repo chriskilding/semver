@@ -144,11 +144,14 @@ git tag | semver -s | tail -n 1
 \fBIncrement\fR the Git tag:
 .Pp
 .Bd -literal -offset indent -compact
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." 0 "." 0 }'      # major++
+# major++
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print ++$1 "." 0 "." 0 }'
 
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." 0 }'     # minor++
+# minor++
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." ++$2 "." 0 }'
 
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'  # patch++
+# patch++
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'
 .Ed
 .Pp
 \fBValidate\fR a candidate version string:

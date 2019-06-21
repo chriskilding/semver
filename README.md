@@ -95,31 +95,18 @@ git tag | semver -s | tail -n 1
 **Increment** the current Git tag:
 
 ```bash
+# major++
+git tag | semver -st | tail -n 1 | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+
+# minor++
+git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+
+# patch++
 git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 ```
 
 **Validate** a candidate version string:
 
 ```bash
-semver -q <<< '1.2.3' && echo 'Valid'
-```
-
-## Extras
-
-The following wrapper functions can make complex versioning operations easier:
-
-```bash
-#!/bin/sh
-
-++major() {
-    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
-}
-
-++minor() {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
-}
-
-++patch() {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
-}
+semver -q <<< '1.2.3' && echo 'ok'
 ```
