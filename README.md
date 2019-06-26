@@ -7,7 +7,7 @@ Semantic Versioning utility.
 
 ## Overview
 
-The `semver` command line utility extracts, increments, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
+The `semver` command line utility extracts, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
 
 The Semantic Versioning format is:
 
@@ -22,27 +22,19 @@ Dependencies:
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
 - [Bats](https://github.com/bats-core/bats-core) (test)
 
-### Source
-
 ```bash
-$ make
-$ make test # optional
-$ make install
+make
+make test # optional
+make install
 ```
 
-### Homebrew
-
-Coming soon.
-
-## Help
-
-### Usage
+## Usage
 
 ```bash
 semver [-hqstw]
 ```
 
-### Options
+Options:
 
 - `-h --help`
   Show the help screen.
@@ -57,7 +49,7 @@ semver [-hqstw]
 
 Most options can be combined. For example, `semver -stw` will word-match occurrences of semvers, sort them, and print them in tabulated form. 
 
-### Manual
+## Manual
 
 ```bash
 man semver
@@ -95,13 +87,13 @@ git tag | semver -s | tail -n 1
 **Increment** the current Git tag:
 
 ```bash
-# major++
+# ++major
 git tag | semver -st | tail -n 1 | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
 
-# minor++
+# ++minor
 git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
 
-# patch++
+# ++patch
 git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 ```
 
