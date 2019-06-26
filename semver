@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use feature qw(say switch);
+use feature qw(say);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
