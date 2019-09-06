@@ -5,15 +5,14 @@
 
 Semantic Versioning utility.
 
-## Overview
+## Description
 
-The `semver` command line utility extracts, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
+The `semver` utility is a text filter for [Semantic Version](https://semver.org/) strings. It searches text from the standard input, selects any Semantic Versions that are present, and writes them to the standard output. It can optionally sort or tabulate the selected versions.
 
-The Semantic Versioning format is:
+A *version* string will be matched within the text stream if the following criteria are met:
 
-    major.minor.patch[-prerelease][+build]
-
-Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3+2008`, `1.2.3-alpha+2008`.
+- *version* is a valid Semantic Version.
+- *version* is a whole line. (This can be modified with the `-w` option.)
 
 ## Install
 
@@ -45,7 +44,7 @@ Options:
 - `-t --tabulate`
   Tabulate the matched versions (separator: '\t').
 - `-w --word-match`
-  Select words that match the semver pattern.
+  Select words that match the semver pattern. (Equivalent to the *grep(1)* `--word-regexp` option.)
 
 Most options can be combined. For example, `semver -stw` will word-match occurrences of semvers, sort them, and print them in tabulated form. 
 
@@ -56,6 +55,12 @@ man semver
 ```
 
 ## Examples
+
+**Match** lines that are version strings:
+
+```bash
+semver < example.txt
+```
 
 **Cut** out the major, minor, and patch components of a version:
 
@@ -72,16 +77,16 @@ while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
 done
 ```
 
-**Format** versions as CSV:
-
-```bash
-semver -tw < versions.txt | tr '\t' ','
-```
-
-**Get** the latest Git tag:
+**Find** the latest Git tag:
 
 ```bash
 git tag | semver -s | tail -n 1
+```
+
+**Format** versions as CSV:
+
+```bash
+semver -tw < example.txt | tr '\t' ','
 ```
 
 **Increment** the current Git tag:

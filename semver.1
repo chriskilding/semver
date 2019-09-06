@@ -10,8 +10,8 @@
 .Sh DESCRIPTION
 The
 .Nm
-utility can search text from the standard input, select any Semantic Version strings that are
-present, and write them to the standard output. It can optionally sort or tabulate the selected
+utility is a text filter for Semantic Version strings. It searches text from the standard input, selects any Semantic
+Versions that are present, and writes them to the standard output. It can optionally sort or tabulate the selected
 versions.
 .Pp
 A
@@ -27,20 +27,6 @@ is a whole line. (This can be modified with the
 .Fl w
 option.)
 .El
-.Pp
-Example:
-.Pp
-.Bd -literal -offset indent
-$ semver <<EOF
-1.1.1
-bar
-2.2.2-alpha+1
-foo-3.3.3.txt
-EOF
-
-1.1.1
-2.2.2-alpha+1
-.Ed
 .Sh OPTIONS
 .Pp
 The
@@ -114,6 +100,12 @@ EOF
 .El
 .Sh EXAMPLES
 .Pp
+\fBMatch\fR lines that are version strings:
+.Pp
+.Bd -literal -offset indent -compact
+semver < example.txt
+.Ed
+.Pp
 \fBCut\fR out the major, minor, and patch components of versions:
 .Pp
 .Bd -literal -offset indent -compact
@@ -129,16 +121,16 @@ while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
 done
 .Ed
 .Pp
-\fBFormat\fR version strings as CSV:
-.Pp
-.Bd -literal -offset indent -compact
-semver -tw < versions.txt | tr '\\t' ','
-.Ed
-.Pp
-\fBGet\fR the current Git tag:
+\fBFind\fR the current Git tag:
 .Pp
 .Bd -literal -offset indent -compact
 git tag | semver -s | tail -n 1
+.Ed
+.Pp
+\fBFormat\fR version strings as CSV:
+.Pp
+.Bd -literal -offset indent -compact
+semver -tw < example.txt | tr '\\t' ','
 .Ed
 .Pp
 \fBIncrement\fR the Git tag:
