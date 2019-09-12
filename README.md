@@ -110,20 +110,20 @@ semver -q <<< '1.2.3' && echo 'ok'
 
 ## Functions
 
-The following wrapper functions can make complex versioning operations easier.
+These Bash helper functions can make complex versioning operations easier.
 
 ```bash
-#!/bin/sh
+#!/usr/bin/env bash
 
-++major() {
+function ++major {
     semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
 }
 
-++minor() {
+function ++minor {
     semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
 }
 
-++patch() {
+function ++patch {
     semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
 }
 ```
