@@ -16,7 +16,7 @@ versions.
 .Pp
 A
 .Sq version
-string will be matched within the text stream if the following criteria are met:
+string will be selected within the text stream if the following criteria are met:
 .Bl -bullet -compact
 .It
 .Sq version
@@ -100,10 +100,23 @@ EOF
 .El
 .Sh EXAMPLES
 .Pp
-\fBMatch\fR lines that are version strings:
+\fBSelect\fR lines that are version strings:
 .Pp
 .Bd -literal -offset indent -compact
 semver < example.txt
+.Ed
+.Pp
+\fBCalculate\fR the next Git tag:
+.Pp
+.Bd -literal -offset indent -compact
+# major++
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print ++$1 "." 0 "." 0 }'
+
+# minor++
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." ++$2 "." 0 }'
+
+# patch++
+git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'
 .Ed
 .Pp
 \fBCut\fR out the major, minor, and patch components of versions:
@@ -131,19 +144,6 @@ git tag | semver -s | tail -n 1
 .Pp
 .Bd -literal -offset indent -compact
 semver -tw < example.txt | tr '\\t' ','
-.Ed
-.Pp
-\fBIncrement\fR the Git tag:
-.Pp
-.Bd -literal -offset indent -compact
-# major++
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print ++$1 "." 0 "." 0 }'
-
-# minor++
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." ++$2 "." 0 }'
-
-# patch++
-git tag | semver -st | tail -n 1 | awk -F '\\t' '{ print $1 "." $2 "." ++$3 }'
 .Ed
 .Pp
 \fBValidate\fR a candidate version string:
