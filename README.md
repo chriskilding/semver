@@ -5,15 +5,14 @@
 
 Semantic Versioning utility.
 
-## Overview
+## Description
 
-The `semver` command line utility extracts, parses, sorts, and validates [Semantic Version](https://semver.org/) strings.
+The `semver` utility is a text filter for [Semantic Version](https://semver.org/) strings. It searches text from the standard input, selects any Semantic Versions that are present, and writes them to the standard output. It can optionally sort or tabulate the selected versions.
 
-The Semantic Versioning format is:
+A *version* string will be selected within the text stream if the following criteria are met:
 
-    major.minor.patch[-prerelease][+build]
-
-Examples: `1.2.3`, `1.2.3-alpha`, `1.2.3+2008`, `1.2.3-alpha+2008`.
+- *version* is a valid Semantic Version.
+- *version* is a whole line. (This can be modified with the `-w` option.)
 
 ## Install
 
@@ -45,7 +44,7 @@ Options:
 - `-t --tabulate`
   Tabulate the matched versions (separator: '\t').
 - `-w --word-match`
-  Select words that match the semver pattern.
+  Select words that match the semver pattern. (Equivalent to the *grep(1)* `--word-regexp` option.)
 
 Most options can be combined. For example, `semver -stw` will word-match occurrences of semvers, sort them, and print them in tabulated form. 
 
@@ -56,6 +55,25 @@ man semver
 ```
 
 ## Examples
+
+**Select** lines that are version strings:
+
+```bash
+semver < example.txt
+```
+
+**Calculate** the next Git tag:
+
+```bash
+# ++major
+git tag | semver -st | tail -n 1 | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+
+# ++minor
+git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+
+# ++patch
+git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+```
 
 **Cut** out the major, minor, and patch components of a version:
 
@@ -72,33 +90,48 @@ while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
 done
 ```
 
-**Format** versions as CSV:
-
-```bash
-semver -tw < versions.txt | tr '\t' ','
-```
-
-**Get** the latest Git tag:
+**Find** the current Git tag:
 
 ```bash
 git tag | semver -s | tail -n 1
 ```
 
-**Increment** the current Git tag:
+**Format** versions as CSV:
 
 ```bash
-# ++major
-git tag | semver -st | tail -n 1 | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
-
-# ++minor
-git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
-
-# ++patch
-git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+semver -tw < example.txt | tr '\t' ','
 ```
 
 **Validate** a candidate version string:
 
 ```bash
 semver -q <<< '1.2.3' && echo 'ok'
+```
+
+## Functions
+
+These Bash helper functions can make complex versioning operations easier.
+
+```bash
+#!/usr/bin/env bash
+
+function ++major {
+    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+}
+
+function ++minor {
+    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+}
+
+function ++patch {
+    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+}
+```
+
+Examples:
+
+```bash
+++major '1.2.3'   #=> 2.0.0
+++minor '1.2.3'   #=> 1.3.0
+++patch '1.2.3'   #=> 1.2.4
 ```
