@@ -20,6 +20,7 @@ jobs:
         with:
           perl-version: '5'
           install-modules: 'Devel::Cover Devel::Cover::Report::Codecov'
+          install-modules-with: 'cpm'
       - name: Test
         run: PERL5OPT=-MDevel::Cover make test
       - uses: codecov/codecov-action@v1
