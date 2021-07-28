@@ -22,5 +22,5 @@ jobs:
           install-modules: 'Devel::Cover Devel::Cover::Report::Codecov'
           install-modules-with: 'cpm'
       - name: Test
-        run: PERL5OPT=-MDevel::Cover make test
+        run: make test
       - uses: codecov/codecov-action@v1
