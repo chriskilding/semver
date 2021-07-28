@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Bats
+        run: sudo apt-get install bats
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5'
+          install-modules: 'Devel::Cover Devel::Cover::Report::Codecov'
+          install-modules-with: 'cpm'
+      - name: Test
+        run: make test
+        env:
+          PERL5OPT: '-MDevel::Cover'
+      - name: Coverage report
+        # TODO: this should be 'cover -report codecov' but the Codecov uploader does not support GitHub Actions yet
+        # see https://github.com/codecov/codecov-perl/pull/41 for details
+        run: cover
