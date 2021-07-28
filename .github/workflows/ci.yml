@@ -18,3 +18,4 @@ jobs:
         run: sudo apt-get install bats
       - name: Test
         run: make test
+      - uses: codecov/codecov-action@v1
