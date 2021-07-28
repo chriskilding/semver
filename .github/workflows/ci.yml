@@ -19,9 +19,7 @@ jobs:
       - uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: '5'
-          install-modules: |
-            Devel::Cover
-            Devel::Cover::Report::Codecov
+          install-modules: 'Devel::Cover Devel::Cover::Report::Codecov'
       - name: Test
         run: PERL5OPT=-MDevel::Cover make test
       - uses: codecov/codecov-action@v1
