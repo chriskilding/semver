@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install APT dependencies
+      - name: Install Bats
         run: sudo apt-get install bats
       - uses: shogo82148/actions-setup-perl@v1
         with:
@@ -26,4 +26,4 @@ jobs:
         env:
           PERL5OPT: '-MDevel::Cover'
       - name: Coverage report
-        run: cover -report codecov
+        run: cover
