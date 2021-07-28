@@ -14,8 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Install APT dependencies
         run: sudo apt-get install bats
+      - name: Install CPAN dependencies
+        run: cpanm --sudo --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
       - name: Test
-        run: make test
+        run: PERL5OPT=-MDevel::Cover make test
       - uses: codecov/codecov-action@v1
