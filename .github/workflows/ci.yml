@@ -23,5 +23,7 @@ jobs:
           install-modules-with: 'cpm'
       - name: Test
         run: make test
+        env:
+          PERL5OPT: '-MDevel::Cover'
       - name: Coverage report
         run: cover -report codecov
