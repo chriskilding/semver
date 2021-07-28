@@ -5,8 +5,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -26,4 +24,6 @@ jobs:
         env:
           PERL5OPT: '-MDevel::Cover'
       - name: Coverage report
+        # TODO: this should be 'cover -report codecov' but the Codecov uploader does not support GitHub Actions yet
+        # see https://github.com/codecov/codecov-perl/pull/41 for details
         run: cover
