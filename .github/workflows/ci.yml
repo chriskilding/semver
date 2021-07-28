@@ -15,9 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install APT dependencies
-        run: sudo apt-get install bats libdevel-cover-perl
-      - name: Install CPAN dependencies
-        run: cpanm --sudo --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov
+        run: sudo apt-get install bats
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5'
+          install-modules: Devel::Cover::Report::Codecov
       - name: Test
         run: PERL5OPT=-MDevel::Cover make test
       - uses: codecov/codecov-action@v1
