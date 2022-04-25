@@ -34,7 +34,7 @@ sub semver::usage() {
     say STDERR "  -t --tabulate    Tabulate the matched versions (separator: '\\t').";
     say STDERR "  -w --word-match  Select words that match the semver pattern.";
 
-    exit 1;
+    exit 0;
 }
 
 sub semver::get {
