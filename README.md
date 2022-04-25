@@ -15,6 +15,15 @@ A *version* string will be selected within the text stream if the following crit
 
 ## Install
 
+### Homebrew
+
+```bash
+brew tap chriskilding/semver
+brew install semver
+```
+
+### From source
+
 Dependencies:
 
 - [Perl](http://www.perl.org) 5+ (pre-installed on: macOS, Debian, openSUSE)
