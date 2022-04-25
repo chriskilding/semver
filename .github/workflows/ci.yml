@@ -23,4 +23,6 @@ jobs:
         run: make test
         env:
           PERL5OPT: '-MDevel::Cover'
-      - uses: codecov/codecov-action@v2
+      - name: Coverage report
+        run: cover
+      - uses: codecov/codecov-action@v3
