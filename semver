@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use feature qw(say);
+use feature qw(say switch);
 use Scalar::Util qw(looks_like_number);
 use List::Util qw(max);
 use Getopt::Long qw(GetOptionsFromArray :config bundling);
@@ -25,14 +25,15 @@ sub semver::usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program [-hqstw]";
+    say STDERR "  $program [-hiqstw]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help        Show the help screen.";
-    say STDERR "  -q --quiet       Quiet - suppress normal output.";
-    say STDERR "  -s --sort        Sort the matched versions in precedence order (low-to-high).";
-    say STDERR "  -t --tabulate    Tabulate the matched versions (separator: '\\t').";
-    say STDERR "  -w --word-match  Select words that match the semver pattern.";
+    say STDERR "  -h --help                             Show the help screen.";
+    say STDERR "  -i --increment <major|minor|patch>   Increment the specified component of the matched versions.";
+    say STDERR "  -q --quiet                           Quiet - suppress normal output.";
+    say STDERR "  -s --sort                            Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate                        Tabulate the matched versions (separator: '\\t').";
+    say STDERR "  -w --word-match                      Select words that match the semver pattern.";
 
     exit 1;
 }
@@ -143,7 +144,7 @@ sub semver::compare {
 }
 
 sub semver::match {
-    my ($quiet, $sort, $tabulate, $word_match) = @_;
+    my ($increment, $quiet, $sort, $tabulate, $word_match) = @_;
 
     my $num_matches = 0;
 
@@ -166,12 +167,18 @@ sub semver::match {
                     exit 0;
                 }
 
+                my @ver = ($1, $2, $3, $4, $5);
+
+                if ($increment) {
+                    @ver = inc($increment, $1, $2, $3);
+                }
+
                 if ($sort) {
-                    push(@lines, plain($1, $2, $3, $4, $5));
+                    push(@lines, plain(@ver));
                 } elsif ($tabulate) {
-                    say tabulate($1, $2, $3, $4, $5);
+                    say tabulate(@ver);
                 } else {
-                    say plain($1, $2, $3, $4, $5);
+                    say plain(@ver);
                 }
             }
         }
@@ -213,6 +220,18 @@ sub semver::tabulate {
     return $str;
 }
 
+sub semver::inc {
+    my ($increment, $major, $minor, $patch) = @_;
+
+    no warnings 'experimental';
+    for ($increment) {
+        when ("major") { return (++$major, 0, 0) }
+        when ("minor") { return ($major, ++$minor, 0) }
+        when ("patch") { return ($major, $minor, ++$patch) }
+        default { say STDERR "Error: unrecognised value for -i|--increment option. Allowed values are 'major', 'minor', or 'patch'."; exit 1; }
+    }
+}
+
 sub semver::plain {
     my ($major, $minor, $patch, $pre, $build) = @_;
 
@@ -239,22 +258,23 @@ sub semver::sort_pair {
 sub main {
     my @args = @_;
 
-    my ($help, $quiet, $sort, $tabulate, $word_match);
+    my ($help, $increment, $quiet, $sort, $tabulate, $word_match);
 
     main::GetOptionsFromArray(
         \@args,
-        "help|h"       => \$help,
-        "quiet|q"      => \$quiet,
-        "sort|s"       => \$sort,
-        "tabulate|t"   => \$tabulate,
-        "word-match|w" => \$word_match
+        "help|h"         => \$help,
+        "quiet|q"        => \$quiet,
+        "increment|i=s"  => \$increment,
+        "sort|s"         => \$sort,
+        "tabulate|t"     => \$tabulate,
+        "word-match|w"   => \$word_match
     ) or exit 1;
 
     if ($help || (scalar(@args) > 0)) {
         usage();
     }
 
-    match($quiet, $sort, $tabulate, $word_match);
+    match($increment, $quiet, $sort, $tabulate, $word_match);
 }
 
 main(@ARGV);
