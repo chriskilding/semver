@@ -38,13 +38,15 @@ make install
 ## Usage
 
 ```bash
-semver [-hqstw]
+semver [-hqstw] [-i <component>]
 ```
 
 Options:
 
 - `-h --help`
   Show the help screen.
+- `-i --increment <component>`
+  Increment the specified component of the matched versions. Allowed values for component are 'major', 'minor', 'patch'.
 - `-q --quiet`
   Quiet - suppress normal output.
 - `-s --sort`
@@ -54,7 +56,7 @@ Options:
 - `-w --word-match`
   Select words that match the semver pattern. (Equivalent to the *grep(1)* `--word-regexp` option.)
 
-Most options can be combined. For example, `semver -stw` will word-match occurrences of semvers, sort them, and print them in tabulated form. 
+Options can be combined. For example, `semver -stw` will word-match occurrences of semvers, sort them, and print them in tabulated form. 
 
 ## Manual
 
@@ -73,14 +75,11 @@ semver < example.txt
 **Calculate** the next Git tag:
 
 ```bash
-# ++major
-git tag | semver -st | tail -n 1 | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
+git tag | semver -s | tail -n 1 | semver -i major
 
-# ++minor
-git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
+git tag | semver -s | tail -n 1 | semver -i minor
 
-# ++patch
-git tag | semver -st | tail -n 1 | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
+git tag | semver -s | tail -n 1 | semver -i patch
 ```
 
 **Cut** out the major, minor, and patch components of a version:
@@ -94,7 +93,7 @@ semver -t <<< '1.2.3-alpha+1' | cut -f 1-3
 ```bash
 v='0.0.1'
 while curl -fs "https://example.com/artifact/$v.tar.gz" > "$v.tar.gz"; do
-    v=$(semver -t <<< "$v" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }')
+    v=$(semver -i patch <<< "$v")
 done
 ```
 
@@ -114,32 +113,4 @@ semver -tw < example.txt | tr '\t' ','
 
 ```bash
 semver -q <<< '1.2.3' && echo 'ok'
-```
-
-## Functions
-
-These Bash helper functions can make complex versioning operations easier.
-
-```bash
-#!/usr/bin/env bash
-
-function ++major {
-    semver -t <<< "$1" | awk -F '\t' '{ print ++$1 "." 0 "." 0 }'
-}
-
-function ++minor {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." ++$2 "." 0 }'
-}
-
-function ++patch {
-    semver -t <<< "$1" | awk -F '\t' '{ print $1 "." $2 "." ++$3 }'
-}
-```
-
-Examples:
-
-```bash
-++major '1.2.3'   #=> 2.0.0
-++minor '1.2.3'   #=> 1.3.0
-++patch '1.2.3'   #=> 1.2.4
 ```
