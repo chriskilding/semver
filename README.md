@@ -38,15 +38,15 @@ make install
 ## Usage
 
 ```bash
-semver [-hiqstw]
+semver [-hqstw] [-i <component>]
 ```
 
 Options:
 
 - `-h --help`
   Show the help screen.
-- `-i --increment <major|minor|patch>`
-  Increment the specified component of the matched versions.
+- `-i --increment <component>`
+  Increment the specified component of the matched versions. Allowed values for component are 'major', 'minor', 'patch'.
 - `-q --quiet`
   Quiet - suppress normal output.
 - `-s --sort`

@@ -25,15 +25,15 @@ sub semver::usage() {
     say STDERR "Semantic Versioning utility.";
     say STDERR "";
     say STDERR "Usage:";
-    say STDERR "  $program [-hiqstw]";
+    say STDERR "  $program [-hqstw] [-i <component>]";
     say STDERR "";
     say STDERR "Options:";
-    say STDERR "  -h --help                             Show the help screen.";
-    say STDERR "  -i --increment <major|minor|patch>   Increment the specified component of the matched versions.";
-    say STDERR "  -q --quiet                           Quiet - suppress normal output.";
-    say STDERR "  -s --sort                            Sort the matched versions in precedence order (low-to-high).";
-    say STDERR "  -t --tabulate                        Tabulate the matched versions (separator: '\\t').";
-    say STDERR "  -w --word-match                      Select words that match the semver pattern.";
+    say STDERR "  -h --help                    Show the help screen.";
+    say STDERR "  -i --increment <component>   Increment the specified component of the matched versions. Allowed values for component are 'major', 'minor', 'patch'.";
+    say STDERR "  -q --quiet                   Quiet - suppress normal output.";
+    say STDERR "  -s --sort                    Sort the matched versions in precedence order (low-to-high).";
+    say STDERR "  -t --tabulate                Tabulate the matched versions (separator: '\\t').";
+    say STDERR "  -w --word-match              Select words that match the semver pattern.";
 
     exit 1;
 }
