@@ -1,0 +1,6 @@
+specfile_path: semver.spec
+files_to_sync:
+    - semver.spec
+    - .packit.yaml
+upstream_package_name: semver
+downstream_package_name: semver
