@@ -20,7 +20,7 @@ jobs:
           install-modules: 'Devel::Cover Devel::Cover::Report::Codecov'
           install-modules-with: 'cpm'
       - name: Test
-        run: bats -r -j "$(nproc 2>/dev/null)" test
+        run: bats -r -j 2 test
         env:
           PERL5OPT: '-MDevel::Cover'
       - name: Coverage report
